@@ -8,10 +8,10 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     alias: {
-      '~': fileURLToPath(new URL('./src', import.meta.url)),
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '#imports': fileURLToPath(new URL('./src/testing/importsMock.ts', import.meta.url)),
-      '#app': fileURLToPath(new URL('./src/testing/importsMock.ts', import.meta.url))
+      '~': fileURLToPath(new URL('./app', import.meta.url)),
+      '@': fileURLToPath(new URL('./app', import.meta.url)),
+      '#imports': fileURLToPath(new URL('./app/testing/importsMock.ts', import.meta.url)),
+      '#app': fileURLToPath(new URL('./app/testing/importsMock.ts', import.meta.url))
     }
   }
 })

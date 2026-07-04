@@ -1,13 +1,49 @@
 // nuxt.config.ts
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
-  srcDir: 'src/',
+  
+  future: {
+    compatibilityVersion: 4
+  },
+
   ssr: false,
 
   modules: [
     '@nuxt/ui',
-    '@nuxtjs/i18n'
+    '@nuxtjs/i18n',
+    '@vite-pwa/nuxt'
   ],
+
+  pwa: {
+    manifest: {
+      name: 'Flow Bright SRP',
+      short_name: 'FlowBright',
+      description: 'SME Resource Planning Platform',
+      theme_color: '#4f46e5',
+      background_color: '#ffffff',
+      icons: [
+        {
+          src: '/icon.svg',
+          sizes: '512x512',
+          type: 'image/svg+xml',
+          purpose: 'any'
+        },
+        {
+          src: '/icon.svg',
+          sizes: '512x512',
+          type: 'image/svg+xml',
+          purpose: 'maskable'
+        }
+      ]
+    },
+    workbox: {
+      navigateFallback: '/'
+    },
+    devOptions: {
+      enabled: true,
+      type: 'module'
+    }
+  },
 
   colorMode: {
     preference: 'light',
@@ -31,7 +67,7 @@ export default defineNuxtConfig({
     ],
     defaultLocale: 'th',
     strategy: 'prefix_except_default',
-    langDir: '../src/locales',
+    langDir: '../app/locales',
     lazy: false,
     detectBrowserLanguage: false
   },
@@ -52,7 +88,7 @@ export default defineNuxtConfig({
   },
 
   css: [
-    '~/app/styles/main.css'
+    '~/assets/styles/main.css'
   ],
 
   typescript: {
