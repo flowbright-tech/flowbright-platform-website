@@ -57,6 +57,7 @@ import { useVendorEngine } from '../features/vendor/composables/useVendorEngine'
 import VendorFilter from '../features/vendor/components/VendorFilter.vue'
 import VendorTable from '../features/vendor/components/VendorTable.vue'
 import VendorDrawer from '../features/vendor/components/VendorDrawer.vue'
+import ConfirmModal from '../components/app/ConfirmModal.vue'
 import type { Vendor, VendorFormData } from '../features/vendor/types'
 
 const { activeTenant } = useAuthEngine()

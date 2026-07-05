@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import { useCookie } from '#imports'
+import { useCookie, useRuntimeConfig } from '#imports'
 import { type Tenant, type UserSession, type UserProfile, type CompanyProfile, MOCK_TENANTS } from '../types'
 
 const userProfileState = ref<UserProfile | null>(null)
@@ -97,7 +97,7 @@ export const useAuthEngine = () => {
     }
   }
 
-  const login = (email: string, token: string, tenantId?: string) => {
+  const login = (email: string, token: string, tenantId?: string, refreshToken?: string) => {
     clearSession()
     session.value = {
       id: `usr-${Date.now()}`,
@@ -105,12 +105,13 @@ export const useAuthEngine = () => {
       name: email.split('@')[0].toUpperCase(),
       role: 'Enterprise Manager',
       tenantId: tenantId || MOCK_TENANTS[0].id,
-      token
+      token,
+      refreshToken
     }
     return true
   }
 
-  const loginWithProfile = (token: string, userProfile: UserProfile, companyProfile: CompanyProfile) => {
+  const loginWithProfile = (token: string, userProfile: UserProfile, companyProfile: CompanyProfile, refreshToken?: string) => {
     clearSession()
     session.value = {
       id: userProfile.id,
@@ -118,7 +119,8 @@ export const useAuthEngine = () => {
       name: `${userProfile.first_name_en} ${userProfile.last_name_en}`,
       role: userProfile.role,
       tenantId: companyProfile.id,
-      token
+      token,
+      refreshToken
     }
     userProfileState.value = userProfile
     companyProfileState.value = companyProfile
@@ -129,12 +131,73 @@ export const useAuthEngine = () => {
     return true
   }
 
+  const logout = async () => {
+    const token = session.value?.token
+    if (token) {
+      try {
+        const config = useRuntimeConfig()
+        const apiDomain = config?.public?.apiDomain || 'https://flowbright-platform-api.onrender.com'
+        
+        await fetch(`${apiDomain}/api/v1/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+      } catch (e) {
+        console.error('Logout API call failed:', e)
+      }
+    }
+    clearSession()
+  }
+
+  const refreshSessionToken = async (): Promise<string | null> => {
+    const rfToken = session.value?.refreshToken
+    if (!rfToken) return null
+
+    const config = useRuntimeConfig()
+    const apiDomain = config?.public?.apiDomain || 'https://flowbright-platform-api.onrender.com'
+
+    try {
+      const res = await fetch(`${apiDomain}/api/v1/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refresh_token: rfToken })
+      })
+
+      if (!res.ok) {
+        throw new Error(`Token refresh request failed: ${res.status}`)
+      }
+
+      const json = await res.json()
+      const newToken = json.data?.token || json.token
+      const newRefreshToken = json.data?.refresh_token || json.refreshToken || rfToken
+
+      if (newToken && session.value) {
+        session.value = {
+          ...session.value,
+          token: newToken,
+          refreshToken: newRefreshToken
+        }
+        return newToken
+      }
+    } catch (e) {
+      console.error('Failed to automatically refresh session token:', e)
+    }
+    return null
+  }
+
   return {
     session,
     tenants,
     activeTenant,
     isAuthenticated,
     clearSession,
+    logout,
+    refreshSessionToken,
     switchTenant,
     login,
     loginWithProfile,

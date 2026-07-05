@@ -1,22 +1,52 @@
-export type CustomerSegment = 'enterprise' | 'sme' | 'retail'
-export type CustomerStatus = 'active' | 'suspended' | 'lead'
-
 export interface Customer {
   id: string
-  code: string
-  name: string
-  email: string
+  company_id: string
+  prefix_en?: string
+  prefix_th?: string
+  first_name_th?: string
+  last_name_th?: string
+  first_name_en?: string
+  last_name_en?: string
   phone: string
-  segment: CustomerSegment
-  status: CustomerStatus
-  tenantId: string
-  createdAt: string
+  email: string
+  address_th?: string
+  address_en?: string
+  gender?: string
+  created_by?: string
+  created_at: string
+  updated_at: string
+  tax_id?: string
+  type: string
+  image_url?: string
+  is_active: boolean
+  code: string
+  nationality?: string
+  birth_date?: string
+  id_card?: string
+  passport?: string
+  occupation?: string
+  social_media?: string // JSON string
 }
 
 export interface CustomerFormData {
-  name: string
-  email: string
+  prefix_en: string
+  prefix_th: string
+  first_name_th: string
+  last_name_th: string
+  first_name_en: string
+  last_name_en: string
   phone: string
-  segment: CustomerSegment
-  status: CustomerStatus
+  email: string
+  address_th: string
+  address_en: string
+  gender: string
+  tax_id: string
+  type: string
+  is_active: boolean
+  nationality: string
+  birth_date: string
+  id_card: string
+  passport: string
+  occupation: string
+  social_media: string // JSON representation or fields
 }

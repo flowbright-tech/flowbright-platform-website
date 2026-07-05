@@ -13,6 +13,7 @@ export interface UserSession {
   role: string
   tenantId: string
   token: string
+  refreshToken?: string
 }
 
 export interface CompanyProfile {

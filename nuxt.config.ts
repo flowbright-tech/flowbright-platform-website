@@ -41,7 +41,8 @@ export default defineNuxtConfig({
     },
     devOptions: {
       enabled: true,
-      type: 'module'
+      type: 'module',
+      suppressWarnings: true
     }
   },
 
@@ -90,6 +91,12 @@ export default defineNuxtConfig({
   css: [
     '~/assets/styles/main.css'
   ],
+
+  runtimeConfig: {
+    public: {
+      apiDomain: process.env.NUXT_PUBLIC_API_DOMAIN || 'https://flowbright-platform-api.onrender.com'
+    }
+  },
 
   typescript: {
     strict: true,

@@ -28,3 +28,11 @@ export function useColorMode() {
     preference: mode
   }
 }
+
+export function useRuntimeConfig() {
+  return {
+    public: {
+      apiDomain: 'https://flowbright-platform-api.onrender.com'
+    }
+  }
+}

@@ -1,148 +1,249 @@
-import { ref, computed } from 'vue'
-import { useState } from '#imports'
-import type { Customer, CustomerFormData, CustomerSegment, CustomerStatus } from '../types'
+import { ref, watch } from 'vue'
+import { useState, useRuntimeConfig } from '#imports'
+import type { Customer, CustomerFormData } from '../types'
 import { useAuthEngine } from '../../auth/composables/useAuthEngine'
-
-const INITIAL_CUSTOMERS: Customer[] = [
-  {
-    id: 'cust-01',
-    code: 'CUST-TH-001',
-    name: 'Siam Retail Corporation Co., Ltd.',
-    email: 'contact@siamretail.co.th',
-    phone: '+66 2 718 9000',
-    segment: 'enterprise',
-    status: 'active',
-    tenantId: 'tenant-bkk-01',
-    createdAt: '2026-01-15'
-  },
-  {
-    id: 'cust-02',
-    code: 'CUST-TH-002',
-    name: 'Bangkok Innovative Tech Solutions',
-    email: 'billing@bkktech.com',
-    phone: '+66 2 345 6789',
-    segment: 'sme',
-    status: 'active',
-    tenantId: 'tenant-bkk-01',
-    createdAt: '2026-02-01'
-  },
-  {
-    id: 'cust-03',
-    code: 'CUST-TH-003',
-    name: 'Northern Supply Chain Ventures',
-    email: 'info@nscventures.com',
-    phone: '+66 53 112 445',
-    segment: 'sme',
-    status: 'lead',
-    tenantId: 'tenant-bkk-01',
-    createdAt: '2026-03-10'
-  },
-  {
-    id: 'cust-04',
-    code: 'CUST-SG-001',
-    name: 'Merlion Global Logistics Pte Ltd',
-    email: 'ops@merlionlogistics.sg',
-    phone: '+65 6789 0123',
-    segment: 'enterprise',
-    status: 'active',
-    tenantId: 'tenant-sg-02',
-    createdAt: '2026-02-18'
-  },
-  {
-    id: 'cust-05',
-    code: 'CUST-TH-004',
-    name: 'Chiang Mai Artisan Coffee Exporters',
-    email: 'admin@cmcoffee.or.th',
-    phone: '+66 53 998 776',
-    segment: 'retail',
-    status: 'suspended',
-    tenantId: 'tenant-cnx-03',
-    createdAt: '2026-04-05'
-  }
-]
+import { useDebounce } from '../../../composables/useDebounce'
 
 export const useCustomerEngine = () => {
-  const { activeTenant } = useAuthEngine()
-  
-  const customers = useState<Customer[]>('srp_customers_master', () => INITIAL_CUSTOMERS)
+  const { session, logout } = useAuthEngine()
+  const config = useRuntimeConfig()
+  const apiDomain = config?.public?.apiDomain || 'https://flowbright-platform-api.onrender.com'
+
+  // State refs
+  const customers = useState<Customer[]>('srp_customers_list', () => [])
+  const totalFilteredCount = useState<number>('srp_customers_total', () => 0)
+  const isLoading = useState<boolean>('srp_customers_loading', () => false)
+  const errorMsg = useState<string | null>('srp_customers_error', () => null)
 
   const searchQuery = ref('')
-  const selectedSegment = ref<string>('all')
-  const selectedStatus = ref<string>('all')
+  const debouncedSearchQuery = useDebounce(searchQuery, 500)
   const currentPage = ref(1)
-  const pageSize = ref(5)
+  const pageSize = ref(10)
 
-  // Tenant-isolated dataset filter
-  const tenantCustomers = computed(() => {
-    const tenantId = activeTenant.value.id
-    if (tenantId === '2f2b761e-4a80-449b-ae7e-e93b33313230') {
-      return customers.value.filter(c => c.tenantId === 'tenant-bkk-01' || c.tenantId === tenantId)
+  // Centralized fetch wrapper to handle auth headers and token expiration intercepting (401/403)
+  const apiFetch = async (path: string, options: RequestInit = {}) => {
+    let token = session.value?.token
+    if (!token) {
+      throw new Error('Authentication required')
     }
-    return customers.value.filter(c => c.tenantId === tenantId)
-  })
 
-  // Search & Filters applied
-  const filteredCustomers = computed(() => {
-    return tenantCustomers.value.filter(customer => {
-      const matchesSearch = searchQuery.value === '' ||
-        customer.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        customer.code.toLowerCase().includes(searchQuery.value.toLowerCase())
-
-      const matchesSegment = selectedSegment.value === 'all' || customer.segment === selectedSegment.value
-      const matchesStatus = selectedStatus.value === 'all' || customer.status === selectedStatus.value
-
-      return matchesSearch && matchesSegment && matchesStatus
-    })
-  })
-
-  const paginatedCustomers = computed(() => {
-    const start = (currentPage.value - 1) * pageSize.value
-    return filteredCustomers.value.slice(start, start + pageSize.value)
-  })
-
-  const totalFilteredCount = computed(() => filteredCustomers.value.length)
-
-  const addCustomer = (data: CustomerFormData) => {
-    const newId = `cust-${Date.now()}`
-    const newCustomer: Customer = {
-      id: newId,
-      code: `CUST-${activeTenant.value.code.split('-')[1] || 'TH'}-${Math.floor(100 + Math.random() * 900)}`,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      segment: data.segment,
-      status: data.status,
-      tenantId: activeTenant.value.id,
-      createdAt: new Date().toISOString().split('T')[0]
+    const makeRequest = async (activeToken: string) => {
+      const headers = {
+        'Authorization': `Bearer ${activeToken}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+      }
+      return await fetch(`${apiDomain}${path}`, {
+        method: 'GET',
+        ...options,
+        headers
+      })
     }
-    customers.value = [newCustomer, ...customers.value]
-    return newCustomer
-  }
 
-  const updateCustomer = (id: string, data: Partial<CustomerFormData>) => {
-    const idx = customers.value.findIndex(c => c.id === id)
-    if (idx !== -1) {
-      customers.value[idx] = {
-        ...customers.value[idx],
-        ...data
+    let res = await makeRequest(token)
+
+    if (res.status === 401 || res.status === 403) {
+      const { refreshSessionToken, logout } = useAuthEngine()
+      const newToken = await refreshSessionToken()
+      if (newToken) {
+        // Retry the original request with the fresh token
+        res = await makeRequest(newToken)
+      } else {
+        // Refresh failed, clear session and log out
+        await logout()
+        if (import.meta.client) {
+          window.location.href = '/login'
+        }
+        throw new Error('Session expired. Logging out...')
       }
     }
+
+    return res
   }
 
-  const deleteCustomer = (id: string) => {
-    customers.value = customers.value.filter(c => c.id !== id)
+  // API Call to fetch customers (list)
+  const fetchCustomers = async () => {
+    const token = session.value?.token
+    if (!token) {
+      customers.value = []
+      totalFilteredCount.value = 0
+      return
+    }
+
+    isLoading.value = true
+    errorMsg.value = null
+
+    try {
+      const searchParams = new URLSearchParams()
+      searchParams.append('page', String(currentPage.value))
+      searchParams.append('limit', String(pageSize.value))
+      
+      if (searchQuery.value) {
+        searchParams.append('search', searchQuery.value)
+      }
+
+      const res = await apiFetch(`/api/v1/customers?${searchParams.toString()}`)
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch customers: ${res.status} ${res.statusText}`)
+      }
+
+      const json = await res.json()
+      if (json.success && Array.isArray(json.data)) {
+        customers.value = json.data
+        totalFilteredCount.value = json.pagination?.total ?? json.data.length
+      } else {
+        throw new Error(json.message || 'API responded with success: false')
+      }
+    } catch (err: any) {
+      console.error('Error fetching customers:', err)
+      errorMsg.value = err.message || 'An error occurred while fetching customer data'
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // API Call to fetch a single customer details by ID
+  const fetchCustomerById = async (id: string): Promise<Customer | null> => {
+    isLoading.value = true
+    errorMsg.value = null
+
+    try {
+      const res = await apiFetch(`/api/v1/customers/${id}`)
+      if (!res.ok) {
+        throw new Error(`Failed to fetch customer: ${res.status} ${res.statusText}`)
+      }
+
+      const json = await res.json()
+      if (json.success && json.data) {
+        return json.data
+      } else {
+        throw new Error(json.message || 'Customer not found')
+      }
+    } catch (err: any) {
+      console.error('Error fetching customer by ID:', err)
+      errorMsg.value = err.message || 'An error occurred while fetching customer details'
+      return null
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Add Customer (POST)
+  const addCustomer = async (data: CustomerFormData) => {
+    isLoading.value = true
+    errorMsg.value = null
+
+    try {
+      const res = await apiFetch('/api/v1/customers', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.message || `Failed to create customer: ${res.status}`)
+      }
+
+      // Reset page to 1 on new addition and reload
+      currentPage.value = 1
+      await fetchCustomers()
+    } catch (err: any) {
+      console.error('Error adding customer:', err)
+      errorMsg.value = err.message || 'Failed to create customer'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Update Customer (PUT)
+  const updateCustomer = async (id: string, data: Partial<CustomerFormData>) => {
+    isLoading.value = true
+    errorMsg.value = null
+
+    try {
+      const res = await apiFetch(`/api/v1/customers/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.message || `Failed to update customer: ${res.status}`)
+      }
+
+      await fetchCustomers()
+    } catch (err: any) {
+      console.error('Error updating customer:', err)
+      errorMsg.value = err.message || 'Failed to update customer'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Delete Customer (DELETE)
+  const deleteCustomer = async (id: string) => {
+    isLoading.value = true
+    errorMsg.value = null
+
+    try {
+      const res = await apiFetch(`/api/v1/customers/${id}`, {
+        method: 'DELETE'
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.message || `Failed to delete customer: ${res.status}`)
+      }
+
+      // Adjust page if we deleted the last item on the page
+      if (customers.value.length === 1 && currentPage.value > 1) {
+        currentPage.value--
+      } else {
+        await fetchCustomers()
+      }
+    } catch (err: any) {
+      console.error('Error deleting customer:', err)
+      errorMsg.value = err.message || 'Failed to delete customer'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Watch filters, search, and page changes to automatically load from server (client-only)
+  if (import.meta.client) {
+    watch(debouncedSearchQuery, () => {
+      currentPage.value = 1 // Reset page to 1
+      fetchCustomers()
+    })
+
+    watch(currentPage, () => {
+      fetchCustomers()
+    })
+
+    watch(() => session.value?.token, (newToken) => {
+      if (newToken) {
+        currentPage.value = 1
+        fetchCustomers()
+      } else {
+        customers.value = []
+        totalFilteredCount.value = 0
+      }
+    })
   }
 
   return {
     searchQuery,
-    selectedSegment,
-    selectedStatus,
     currentPage,
     pageSize,
-    tenantCustomers,
-    filteredCustomers,
-    paginatedCustomers,
+    isLoading,
+    errorMsg,
+    fetchCustomers,
+    fetchCustomerById,
+    paginatedCustomers: customers,
     totalFilteredCount,
     addCustomer,
     updateCustomer,

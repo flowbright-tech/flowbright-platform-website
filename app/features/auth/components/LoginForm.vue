@@ -105,7 +105,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthEngine } from '../composables/useAuthEngine'
-import { useLocalePath } from '#imports'
+import { useLocalePath, useRuntimeConfig } from '#imports'
 
 const router = useRouter()
 const localePath = useLocalePath()
@@ -152,7 +152,9 @@ const handleLogin = async () => {
   loading.value = true
 
   try {
-    const res = await fetch('https://flowbright-platform-api.onrender.com/api/v1/auth/login', {
+    const config = useRuntimeConfig()
+    const apiDomain = config.public.apiDomain || 'https://flowbright-platform-api.onrender.com'
+    const res = await fetch(`${apiDomain}/api/v1/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
