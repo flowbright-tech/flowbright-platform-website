@@ -99,4 +99,129 @@ Lazy Loading: Always prefix non-critical layout blocks or secondary popups using
 
 Dependency Auditing: Packages that import heavy footprints (e.g., Lodash, Moment.js) are explicitly banned. Use date-fns or native modern browser APIs (Intl.NumberFormat).
 
+## 6. Nuxt 4 Native Architecture & Tooling Exploitation
+
+### 6.1 Multi-Layer Isolation (Domain-Driven Layers)
+To prevent cross-domain dependency bleeding as the SRP platform scales across complex ERP modules (Invoicing, Inventory, CRM), developers must leverage Nuxt 4's multi-layer system to encapsulate domains physically, rather than just conceptually.
+* **Rule:** Multi-tenant feature modules must be built as autonomous Nuxt Layers under a unified repository layout or a dedicated `modules/` or `features/` setup. Each layer must encapsulate its own domain-specific components, composables, and serverless mock hooks if applicable.
+* **Prefixing Components:** Shared components inside local feature layers must utilize specific prefix mappings within their local configuration to make usage origins explicit and transparent.
+
+```typescript
+// features/invoicing/nuxt.config.ts
+export default defineNuxtConfig({
+  components: [
+    { path: './components', prefix: 'Inv' } // Automagically prefixes invoicing elements (e.g., <InvTaxTable/>)
+  ]
+})
+6.2 Strict Client-Only Data Utilities
+Because this app relies entirely on static compilation via nuxt generate (or an explicit Single Page Application layout), server-side telemetry or authentication leaks during build execution must be avoided.
+
+The server: false Enforcer: Standard execution of useAsyncData or useFetch on global entrypoints is banned unless configured with both server: false and immediate: false.
+
+Safe Lazy Hydration: Fetch runtime telemetry only within explicit client interactions or clean lifecycle triggers.
+
+TypeScript
+// Hard enforcement for runtime client-side calls
+const { data: stockRecords, execute, status } = await useAsyncData(
+  'inventory-feed',
+  () => $api('/api/v1/inventory/items'),
+  {
+    server: false,    // Crucial: Prevents Nuxt from trying to compile or mock this during build time
+    immediate: false  // Delays invocation until explicitly required by client-side mounted events
+  }
+)
+
+onMounted(() => {
+  execute() // Securely initializes state strictly within the client browser context
+})
+7. Nuxt UI Integration Framework (Design-Token First) and use skill for antigravity
+Nuxt UI must be implemented using a Headless-First / Design-Token mindset to maintain the presentational vs. smart component boundaries established in Section 2.1.
+
+7.1 Unified Design Configuration (Zero Inline Bloat)
+Rule: Do not scatter chaotic, inline tailwind override utilities via the ui property directly across nested features. All standard component mutations must be handled globally inside app.config.ts.
+
+Atomic Primitives: Local feature views must inherit from structured primitives rather than inventing custom atomic styles per module.
+
+TypeScript
+// app.config.ts - Centralized Design Token Matrix for Flow Bright SRP
+export default defineAppConfig({
+  ui: {
+    primary: 'emerald', // Flow Bright corporate aesthetic
+    gray: 'cool',
+    button: {
+      default: {
+        size: 'sm',
+        loadingIcon: 'i-lucide-loader-circle'
+      },
+      padding: {
+        sm: 'px-3 py-1.5'
+      }
+    }
+  }
+})
+7.2 Strict Form & Schema Validation (Decoupled State)
+Nuxt UI provides excellent integration with structural validation schemas (such as Zod). For high-integrity SME software, validation schemas must be completely separated from view templates.
+
+Form States: Always bind <UForm> wrappers against explicit reactive definitions validated via strict TypeScript/Zod structures.
+
+Calculations: Complex UI representations like data tables (<UDataTable>) must pass actions directly to domain composables instead of calculating transformations inside the markup layout.
+
+Code snippet
+<!-- features/inventory/components/StockAdjustmentForm.vue -->
+<script setup lang="ts">
+import { z } from 'zod'
+import type { FormSubmitEvent } from '#ui/types'
+
+const emit = defineEmits(['submitAdjustment'])
+
+// 1. Structural Validation Rule - Enforced outside the HTML layout
+const formValidationSchema = z.object({
+  sku: z.string().min(4, 'SKU must be at least 4 characters long'),
+  quantity: z.number().int().positive('Adjustment quantity must be a positive integer')
+})
+
+type FormData = z.output<typeof formValidationSchema>
+const state = reactive({ sku: '', quantity: 0 })
+
+const handleFormSubmission = (event: FormSubmitEvent<FormData>) => {
+  // Bubbles completely clean, pre-validated data to the Smart Component or Domain Composable
+  emit('submitAdjustment', event.data)
+}
+</script>
+
+<template>
+  <UForm :schema="formValidationSchema" :state="state" @submit="handleFormSubmission" class="space-y-4">
+    <UFormGroup label="Asset SKU Identifier" name="sku">
+      <UInput placeholder="e.g., INV-PROD-001" v-model="state.sku"/>
+    </UFormGroup>
+
+    <UFormGroup label="Quantity Delta" name="quantity">
+      <UInput type="number" v-model.number="state.quantity"/>
+    </UFormGroup>
+
+    <UButton block type="submit" variant="solid">
+      Commit Adjustment
+    </UButton>
+  </UForm>
+</template>
+8. Build & Verification Guardrails
+To lock down compilation security, configure explicit optimization checks within your primary workspace configuration file.
+
+TypeScript
+// nuxt.config.ts
+export default defineNuxtConfig({
+  ssr: false, // Forces Single Page Application/SSG mode explicitly at core configuration
+
+  nitro: {
+    prerender: {
+      crawlLinks: false, // Safeguard: prevents static crawler from indexing secure paths during generation
+      routes: ['/']      // Only pre-builds the application shell framework
+    }
+  },
+
+  experimental: {
+    typedPages: true // Full compile-time routing safety matrix across dynamic ERP modules
+  }
+})
+
 Bundle Monitoring: Runs checking page bundle budgets on every commit via CI pipelines. Individual route chunk sizes must not exceed 150kb.

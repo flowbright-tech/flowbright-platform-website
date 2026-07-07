@@ -82,8 +82,8 @@
       </div>
 
       <UPagination
-        v-model="page"
-        :page-count="pageSize"
+        v-model:page="page"
+        :items-per-page="pageSize"
         :total="total"
         size="sm"
         :active-button="{ color: 'primary' }"

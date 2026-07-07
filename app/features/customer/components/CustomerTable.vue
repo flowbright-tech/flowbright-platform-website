@@ -44,7 +44,7 @@
         <!-- Created Date Column -->
         <template #created_at-cell="{ row }">
           <span class="text-slate-500 dark:text-slate-400 text-xs">
-            {{ formatDate(row.original.created_at) }}
+            {{ formatDateTime(row.original.created_at) }}
           </span>
         </template>
 
@@ -71,7 +71,7 @@
         }}
       </div>
 
-      <UPagination v-model="page" :page-count="pageSize" :total="total" size="sm"
+      <UPagination v-model:page="page" :items-per-page="pageSize" :total="total" size="sm"
         :active-button="{ color: 'primary' }" />
     </div>
   </div>
@@ -122,6 +122,23 @@ const formatDate = (dateStr?: string) => {
     const month = months[date.getMonth()]
     const year = date.getFullYear()
     return `${day}-${month}-${year}`
+  } catch (e) {
+    return '-'
+  }
+}
+
+const formatDateTime = (dateStr?: string) => {
+  if (!dateStr) return '-'
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return '-'
+    const day = String(date.getDate()).padStart(2, '0')
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const month = months[date.getMonth()]
+    const year = date.getFullYear()
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${day}-${month}-${year} ${hours}:${minutes}`
   } catch (e) {
     return '-'
   }

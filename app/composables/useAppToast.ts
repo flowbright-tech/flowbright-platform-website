@@ -1,28 +1,32 @@
-import { useToast } from '#imports'
+import { useToast, useI18n } from '#imports'
 
 export const useAppToast = () => {
   const toast = useToast()
+  const { t, te } = useI18n()
 
   const showSuccess = (action: 'create' | 'update' | 'delete', resourceName: string) => {
+    const lowerResource = resourceName.toLowerCase()
+    const translatedResource = te(`toast.${lowerResource}`) ? t(`toast.${lowerResource}`) : resourceName
+
     let title = ''
     let description = ''
     let color: 'success' | 'neutral' | 'error' | 'warning' | 'primary' = 'success'
     let icon = ''
 
     if (action === 'create') {
-      title = `${resourceName} Created`
-      description = `A new ${resourceName.toLowerCase()} record has been added successfully.`
+      title = t('toast.create_title', { resource: translatedResource })
+      description = t('toast.create_desc', { resource: translatedResource })
       color = 'success'
       icon = 'i-heroicons-check-circle'
     } else if (action === 'update') {
-      title = `${resourceName} Updated`
-      description = `The ${resourceName.toLowerCase()} profile has been modified successfully.`
-      color = 'primary'
+      title = t('toast.update_title', { resource: translatedResource })
+      description = t('toast.update_desc', { resource: translatedResource })
+      color = 'success'
       icon = 'i-heroicons-arrow-path'
     } else if (action === 'delete') {
-      title = `${resourceName} Deleted`
-      description = `The ${resourceName.toLowerCase()} record has been removed from the database.`
-      color = 'error'
+      title = t('toast.delete_title', { resource: translatedResource })
+      description = t('toast.delete_desc', { resource: translatedResource })
+      color = 'success'
       icon = 'i-heroicons-trash'
     }
 
@@ -36,9 +40,10 @@ export const useAppToast = () => {
   }
 
   const showError = (message: string) => {
+    const translatedMessage = te(message) ? t(message) : message
     toast.add({
-      title: 'Action Failed',
-      description: message,
+      title: t('toast.action_failed'),
+      description: translatedMessage,
       color: 'error',
       icon: 'i-heroicons-x-circle',
       id: `toast-error-${Date.now()}`

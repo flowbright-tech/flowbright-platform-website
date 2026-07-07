@@ -26,6 +26,8 @@ export interface Customer {
   passport?: string
   occupation?: string
   social_media?: string // JSON string
+  verification_type?: string
+  note?: string
 }
 
 export interface CustomerFormData {
@@ -49,4 +51,6 @@ export interface CustomerFormData {
   passport: string
   occupation: string
   social_media: string // JSON representation or fields
+  verification_type?: string
+  note?: string
 }

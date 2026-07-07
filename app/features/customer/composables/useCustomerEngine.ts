@@ -3,11 +3,13 @@ import { useState, useRuntimeConfig } from '#imports'
 import type { Customer, CustomerFormData } from '../types'
 import { useAuthEngine } from '../../auth/composables/useAuthEngine'
 import { useDebounce } from '../../../composables/useDebounce'
+import { useApiFetch } from '../../../composables/useApiFetch'
 
 export const useCustomerEngine = () => {
   const { session, logout } = useAuthEngine()
   const config = useRuntimeConfig()
   const apiDomain = config?.public?.apiDomain || 'https://flowbright-platform-api.onrender.com'
+  const { apiFetch } = useApiFetch()
 
   // State refs
   const customers = useState<Customer[]>('srp_customers_list', () => [])
@@ -19,47 +21,6 @@ export const useCustomerEngine = () => {
   const debouncedSearchQuery = useDebounce(searchQuery, 500)
   const currentPage = ref(1)
   const pageSize = ref(10)
-
-  // Centralized fetch wrapper to handle auth headers and token expiration intercepting (401/403)
-  const apiFetch = async (path: string, options: RequestInit = {}) => {
-    let token = session.value?.token
-    if (!token) {
-      throw new Error('Authentication required')
-    }
-
-    const makeRequest = async (activeToken: string) => {
-      const headers = {
-        'Authorization': `Bearer ${activeToken}`,
-        'Content-Type': 'application/json',
-        ...options.headers
-      }
-      return await fetch(`${apiDomain}${path}`, {
-        method: 'GET',
-        ...options,
-        headers
-      })
-    }
-
-    let res = await makeRequest(token)
-
-    if (res.status === 401 || res.status === 403) {
-      const { refreshSessionToken, logout } = useAuthEngine()
-      const newToken = await refreshSessionToken()
-      if (newToken) {
-        // Retry the original request with the fresh token
-        res = await makeRequest(newToken)
-      } else {
-        // Refresh failed, clear session and log out
-        await logout()
-        if (import.meta.client) {
-          window.location.href = '/login'
-        }
-        throw new Error('Session expired. Logging out...')
-      }
-    }
-
-    return res
-  }
 
   // API Call to fetch customers (list)
   const fetchCustomers = async () => {
@@ -77,7 +38,7 @@ export const useCustomerEngine = () => {
       const searchParams = new URLSearchParams()
       searchParams.append('page', String(currentPage.value))
       searchParams.append('limit', String(pageSize.value))
-      
+
       if (searchQuery.value) {
         searchParams.append('search', searchQuery.value)
       }

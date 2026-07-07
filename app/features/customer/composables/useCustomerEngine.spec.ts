@@ -1,6 +1,33 @@
+import { ref } from 'vue'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { useCustomerEngine } from './useCustomerEngine'
 import { useAuthEngine } from '../../auth/composables/useAuthEngine'
+
+vi.mock('#imports', async (importOriginal) => {
+  const actual = await importOriginal() as any
+  const activeRefs = new Map()
+  return {
+    ...actual,
+    useState: (key: string, init: () => any) => {
+      if (!activeRefs.has(key)) {
+        activeRefs.set(key, ref(init()))
+      }
+      return activeRefs.get(key)
+    },
+    useRuntimeConfig: () => ({
+      public: {
+        apiDomain: 'https://flowbright-platform-api.onrender.com'
+      }
+    }),
+    useToast: () => ({
+      add: vi.fn()
+    }),
+    useI18n: () => ({
+      t: (key: string) => key,
+      te: () => false
+    })
+  }
+})
 
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)

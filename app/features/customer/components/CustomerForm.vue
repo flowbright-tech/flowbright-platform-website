@@ -5,7 +5,7 @@
         
         <!-- Section 1: Customer Type & Code -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-          <UFormField>
+          <UFormField :error="errors.customer_type || undefined">
             <template #label>
               <span>{{ $t('customers.customer_type') }}</span>
               <span class="text-red-500 font-bold ml-0.5">*</span>
@@ -18,6 +18,7 @@
               searchable
               size="md"
               class="w-full"
+              :placeholder="$t('customers.select_type')"
             />
           </UFormField>
 
@@ -37,7 +38,7 @@
             <span>{{ $t('customers.verification_type') }}</span>
             <span class="text-red-500 font-bold ml-0.5">*</span>
           </label>
-          <div class="grid grid-cols-3 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div
               v-for="opt in verificationTypes"
               :key="opt.value"
@@ -94,18 +95,20 @@
         </div>
 
         <!-- Section 4: Conditional Details (Thai vs English Name & ID) -->
-        <div v-if="form.verification_type === 'idcard'" class="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Thai Citizen Details</h3>
+        <div v-if="form.verification_type === 'idcard' || form.verification_type === 'driver_license'" class="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">
+            {{ form.verification_type === 'idcard' ? 'Thai Citizen Details' : 'Driver License Details' }}
+          </h3>
           
           <div class="space-y-4">
-            <UFormField :error="errors.id_card">
+            <UFormField :error="errors.id_card || undefined">
               <template #label>
-                <span>{{ $t('customers.id_card_num') }}</span>
+                <span>{{ form.verification_type === 'idcard' ? $t('customers.id_card_num') : $t('customers.driver_license_num') }}</span>
                 <span class="text-red-500 font-bold ml-0.5">*</span>
               </template>
               <UInput
                 v-model="form.id_card"
-                placeholder="1100700123456"
+                :placeholder="form.verification_type === 'idcard' ? '1100700123456' : '1100700123456'"
                 size="md"
                 class="w-full"
               />
@@ -121,10 +124,11 @@
                   searchable
                   size="md"
                   class="w-full"
+                  :placeholder="$t('customers.select_prefix')"
                 />
               </UFormField>
 
-              <UFormField :error="errors.first_name_th">
+              <UFormField :error="errors.first_name_th || undefined">
                 <template #label>
                   <span>{{ $t('customers.first_name_th') }}</span>
                   <span class="text-red-500 font-bold ml-0.5">*</span>
@@ -137,7 +141,7 @@
                 />
               </UFormField>
 
-              <UFormField :error="errors.last_name_th">
+              <UFormField :error="errors.last_name_th || undefined">
                 <template #label>
                   <span>{{ $t('customers.last_name_th') }}</span>
                   <span class="text-red-500 font-bold ml-0.5">*</span>
@@ -165,6 +169,7 @@
                   searchable
                   size="md"
                   class="w-full"
+                  :placeholder="$t('customers.select_prefix')"
                 />
               </UFormField>
               <UFormField :label="$t('customers.first_name_en')">
@@ -181,7 +186,7 @@
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">Passport / International ID Details</h3>
 
           <div class="space-y-4">
-            <UFormField :error="errors.passport">
+            <UFormField :error="errors.passport || undefined">
               <template #label>
                 <span>{{ $t('customers.passport_num') }}</span>
                 <span class="text-red-500 font-bold ml-0.5">*</span>
@@ -207,7 +212,7 @@
                 />
               </UFormField>
 
-              <UFormField :error="errors.first_name_en">
+              <UFormField :error="errors.first_name_en || undefined">
                 <template #label>
                   <span>{{ $t('customers.first_name_en') }}</span>
                   <span class="text-red-500 font-bold ml-0.5">*</span>
@@ -220,7 +225,7 @@
                 />
               </UFormField>
 
-              <UFormField :error="errors.last_name_en">
+              <UFormField :error="errors.last_name_en || undefined">
                 <template #label>
                   <span>{{ $t('customers.last_name_en') }}</span>
                   <span class="text-red-500 font-bold ml-0.5">*</span>
@@ -248,6 +253,7 @@
                   searchable
                   size="md"
                   class="w-full"
+                  :placeholder="$t('customers.select_prefix')"
                 />
               </UFormField>
               <UFormField :label="$t('customers.first_name_th')">
@@ -265,7 +271,7 @@
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $t('customers.profile_contact_heading') }}</h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UFormField :label="$t('customers.tax_id')" :error="errors.tax_id" class="md:col-span-2">
+            <UFormField :label="$t('customers.tax_id')" :error="errors.tax_id || undefined" class="md:col-span-2">
               <template #label v-if="form.customer_type === 'company'">
                 <span>{{ $t('customers.tax_id') }}</span>
                 <span class="text-red-500 font-bold ml-0.5">*</span>
@@ -278,7 +284,7 @@
               />
             </UFormField>
 
-            <UFormField :label="$t('customers.email')" :error="errors.email">
+            <UFormField :label="$t('customers.email')" :error="errors.email || undefined">
               <UInput
                 v-model="form.email"
                 type="email"
@@ -289,7 +295,7 @@
               />
             </UFormField>
 
-            <UFormField :label="$t('customers.phone')" :error="errors.phone">
+            <UFormField :label="$t('customers.phone')" :error="errors.phone || undefined">
               <UInput
                 v-model="form.phone"
                 placeholder="+66812345678"
@@ -299,7 +305,11 @@
               />
             </UFormField>
 
-            <UFormField :label="$t('customers.gender')">
+            <UFormField :error="errors.gender || undefined">
+              <template #label>
+                <span>{{ $t('customers.gender') }}</span>
+                <span class="text-red-500 font-bold ml-0.5">*</span>
+              </template>
               <USelectMenu
                 v-model="form.gender"
                 :items="genderOptions"
@@ -308,6 +318,7 @@
                 searchable
                 size="md"
                 class="w-full"
+                :placeholder="$t('customers.select_gender')"
               />
             </UFormField>
 
@@ -318,10 +329,15 @@
                 searchable
                 size="md"
                 class="w-full"
+                :placeholder="$t('customers.select_nationality')"
               />
             </UFormField>
 
-            <UFormField :label="$t('customers.birth_date')">
+            <UFormField :error="errors.birth_date || undefined">
+              <template #label>
+                <span>{{ $t('customers.birth_date') }}</span>
+                <span class="text-red-500 font-bold ml-0.5">*</span>
+              </template>
               <UInput v-model="form.birth_date" type="date" size="md" icon="i-heroicons-calendar" class="w-full" />
             </UFormField>
 
@@ -359,9 +375,23 @@
           </UFormField>
         </div>
 
+        <!-- Section 8: Additional Notes -->
+        <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $t('customers.note_heading') }}</h3>
+          <UFormField :label="$t('customers.note')">
+            <UTextarea
+              v-model="form.note"
+              :placeholder="$t('customers.note_placeholder')"
+              size="md"
+              :rows="3"
+              class="w-full"
+            />
+          </UFormField>
+        </div>
+
         <!-- Action buttons with primary submit color -->
         <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
-          <UButton color="gray" variant="ghost" @click="$emit('cancel')">
+          <UButton type="button" color="gray" variant="ghost" @click="$emit('cancel')">
             {{ $t('common.cancel') }}
           </UButton>
           <UButton color="primary" icon="i-heroicons-check" class="font-semibold shadow-md text-white" type="submit" :loading="isLoading || isUploadingImage">
@@ -379,8 +409,11 @@ import { reactive, watch, computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Customer, CustomerFormData } from '../types'
 import { useImageUpload } from '../../../composables/useImageUpload'
+import { useAppToast } from '../../../composables/useAppToast'
 
 const { t } = useI18n()
+const { uploadImage } = useImageUpload()
+const { showError } = useAppToast()
 const isUploadingImage = ref(false)
 
 const props = defineProps<{
@@ -395,9 +428,9 @@ const emit = defineEmits<{
 
 const form = reactive({
   code: '',
-  customer_type: 'individuals',
-  prefix_en: 'Mr.',
-  prefix_th: 'นาย',
+  customer_type: '',
+  prefix_en: '',
+  prefix_th: '',
   first_name_en: '',
   last_name_en: '',
   first_name_th: '',
@@ -406,15 +439,16 @@ const form = reactive({
   phone: '',
   address_en: '',
   address_th: '',
-  gender: 'Male',
+  gender: '',
   tax_id: '',
-  nationality: 'Thailand',
+  nationality: '',
   birth_date: '',
   id_card: '',
   passport: '',
   occupation: '',
   social_media: '',
   image_url: '',
+  note: '',
   verification_type: 'idcard'
 })
 
@@ -427,15 +461,18 @@ const errors = reactive({
   first_name_th: '',
   last_name_th: '',
   first_name_en: '',
-  last_name_en: ''
+  last_name_en: '',
+  birth_date: '',
+  customer_type: '',
+  gender: ''
 })
 
 watch(() => props.customerToEdit, (newVal) => {
   if (newVal) {
     form.code = newVal.code || ''
-    form.customer_type = newVal.type === 'company' ? 'company' : 'individuals'
-    form.prefix_en = newVal.prefix_en || 'Mr.'
-    form.prefix_th = newVal.prefix_th || 'นาย'
+    form.customer_type = newVal.type === 'company' ? 'company' : (newVal.type === 'individuals' ? 'individuals' : '')
+    form.prefix_en = newVal.prefix_en || ''
+    form.prefix_th = newVal.prefix_th || ''
     form.first_name_en = newVal.first_name_en || ''
     form.last_name_en = newVal.last_name_en || ''
     form.first_name_th = newVal.first_name_th || ''
@@ -444,17 +481,20 @@ watch(() => props.customerToEdit, (newVal) => {
     form.phone = newVal.phone || ''
     form.address_en = newVal.address_en || ''
     form.address_th = newVal.address_th || ''
-    form.gender = newVal.gender || 'Male'
+    form.gender = newVal.gender || ''
     form.tax_id = newVal.tax_id || ''
-    form.nationality = newVal.nationality || 'Thailand'
+    form.nationality = newVal.nationality || ''
     form.birth_date = newVal.birth_date ? newVal.birth_date.split('T')[0] : ''
     form.id_card = newVal.id_card || ''
     form.passport = newVal.passport || ''
     form.occupation = newVal.occupation || ''
     form.image_url = newVal.image_url || ''
     form.social_media = newVal.social_media || ''
+    form.note = newVal.note || ''
     
-    if (newVal.id_card) {
+    if (newVal.verification_type) {
+      form.verification_type = newVal.verification_type
+    } else if (newVal.id_card) {
       form.verification_type = 'idcard'
     } else if (newVal.passport) {
       form.verification_type = 'passport'
@@ -471,6 +511,7 @@ const customerTypeOptions = computed(() => [
 
 const verificationTypes = computed(() => [
   { label: t('customers.id_card_type'), value: 'idcard', icon: 'i-heroicons-identification' },
+  { label: t('customers.driver_license_type'), value: 'driver_license', icon: 'i-heroicons-credit-card' },
   { label: t('customers.passport_type'), value: 'passport', icon: 'i-heroicons-globe-americas' },
   { label: t('customers.others_type'), value: 'others', icon: 'i-heroicons-shield-check' }
 ])
@@ -478,28 +519,43 @@ const verificationTypes = computed(() => [
 const prefixEnOptions = [
   { label: 'Mr.', value: 'Mr.' },
   { label: 'Ms.', value: 'Ms.' },
-  { label: 'Mrs.', value: 'Mrs.' },
-  { label: 'Dr.', value: 'Dr.' }
+  { label: 'Mrs.', value: 'Mrs.' }
 ]
 
 const prefixThOptions = [
   { label: 'นาย', value: 'นาย' },
   { label: 'นางสาว', value: 'นางสาว' },
   { label: 'นาง', value: 'นาง' },
-  { label: 'ดร.', value: 'ดร.' }
+  { label: 'เด็กชาย', value: 'เด็กชาย' },
+  { label: 'เด็กหญิง', value: 'เด็กหญิง' }
 ]
 
 const genderOptions = computed(() => [
   { label: t('customers.gender_male'), value: 'Male' },
-  { label: t('customers.gender_female'), value: 'Female' },
-  { label: t('customers.gender_other'), value: 'Other' }
+  { label: t('customers.gender_female'), value: 'Female' }
 ])
 
 const nationalityOptions = [
-  'Thailand', 'Singapore', 'Malaysia', 'Japan', 'South Korea', 'China', 'India',
-  'United States', 'United Kingdom', 'Canada', 'Australia', 'Germany', 'France',
-  'Italy', 'Spain', 'Switzerland', 'Netherlands', 'Norway', 'Sweden', 'Finland',
-  'New Zealand', 'Denmark', 'Russia', 'Brazil', 'South Africa'
+  'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
+  'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
+  'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cabo Verde', 'Cambodia',
+  'Cameroon', 'Canada', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo (Congo-Brazzaville)', 'Costa Rica',
+  'Croatia', 'Cuba', 'Cyprus', 'Czechia (Czech Republic)', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt',
+  'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon',
+  'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana',
+  'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel',
+  'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kuwait', 'Kyrgyzstan', 'Laos',
+  'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar', 'Malawi',
+  'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia', 'Moldova',
+  'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar (formerly Burma)', 'Namibia', 'Nauru', 'Nepal', 'Netherlands',
+  'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman', 'Pakistan', 'Palau',
+  'Palestine State', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania',
+  'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal',
+  'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Korea',
+  'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan',
+  'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu',
+  'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States of America', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela', 'Vietnam',
+  'Yemen', 'Zambia', 'Zimbabwe'
 ]
 
 const handleImageUpload = (e: Event) => {
@@ -526,6 +582,15 @@ const submitForm = async () => {
   errors.last_name_th = ''
   errors.first_name_en = ''
   errors.last_name_en = ''
+  errors.birth_date = ''
+  errors.customer_type = ''
+  errors.gender = ''
+
+  // Customer Type validation: required
+  if (!form.customer_type) {
+    errors.customer_type = t('customers.err_customer_type_required')
+    isValid = false
+  }
 
   // 1. Customer Type validation: if company, Tax ID is required
   if (form.customer_type === 'company') {
@@ -553,13 +618,29 @@ const submitForm = async () => {
     }
   }
 
+  // Date of Birth validation: required
+  if (!form.birth_date) {
+    errors.birth_date = t('customers.err_birth_date_required')
+    isValid = false
+  }
+
+  // Gender validation: required
+  if (!form.gender) {
+    errors.gender = t('customers.err_gender_required')
+    isValid = false
+  }
+
   // 4. Identity validation based on verification type
-  if (form.verification_type === 'idcard') {
+  if (form.verification_type === 'idcard' || form.verification_type === 'driver_license') {
     if (!form.id_card.trim()) {
-      errors.id_card = t('customers.err_id_card_required')
+      errors.id_card = form.verification_type === 'idcard'
+        ? t('customers.err_id_card_required')
+        : t('customers.err_driver_license_required')
       isValid = false
     } else if (!/^\d{13}$/.test(form.id_card.trim())) {
-      errors.id_card = t('customers.err_id_card_format')
+      errors.id_card = form.verification_type === 'idcard'
+        ? t('customers.err_id_card_format')
+        : t('customers.err_driver_license_format')
       isValid = false
     }
 
@@ -595,13 +676,12 @@ const submitForm = async () => {
   if (form.image_url && form.image_url.startsWith('data:image/')) {
     isUploadingImage.value = true
     try {
-      const { uploadImage } = useImageUpload()
       const url = await uploadImage(form.image_url, 'customers')
       if (url) {
         uploadedImageUrl = url
       }
     } catch (err: any) {
-      errors.email = `Failed to upload document image: ${err.message || err}`
+      showError(`Failed to upload document image: ${err.message || err}`)
       isUploadingImage.value = false
       return
     } finally {
@@ -628,11 +708,13 @@ const submitForm = async () => {
     is_active: true,
     nationality: typeof form.nationality === 'object' ? (form.nationality as any).value : form.nationality,
     birth_date: form.birth_date ? `${form.birth_date}T00:00:00+00:00` : '',
-    id_card: form.verification_type === 'idcard' ? form.id_card : '',
-    passport: form.verification_type !== 'idcard' ? form.passport : '',
+    id_card: (form.verification_type === 'idcard' || form.verification_type === 'driver_license') ? form.id_card : '',
+    passport: (form.verification_type !== 'idcard' && form.verification_type !== 'driver_license') ? form.passport : '',
     occupation: form.occupation,
     social_media: form.social_media,
-    image_url: uploadedImageUrl
+    image_url: uploadedImageUrl,
+    verification_type: form.verification_type,
+    note: form.note
   }
 
   emit('save', payload)
