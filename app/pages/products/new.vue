@@ -23,9 +23,9 @@
     <!-- Error Alert banner if form fails -->
     <UAlert
       v-if="errorMsg"
-      color="red"
+      color="error"
       variant="soft"
-      icon="i-heroicons-exclamation-triangle"
+      icon="i-lucide-alert-triangle"
       title="Form Submission Error"
       :description="errorMsg"
       class="mb-6"
