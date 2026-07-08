@@ -150,7 +150,7 @@
           <h3 class="text-sm font-bold text-highlighted pb-2 border-b border-muted">
             {{ $t('products.description') || 'General Description' }}
           </h3>
-          <UFormField :label="$t('products.description') || 'Description'">
+          <UFormField>
             <UTextarea v-model="form.description" :rows="3" autoresize :maxrows="6" placeholder="Product description details..." class="w-full" />
           </UFormField>
         </div>
@@ -221,11 +221,7 @@
               />
             </UFormField>
 
-            <UFormField :error="errors.stock || undefined">
-              <template #label>
-                <span>{{ $t('products.stock') || 'Total Stock' }}</span>
-                <span class="text-error font-bold ml-0.5">*</span>
-              </template>
+            <UFormField :error="errors.stock || undefined" :label="$t('products.stock') || 'Total Stock'">
               <UInput
                 v-model.number="form.stock"
                 type="number"
@@ -300,10 +296,10 @@
 
         <!-- Action buttons -->
         <div class="flex items-center justify-end gap-3 pt-6 border-t border-muted">
-          <UButton type="button" color="neutral" variant="ghost" @click="$emit('cancel')">
+          <UButton type="button" color="neutral" variant="ghost" icon="i-heroicons-x-mark" @click="$emit('cancel')">
             {{ $t('common.cancel') }}
           </UButton>
-          <UButton type="submit" color="primary" class="px-6 font-semibold" :loading="isLoading || isUploadingImage">
+          <UButton type="submit" color="primary" class="px-6 font-semibold" icon="i-heroicons-check" :loading="isLoading || isUploadingImage">
             {{ $t('common.save') }}
           </UButton>
         </div>
@@ -468,22 +464,35 @@ const submitForm = async () => {
     isValid = false
   }
 
+  if (!form.product_type) {
+    errors.product_type = t('products.err_product_type') || 'Product type is required'
+    isValid = false
+  }
+
   if (!form.unit.trim()) {
     errors.unit = t('products.err_unit') || 'Unit is required'
     isValid = false
   }
 
-  if (form.cost === undefined || form.cost === null || isNaN(form.cost) || form.cost < 0) {
+  if (form.cost === undefined || form.cost === null || isNaN(form.cost) || (form.cost as any) === '') {
+    errors.cost = t('products.err_cost_required') || 'Cost is required'
+    isValid = false
+  } else if (form.cost < 0) {
     errors.cost = t('products.err_cost') || 'Cost must be a non-negative number'
     isValid = false
   }
 
-  if (form.selling_price === undefined || form.selling_price === null || isNaN(form.selling_price) || form.selling_price < 0) {
+  if (form.selling_price === undefined || form.selling_price === null || isNaN(form.selling_price) || (form.selling_price as any) === '') {
+    errors.selling_price = t('products.err_price_required') || 'Selling price is required'
+    isValid = false
+  } else if (form.selling_price < 0) {
     errors.selling_price = t('products.err_price') || 'Selling price must be a non-negative number'
     isValid = false
   }
 
-  if (form.stock === undefined || form.stock === null || isNaN(form.stock) || form.stock < 0) {
+  if (form.stock === undefined || form.stock === null || isNaN(form.stock) || (form.stock as any) === '') {
+    form.stock = 0
+  } else if (form.stock < 0) {
     errors.stock = t('products.err_stock') || 'Stock count must be a non-negative number'
     isValid = false
   }

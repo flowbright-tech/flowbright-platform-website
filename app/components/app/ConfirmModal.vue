@@ -16,13 +16,13 @@
         </p>
 
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <UButton color="gray" variant="ghost" @click="handleCancel">
+          <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark" @click="handleCancel">
             {{ cancelText || $t('common.cancel') }}
           </UButton>
           <UButton
             :color="confirmColor || 'primary'"
             :icon="confirmIcon"
-            class="text-white dark:text-slate-950 font-bold px-4 py-2 hover:bg-indigo-700 dark:hover:bg-indigo-300"
+            class="text-white font-bold px-4 py-2"
             @click="handleConfirm"
           >
             {{ confirmText || $t('common.confirm') }}

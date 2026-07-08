@@ -7,7 +7,14 @@ export default defineAppConfig({
       default: {
         color: 'primary',
         loadingIcon: 'i-heroicons-arrow-path-20-solid'
-      }
+      },
+      compoundVariants: [
+        {
+          color: 'primary',
+          variant: 'solid',
+          class: 'text-white'
+        }
+      ]
     },
     card: {
       background: 'bg-white dark:bg-slate-900',
