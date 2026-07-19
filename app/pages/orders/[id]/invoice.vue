@@ -79,7 +79,7 @@
     <div v-else class="a4-page-container w-full max-w-[210mm]">
       <div class="a4-page print-content">
         <!-- Logo & Header Section -->
-        <div class="flex gap-5 items-start">
+        <div class="flex gap-5 items-center">
           <!-- SVG Clinic Logo or Image logo -->
           <div class="shrink-0">
             <img
@@ -122,7 +122,7 @@
         <hr class="border-slate-300 my-4" />
 
         <!-- Invoice Subheader Details -->
-        <div class="grid grid-cols-3 items-center gap-2 mb-5">
+        <div class="grid grid-cols-3 items-center mb-4">
           <div class="text-[13px] font-extrabold text-slate-900 flex items-center gap-1">
             <span>ใบเสร็จรับเงิน</span>
             <span class="text-slate-600 text-xs font-bold">(RECEIPT)</span>
@@ -154,25 +154,25 @@
             </div>
           </div>
 
-          <!-- Unequal Columns to ensure DOB stays in one line and shrinks HN/Age -->
-          <div class="grid grid-cols-12 gap-2 text-[11px] items-center">
-            <div class="col-span-3 whitespace-nowrap">
+          <!-- Dynamic single row flex layout spacing out items cleanly -->
+          <div class="flex justify-between items-center text-[11px] gap-4 w-full">
+            <div class="whitespace-nowrap">
               <span class="font-bold text-slate-700">HN :</span>
-              <span class="font-mono font-bold text-slate-900 ml-1">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
+              <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
             </div>
-            <div class="col-span-5 whitespace-nowrap">
+            <div class="whitespace-nowrap">
               <span class="font-bold text-slate-700">วันเดือนปีเกิด</span>
               <span class="text-[9px] text-slate-500 font-semibold ml-0.5">( DateOfBirth ) :</span>
-              <span class="font-mono font-bold text-slate-900 ml-1">{{ formatBirthDate(customer?.birth_date) }}</span>
+              <span class="font-mono font-bold text-slate-900 ml-1.5">{{ formatBirthDate(customer?.birth_date) }}</span>
             </div>
-            <div class="col-span-2 whitespace-nowrap">
+            <div class="whitespace-nowrap">
               <span class="font-bold text-slate-700">อายุ</span>
               <span class="text-[9px] text-slate-500 font-semibold ml-0.5">( Age ) :</span>
-              <span class="font-bold text-slate-900 ml-1">{{ calculateAge(customer?.birth_date) }}</span>
+              <span class="font-bold text-slate-900 ml-1.5">{{ calculateAge(customer?.birth_date) }}</span>
             </div>
-            <div class="col-span-2 whitespace-nowrap text-right">
-              <span class="font-bold text-slate-700">Passport :</span>
-              <span class="font-mono font-bold text-slate-900 ml-1">{{ customer?.passport || customer?.id_card || '-' }}</span>
+            <div class="whitespace-nowrap text-right">
+              <span class="font-bold text-slate-700">Passport No. :</span>
+              <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.passport || customer?.id_card || '-' }}</span>
             </div>
           </div>
         </div>
@@ -194,9 +194,6 @@
                 <td class="px-4 py-3">
                   <div class="font-extrabold text-slate-950 text-[12px]">
                     {{ locale === 'th' ? (item.package?.name_th || item.package_name_th || item.package_id) : (item.package?.name_en || item.package_name_en || item.package_id) }}
-                  </div>
-                  <div v-if="item.notes" class="text-[10px] text-slate-500 italic mt-0.5 font-medium">
-                    {{ item.notes }}
                   </div>
                 </td>
                 <td class="px-4 py-3 text-center font-bold font-mono">{{ item.quantity }}</td>
