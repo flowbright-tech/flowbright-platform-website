@@ -72,14 +72,14 @@
       <div class="a4-page print-content flex flex-col justify-between">
         <div>
           <!-- Customer Document Scan Image (Passport/ID Card) -->
-          <div class="flex justify-center mb-8">
+          <div class="flex justify-center mb-6">
             <img
               v-if="customer?.image_url"
               :src="customer.image_url"
-              class="max-h-[75mm] object-contain border border-slate-200/80 rounded-lg shadow-sm"
+              class="max-h-[55mm] max-w-[100mm] object-contain border border-slate-200/80 rounded-lg shadow-sm"
               alt="Customer Document"
             />
-            <div v-else class="w-[120mm] h-[75mm] bg-slate-50 border border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-2 text-slate-400">
+            <div v-else class="w-[100mm] h-[55mm] bg-slate-50 border border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-2 text-slate-400">
               <UIcon name="i-heroicons-identification" class="w-12 h-12 text-slate-300" />
               <span class="text-xs font-semibold">No Document / Passport scan uploaded</span>
             </div>
@@ -88,17 +88,17 @@
           <!-- Document Profile Metadata (2 Clean Rows) -->
           <div class="space-y-3 border-y border-slate-200 py-3.5 text-slate-800 text-[11.5px] font-medium">
             <!-- Row 1 -->
-            <div class="flex justify-between items-center">
-              <div class="w-1/3">
+            <div class="grid grid-cols-12 gap-2 items-center">
+              <div class="col-span-4 whitespace-nowrap">
                 <span class="font-bold">วันที่</span>
                 <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( Billing Date. ) :</span>
                 <span class="font-mono font-bold text-slate-900 ml-1.5">{{ formatInvoiceDate(invoice?.delivery_date) }}</span>
               </div>
-              <div class="w-1/3 text-center">
+              <div class="col-span-3 whitespace-nowrap text-center">
                 <span class="font-bold">HN :</span>
                 <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
               </div>
-              <div class="w-1/3 text-right">
+              <div class="col-span-5 whitespace-nowrap text-right">
                 <span class="font-bold">ช่องทางการชำระเงิน</span>
                 <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( Payment Channel ) :</span>
                 <span class="font-bold text-slate-900 ml-1.5 capitalize">{{ formatPaymentChannel(invoice?.payment_channel) }}</span>
@@ -106,15 +106,15 @@
             </div>
 
             <!-- Row 2 -->
-            <div class="flex justify-between items-center">
-              <div class="w-[60%]">
+            <div class="grid grid-cols-12 gap-2 items-center">
+              <div class="col-span-6 whitespace-nowrap">
                 <span class="font-bold">ชื่อ</span>
                 <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( Name ) :</span>
-                <span class="font-extrabold text-slate-950 ml-1.5 text-[12px]">
+                <span class="font-extrabold text-slate-955 ml-1.5 text-[12px]">
                   {{ getCustomerFullName() }}
                 </span>
               </div>
-              <div class="w-[40%] text-right">
+              <div class="col-span-6 whitespace-nowrap text-right">
                 <span class="font-bold">อายุ</span>
                 <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( Age ) :</span>
                 <span class="font-bold text-slate-900 ml-1.5">{{ calculatePreciseAge(customer?.birth_date, invoice?.created_at) }}</span>
