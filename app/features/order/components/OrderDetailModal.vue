@@ -82,7 +82,7 @@
                 <tr v-for="(item, idx) in order.items" :key="idx">
                   <td class="px-4 py-3">
                     <div class="font-bold text-slate-900 dark:text-white">
-                      {{ locale === 'th' ? (item.package_name_th || item.package_id) : (item.package_name_en || item.package_id) }}
+                      {{ locale === 'th' ? (item.package_name_th || (item as any).package?.name_th || (item as any).name_th || item.package_name_en || (item as any).package?.name_en || item.package_id) : (item.package_name_en || (item as any).package?.name_en || (item as any).name_en || item.package_name_th || (item as any).package?.name_th || item.package_id) }}
                     </div>
                     <div v-if="item.notes" class="text-[11px] text-slate-500 italic mt-0.5">
                       Note: {{ item.notes }}

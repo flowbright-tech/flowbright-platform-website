@@ -159,11 +159,6 @@
 
           <!-- Items Table -->
           <div v-else class="space-y-4">
-            <div v-if="errors.items" class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/35 border border-rose-200/60 dark:border-rose-800/80 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
-              <UIcon name="i-heroicons-exclamation-circle" class="w-4 h-4 text-rose-500 shrink-0" />
-              <span>{{ errors.items }}</span>
-            </div>
-
             <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
               <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/30">
                 <thead>
@@ -281,11 +276,13 @@ import { useI18n } from 'vue-i18n'
 import type { Order, OrderFormData } from '../types'
 import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, safeLowerCase } from '../composables/useOrderEngine'
 import { useApiFetch } from '../../../composables/useApiFetch'
+import { useAppToast } from '../../../composables/useAppToast'
 import type { Customer } from '../../customer/types'
 import type { Package } from '../../package/types'
 
 const { t, locale } = useI18n()
 const { apiFetch } = useApiFetch()
+const { showError } = useAppToast()
 
 const props = defineProps<{
   orderToEdit?: Order | null
@@ -560,13 +557,17 @@ const submitForm = () => {
   }
 
   if (form.items.length === 0) {
-    errors.items = safeLowerCase(t('orders.err_items_empty') || 'order must contain at least one package item')
+    const errMsg = safeLowerCase(t('orders.err_items_empty') || 'order must contain at least one package item')
+    errors.items = errMsg
+    showError(errMsg)
     isValid = false
   }
 
   for (let i = 0; i < form.items.length; i++) {
     if (form.items[i].quantity <= 0) {
-      errors.items = `${safeLowerCase(t('orders.err_quantity_invalid') || 'quantity must be greater than 0')} (row ${i + 1})`
+      const errMsg = `${safeLowerCase(t('orders.err_quantity_invalid') || 'quantity must be greater than 0')} (row ${i + 1})`
+      errors.items = errMsg
+      showError(errMsg)
       isValid = false
       break
     }
