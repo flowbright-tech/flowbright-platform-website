@@ -4,12 +4,13 @@
       <!-- Customer & Order Info column (Only Order Number / Customer Name) -->
       <template #customer_name-cell="{ row }">
         <div class="flex items-center gap-2 py-1">
+          <UBadge v-if="row.original.code || row.original.order_number" color="neutral" variant="soft" size="md"
+            class="font-mono font-bold text-xs sm:text-sm px-2.5 py-1">
+            {{ row.original.code || row.original.order_number }}
+          </UBadge>
           <span class="font-bold text-slate-900 dark:text-white text-sm">
             {{ row.original.customer_name || 'N/A' }}
           </span>
-          <UBadge v-if="row.original.code || row.original.order_number" color="neutral" variant="soft" size="md" class="font-mono font-bold text-xs sm:text-sm px-2.5 py-1">
-            {{ row.original.code || row.original.order_number }}
-          </UBadge>
         </div>
       </template>
 
@@ -23,7 +24,8 @@
 
       <!-- Payment Channel cell (Increased badge size) -->
       <template #payment_channel-cell="{ row }">
-        <UBadge :color="getPaymentBadgeColor(row.original.payment_channel)" variant="soft" size="sm" class="capitalize font-bold px-2.5 py-1">
+        <UBadge :color="getPaymentBadgeColor(row.original.payment_channel)" variant="soft" size="md"
+          class="capitalize font-bold px-2.5 py-1">
           <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-4 h-4 mr-1" />
           {{ formatPaymentChannel(row.original.payment_channel) }}
         </UBadge>
@@ -31,7 +33,8 @@
 
       <!-- Status cell (Increased badge size) -->
       <template #status-cell="{ row }">
-        <UBadge :color="getStatusBadgeColor(row.original.status)" variant="solid" size="sm" class="capitalize font-bold px-2.5 py-1">
+        <UBadge :color="getStatusBadgeColor(row.original.status)" variant="solid" size="md"
+          class="capitalize font-bold px-2.5 py-1">
           <span class="w-1.5 h-1.5 rounded-full bg-white mr-1.5 inline-block animate-pulse"></span>
           {{ formatStatus(row.original.status) }}
         </UBadge>
@@ -39,7 +42,8 @@
 
       <!-- Items Count cell -->
       <template #items-cell="{ row }">
-        <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
+        <span
+          class="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
           {{ row.original.items?.length || 0 }} {{ $t('orders.col_items') || 'Items' }}
         </span>
       </template>
@@ -54,28 +58,14 @@
       <!-- Actions cell -->
       <template #actions-cell="{ row }">
         <div class="flex items-center justify-end gap-1">
-          <UButton
-            color="neutral"
-            variant="ghost"
-            icon="i-heroicons-eye"
-            size="xs"
-            :title="$t('orders.view_detail') || 'View Details'"
-            @click="$emit('view', row.original)"
-          />
-          <UButton
-            color="primary"
-            variant="ghost"
-            icon="i-heroicons-pencil-square"
-            size="xs"
-            @click="$emit('edit', row.original)"
-          />
-          <UButton
-            color="error"
-            variant="ghost"
-            icon="i-heroicons-trash"
-            size="xs"
-            @click="$emit('delete', row.original.id)"
-          />
+          <UButton color="neutral" variant="ghost" icon="i-heroicons-printer" size="xs"
+            :title="$t('orders.print_invoice') || 'Print Invoice'" @click="$emit('print', row.original)" />
+          <UButton color="neutral" variant="ghost" icon="i-heroicons-eye" size="xs"
+            :title="$t('orders.view_detail') || 'View Details'" @click="$emit('view', row.original)" />
+          <UButton color="primary" variant="ghost" icon="i-heroicons-pencil-square" size="xs"
+            @click="$emit('edit', row.original)" />
+          <UButton color="error" variant="ghost" icon="i-heroicons-trash" size="xs"
+            @click="$emit('delete', row.original.id)" />
         </div>
       </template>
     </UTable>
@@ -105,6 +95,7 @@ defineEmits<{
   (e: 'view', order: Order): void
   (e: 'edit', order: Order): void
   (e: 'delete', id: string): void
+  (e: 'print', order: Order): void
 }>()
 
 const { t } = useI18n()

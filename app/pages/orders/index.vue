@@ -56,6 +56,7 @@
       @view="handleViewOrder"
       @edit="handleEditOrder"
       @delete="handleConfirmDelete"
+      @print="handlePrintInvoice"
     />
 
     <!-- Pagination -->
@@ -141,6 +142,13 @@ const handleEditOrder = (order: Order) => {
 const handleViewOrder = (order: Order) => {
   selectedOrderForView.value = order
   isDetailModalOpen.value = true
+}
+
+const handlePrintInvoice = (order: Order) => {
+  if (import.meta.client) {
+    const routeUrl = localePath(`/orders/${order.id}/invoice`)
+    window.open(routeUrl, '_blank')
+  }
 }
 
 const handleConfirmDelete = (id: string) => {

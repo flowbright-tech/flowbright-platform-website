@@ -432,7 +432,8 @@
     "err_items_empty": "คำสั่งซื้อต้องมีอย่างน้อยหนึ่งรายการแพ็คเกจ",
     "err_quantity_invalid": "จำนวนต้องมากกว่า 0",
     "view_detail": "ดูรายละเอียด",
-    "order_detail_title": "รายละเอียดคำสั่งซื้อ"
+    "order_detail_title": "รายละเอียดคำสั่งซื้อ",
+    "print_invoice": "พิมพ์ใบเสร็จ/ใบแจ้งหนี้"
   },
   "errors": {
     "bad_request_title": "คำขอไม่ถูกต้อง (400)",
