@@ -16,15 +16,27 @@
           Invoice Printing Preview
         </span>
       </div>
-      <UButton
-        color="primary"
-        icon="i-heroicons-printer"
-        size="md"
-        class="font-semibold shadow-sm"
-        @click="printInvoice"
-      >
-        Print Invoice (A4)
-      </UButton>
+      <div class="flex items-center gap-3">
+        <!-- Language Switcher Button -->
+        <UButton
+          color="neutral"
+          variant="outline"
+          size="sm"
+          icon="i-heroicons-language"
+          @click="toggleLanguage"
+        >
+          {{ locale === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย' }}
+        </UButton>
+        <UButton
+          color="primary"
+          icon="i-heroicons-printer"
+          size="md"
+          class="font-semibold shadow-sm"
+          @click="printInvoice"
+        >
+          Print Invoice (A4)
+        </UButton>
+      </div>
     </div>
 
     <!-- Loading Skeleton -->
@@ -86,18 +98,18 @@
             </svg>
           </div>
           <!-- Clinic Details (TH & EN) -->
-          <div class="flex-1 space-y-1 text-slate-800">
+          <div class="flex-1 space-y-0.5 text-slate-800">
             <h1 class="text-base font-extrabold leading-tight tracking-tight">
               {{ company?.name_th || 'คลินิก เอ็ม.ที อินเตอร์แล็บ ( M.T.INTER MEDICAL LABORATORY CLINIC )' }}
             </h1>
             <h2 class="text-[13px] font-bold leading-tight">
               {{ company?.name_en || 'บริษัท เมโทรเมด จำกัด (สำนักงานใหญ่) ( METRO MED COMPANY LIMITED )' }}
             </h2>
-            <p class="text-[10px] leading-snug text-slate-600 font-medium whitespace-pre-line">
-              {{ company?.address_th || '193/421 หมู่ 10 ต.หนองปรือ อ.บางละมุง จ.ชลบุรี 20150' }} <span v-if="company?.phone">โทร. : {{ company.phone }}</span>
+            <p class="text-[10px] leading-snug text-slate-600 font-medium">
+              {{ company?.address_th || '193/421 หมู่ 10 ต.หนองปรือ อ.บางละมุง จ.ชลบุรี 20150' }} <span v-if="company?.phone">โทร. : {{ formatPhoneTh(company.phone) }}</span>
             </p>
-            <p class="text-[10px] leading-snug text-slate-600 font-medium whitespace-pre-line">
-              {{ company?.address_en || '193/421 Moo.10 Nongprue,Banglamung Chonburi Thailand 20150' }} <span v-if="company?.phone">Tel. : {{ company.phone }}</span>
+            <p class="text-[10px] leading-snug text-slate-600 font-medium">
+              {{ formatAddressSingleLine(company?.address_en) || '193/421 Moo 10, Nongprue, Banglamung, Chonburi, Thailand 20150' }} <span v-if="company?.phone">Tel. : {{ formatPhoneEn(company.phone) }}</span>
             </p>
             <p class="text-[9.5px] text-slate-500 font-semibold flex items-center gap-4 pt-0.5">
               <span v-if="company?.email">Email : {{ company.email.trim() }}</span>
@@ -142,24 +154,25 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-4 gap-4 text-[11px]">
-            <div>
+          <!-- Unequal Columns to ensure DOB stays in one line and shrinks HN/Age -->
+          <div class="grid grid-cols-12 gap-2 text-[11px] items-center">
+            <div class="col-span-3 whitespace-nowrap">
               <span class="font-bold text-slate-700">HN :</span>
-              <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
+              <span class="font-mono font-bold text-slate-900 ml-1">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
             </div>
-            <div>
+            <div class="col-span-5 whitespace-nowrap">
               <span class="font-bold text-slate-700">วันเดือนปีเกิด</span>
-              <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( DateOfBirth ) :</span>
-              <span class="font-mono font-bold text-slate-900 ml-1.5">{{ formatBirthDate(customer?.birth_date) }}</span>
+              <span class="text-[9px] text-slate-500 font-semibold ml-0.5">( DateOfBirth ) :</span>
+              <span class="font-mono font-bold text-slate-900 ml-1">{{ formatBirthDate(customer?.birth_date) }}</span>
             </div>
-            <div>
+            <div class="col-span-2 whitespace-nowrap">
               <span class="font-bold text-slate-700">อายุ</span>
-              <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( Age ) :</span>
-              <span class="font-bold text-slate-900 ml-1.5">{{ calculateAge(customer?.birth_date) }}</span>
+              <span class="text-[9px] text-slate-500 font-semibold ml-0.5">( Age ) :</span>
+              <span class="font-bold text-slate-900 ml-1">{{ calculateAge(customer?.birth_date) }}</span>
             </div>
-            <div>
-              <span class="font-bold text-slate-700">Passport No. :</span>
-              <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.passport || customer?.id_card || '-' }}</span>
+            <div class="col-span-2 whitespace-nowrap text-right">
+              <span class="font-bold text-slate-700">Passport :</span>
+              <span class="font-mono font-bold text-slate-900 ml-1">{{ customer?.passport || customer?.id_card || '-' }}</span>
             </div>
           </div>
         </div>
@@ -231,7 +244,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useLocalePath } from '#imports'
+import { useLocalePath, useSwitchLocalePath } from '#imports'
 import { useI18n } from 'vue-i18n'
 import { useApiFetch } from '../../../composables/useApiFetch'
 import { useAuthEngine } from '../../../features/auth/composables/useAuthEngine'
@@ -245,6 +258,7 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
+const switchLocalePath = useSwitchLocalePath()
 const { locale } = useI18n()
 const { apiFetch } = useApiFetch()
 const { company: authCompany } = useAuthEngine()
@@ -357,6 +371,38 @@ const formatCurrency = (val: number) => {
   return Number(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+const formatAddressSingleLine = (addr?: string) => {
+  if (!addr) return ''
+  return addr.replace(/\n+/g, ', ').replace(/\s+/g, ' ').replace(/,\s*,/g, ',').trim()
+}
+
+const formatPhoneTh = (phoneStr?: string) => {
+  if (!phoneStr) return ''
+  const cleaned = phoneStr.replace(/\D/g, '')
+  if (cleaned.length === 10) {
+    return `${cleaned.substring(0, 3)}-${cleaned.substring(3, 6)}-${cleaned.substring(6)}`
+  }
+  return phoneStr
+}
+
+const formatPhoneEn = (phoneStr?: string) => {
+  if (!phoneStr) return ''
+  const cleaned = phoneStr.replace(/\D/g, '')
+  if (cleaned.startsWith('0')) {
+    const main = cleaned.substring(1)
+    if (main.length === 9) {
+      // e.g. 082-495-6642 -> (+66) 82-495-6642
+      return `(+66) ${main.substring(0, 2)}-${main.substring(2, 5)}-${main.substring(5)}`
+    }
+    return `(+66) ${main}`
+  }
+  if (cleaned.startsWith('66')) {
+    const main = cleaned.substring(2)
+    return `(+66) ${main.substring(0, 2)}-${main.substring(2, 5)}-${main.substring(5)}`
+  }
+  return phoneStr
+}
+
 const formatPrintDate = (dObj: Date = new Date()) => {
   const day = String(dObj.getDate()).padStart(2, '0')
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -364,6 +410,12 @@ const formatPrintDate = (dObj: Date = new Date()) => {
   const hours = String(dObj.getHours()).padStart(2, '0')
   const minutes = String(dObj.getMinutes()).padStart(2, '0')
   return `${day}-${months[dObj.getMonth()]}-${year} ${hours}:${minutes}`
+}
+
+const toggleLanguage = () => {
+  const targetLocale = locale.value === 'th' ? 'en' : 'th'
+  const targetPath = switchLocalePath(targetLocale)
+  router.push(targetPath)
 }
 
 const printInvoice = () => {
