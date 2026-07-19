@@ -96,7 +96,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useLocalePath } from '#imports'
 import { useOrderEngine } from '../../features/order/composables/useOrderEngine'
 import type { Order } from '../../features/order/types'
 import OrderFilter from '../../features/order/components/OrderFilter.vue'

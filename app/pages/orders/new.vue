@@ -44,7 +44,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useLocalePath } from '#imports'
 import { useOrderEngine } from '../../features/order/composables/useOrderEngine'
 import type { OrderFormData } from '../../features/order/types'
 import OrderForm from '../../features/order/components/OrderForm.vue'
