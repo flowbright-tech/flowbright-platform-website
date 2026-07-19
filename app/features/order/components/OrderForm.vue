@@ -93,21 +93,25 @@
               />
             </UFormField>
 
-            <!-- Payment Channel -->
+            <!-- Payment Channel (Searchable Dropdown) -->
             <UFormField :label="$t('orders.payment_channel') || 'Payment Channel'">
-              <USelect
+              <USelectMenu
                 v-model="form.payment_channel"
                 :items="paymentOptions"
+                value-key="value"
+                label-key="label"
                 size="md"
                 class="w-full"
               />
             </UFormField>
 
-            <!-- Order Status -->
+            <!-- Order Status (Default Pending, Searchable Dropdown) -->
             <UFormField :label="$t('orders.status') || 'Order Status'">
-              <USelect
+              <USelectMenu
                 v-model="form.status"
                 :items="statusOptions"
+                value-key="value"
+                label-key="label"
                 size="md"
                 class="w-full"
               />
@@ -286,15 +290,15 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Form reactive state
+// Form reactive state - Status defaults strictly to 'pending', Payment channel to 3 options
 const form = reactive<OrderFormData>({
   customer_id: '',
   customer_name: '',
   customer_email: '',
   customer_phone: '',
   delivery_date: getTodayDateString(), // Default today date
-  payment_channel: 'bank_transfer',
-  status: 'pending',
+  payment_channel: 'cash',
+  status: 'pending', // Default pending
   notes: '',
   total_amount: 0,
   items: []
@@ -320,11 +324,11 @@ const packageSearchQuery = ref('')
 const packageOptions = ref<any[]>([])
 const isSearchingPackages = ref(false)
 
+// Payment Channels (Strictly 3 options: Cash, Credit Card, Internet Banking)
 const paymentOptions = computed(() => [
-  { value: 'bank_transfer', label: t('orders.payment_bank_transfer') || 'Bank Transfer' },
-  { value: 'promptpay', label: t('orders.payment_promptpay') || 'PromptPay' },
+  { value: 'cash', label: t('orders.payment_cash') || 'Cash' },
   { value: 'credit_card', label: t('orders.payment_credit_card') || 'Credit Card' },
-  { value: 'cash', label: t('orders.payment_cash') || 'Cash' }
+  { value: 'internet_banking', label: t('orders.payment_internet_banking') || 'Internet Banking' }
 ])
 
 const statusOptions = computed(() => [
@@ -349,7 +353,7 @@ function debounce(fn: Function, delay = 300) {
 const fetchCustomerOptions = async (query: string) => {
   isSearchingCustomers.value = true
   try {
-    const res = await apiFetch(`/api/v1/customers?search=${encodeURIComponent(query)}&page=1&limit=10`)
+    const res = await apiFetch(`/api/v1/customers?search=${encodeURIComponent(query.toLowerCase())}&page=1&limit=10`)
     if (res.ok) {
       const json = await res.json()
       if (json.success && Array.isArray(json.data)) {
@@ -401,7 +405,7 @@ watch(selectedCustomer, (val) => {
 const fetchPackageOptions = async (query: string) => {
   isSearchingPackages.value = true
   try {
-    const res = await apiFetch(`/api/v1/packages?search=${encodeURIComponent(query)}&page=1&limit=10`)
+    const res = await apiFetch(`/api/v1/packages?search=${encodeURIComponent(query.toLowerCase())}&page=1&limit=10`)
     if (res.ok) {
       const json = await res.json()
       if (json.success && Array.isArray(json.data)) {
@@ -492,8 +496,8 @@ watch(() => props.orderToEdit, (newVal) => {
     form.customer_email = newVal.customer_email || ''
     form.customer_phone = newVal.customer_phone || ''
     form.delivery_date = newVal.delivery_date ? newVal.delivery_date.split('T')[0] : getTodayDateString()
-    form.payment_channel = newVal.payment_channel || 'bank_transfer'
-    form.status = newVal.status || 'pending'
+    form.payment_channel = (newVal.payment_channel || 'cash').toLowerCase()
+    form.status = (newVal.status || 'pending').toLowerCase()
     form.notes = newVal.notes || ''
     form.total_amount = newVal.total_amount || 0
     form.items = Array.isArray(newVal.items)
@@ -511,7 +515,7 @@ watch(() => props.orderToEdit, (newVal) => {
   }
 }, { immediate: true })
 
-// Form Submission
+// Form Submission with lowercased error strings
 const submitForm = () => {
   // Clear previous errors
   errors.customer = ''
@@ -522,34 +526,38 @@ const submitForm = () => {
   let isValid = true
 
   if (!form.customer_name.trim()) {
-    errors.customer_name = t('orders.err_customer_required') || 'Customer name is required'
+    errors.customer_name = (t('orders.err_customer_required') || 'please select or specify customer information').toLowerCase()
     isValid = false
   }
 
   if (!form.delivery_date) {
-    errors.delivery_date = t('orders.err_delivery_date_required') || 'Delivery date is required'
+    errors.delivery_date = (t('orders.err_delivery_date_required') || 'delivery date is required').toLowerCase()
     isValid = false
   }
 
   if (form.items.length === 0) {
-    errors.items = t('orders.err_items_empty') || 'Order must contain at least one package item'
+    errors.items = (t('orders.err_items_empty') || 'order must contain at least one package item').toLowerCase()
     isValid = false
   }
 
   for (let i = 0; i < form.items.length; i++) {
     if (form.items[i].quantity <= 0) {
-      errors.items = `${t('orders.err_quantity_invalid') || 'Quantity must be greater than 0'} (Row ${i + 1})`
+      errors.items = `${(t('orders.err_quantity_invalid') || 'quantity must be greater than 0').toLowerCase()} (row ${i + 1})`
       isValid = false
       break
     }
   }
 
   if (!isValid) {
-    showError(t('common.form_invalid') || 'Please resolve form errors before submitting')
+    showError((t('common.form_invalid') || 'please resolve form errors before submitting').toLowerCase())
     return
   }
 
   recalculateOrderTotal()
-  emit('save', { ...form })
+  emit('save', {
+    ...form,
+    status: form.status.toLowerCase(),
+    payment_channel: form.payment_channel.toLowerCase()
+  })
 }
 </script>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString } from './useOrderEngine'
+import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, formatDeliveryDate } from './useOrderEngine'
 
 describe('Order Calculation & Utility Engine', () => {
   describe('calculateItemSubtotal', () => {
@@ -53,6 +53,23 @@ describe('Order Calculation & Utility Engine', () => {
     it('should format single digit months and days with leading zeros', () => {
       const mockDate = new Date(2026, 0, 5) // Jan 5, 2026
       expect(getTodayDateString(mockDate)).toBe('2026-01-05')
+    })
+  })
+
+  describe('formatDeliveryDate', () => {
+    it('should format YYYY-MM-DD date into DD-MMM-YYYY format', () => {
+      expect(formatDeliveryDate('2026-07-19')).toBe('19-Jul-2026')
+      expect(formatDeliveryDate('2026-01-05')).toBe('05-Jan-2026')
+      expect(formatDeliveryDate('2026-12-31')).toBe('31-Dec-2026')
+    })
+
+    it('should handle ISO date strings with timestamps', () => {
+      expect(formatDeliveryDate('2026-07-19T10:30:00.000Z')).toBe('19-Jul-2026')
+    })
+
+    it('should return fallback dash when date string is null or empty', () => {
+      expect(formatDeliveryDate(null)).toBe('-')
+      expect(formatDeliveryDate('')).toBe('-')
     })
   })
 })

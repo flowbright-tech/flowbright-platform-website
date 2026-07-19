@@ -257,7 +257,7 @@ const isMobileMenuOpen = ref(false)
 const isLogoutConfirmOpen = ref(false)
 
 const expandedMenus = ref<Record<string, boolean>>({
-  product_master: route.path.includes('/categories') || route.path.includes('/products') || route.path.includes('/boms') || route.path.includes('/packages')
+  product_master: route.path.includes('/categories') || route.path.includes('/products') || route.path.includes('/boms') || route.path.includes('/packages') || route.path.includes('/orders')
 })
 
 const toggleMenu = (key: string) => {

@@ -12,21 +12,25 @@
         />
       </div>
 
-      <!-- Status Filter -->
+      <!-- Status Filter Dropdown (Searchable) -->
       <div class="w-full sm:w-48">
-        <USelect
+        <USelectMenu
           v-model="statusFilter"
           :items="statusOptions"
+          value-key="value"
+          label-key="label"
           size="md"
           class="w-full"
         />
       </div>
 
-      <!-- Payment Channel Filter -->
-      <div class="w-full sm:w-48">
-        <USelect
+      <!-- Payment Channel Filter Dropdown (Searchable) -->
+      <div class="w-full sm:w-52">
+        <USelectMenu
           v-model="paymentChannelFilter"
           :items="paymentOptions"
+          value-key="value"
+          label-key="label"
           size="md"
           class="w-full"
         />
@@ -72,9 +76,8 @@ const statusOptions = computed(() => [
 
 const paymentOptions = computed(() => [
   { value: '', label: t('orders.all_payment_channels') || 'All Payment Channels' },
-  { value: 'bank_transfer', label: t('orders.payment_bank_transfer') || 'Bank Transfer' },
-  { value: 'promptpay', label: t('orders.payment_promptpay') || 'PromptPay' },
+  { value: 'cash', label: t('orders.payment_cash') || 'Cash' },
   { value: 'credit_card', label: t('orders.payment_credit_card') || 'Credit Card' },
-  { value: 'cash', label: t('orders.payment_cash') || 'Cash' }
+  { value: 'internet_banking', label: t('orders.payment_internet_banking') || 'Internet Banking' }
 ])
 </script>

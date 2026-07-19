@@ -1,5 +1,5 @@
 export type OrderStatus = 'pending' | 'processing' | 'completed' | 'cancelled'
-export type PaymentChannel = 'bank_transfer' | 'promptpay' | 'credit_card' | 'cash'
+export type PaymentChannel = 'cash' | 'credit_card' | 'internet_banking'
 
 export interface OrderItem {
   id?: string

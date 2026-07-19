@@ -33,15 +33,44 @@ export const getTodayDateString = (dateObj: Date = new Date()): string => {
   return `${year}-${month}-${day}`
 }
 
+/**
+ * Formats a date string (YYYY-MM-DD or ISO) into DD-MMM-YYYY format (e.g. 19-Jul-2026)
+ */
+export const formatDeliveryDate = (dateStr?: string | null): string => {
+  if (!dateStr) return '-'
+  try {
+    const cleanStr = dateStr.split('T')[0]
+    const parts = cleanStr.split('-')
+    if (parts.length === 3) {
+      const year = parts[0]
+      const monthIdx = parseInt(parts[1], 10) - 1
+      const day = String(parseInt(parts[2], 10)).padStart(2, '0')
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      if (monthIdx >= 0 && monthIdx < 12) {
+        return `${day}-${months[monthIdx]}-${year}`
+      }
+    }
+    const d = new Date(dateStr)
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getDate()).padStart(2, '0')
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      return `${day}-${months[d.getMonth()]}-${d.getFullYear()}`
+    }
+    return dateStr
+  } catch (err) {
+    return dateStr
+  }
+}
+
 export const useOrderEngine = () => {
   const { session } = useAuthEngine()
   const { apiFetch } = useApiFetch()
 
   // State refs
-  const orders = useState<Order[]>('srp_orders_list', () => [])
-  const totalFilteredCount = useState<number>('srp_orders_total', () => 0)
-  const isLoading = useState<boolean>('srp_orders_loading', () => false)
-  const errorMsg = useState<string | null>('srp_orders_error', () => null)
+  const orders = ref<Order[]>([])
+  const totalFilteredCount = ref<number>(0)
+  const isLoading = ref<boolean>(false)
+  const errorMsg = ref<string | null>(null)
 
   const searchQuery = ref('')
   const statusFilter = ref('')
@@ -68,19 +97,20 @@ export const useOrderEngine = () => {
       searchParams.append('limit', String(pageSize.value))
 
       if (searchQuery.value) {
-        searchParams.append('search', searchQuery.value)
+        searchParams.append('search', searchQuery.value.toLowerCase())
       }
       if (statusFilter.value) {
-        searchParams.append('status', statusFilter.value)
+        searchParams.append('status', statusFilter.value.toLowerCase())
       }
       if (paymentChannelFilter.value) {
-        searchParams.append('payment_channel', paymentChannelFilter.value)
+        searchParams.append('payment_channel', paymentChannelFilter.value.toLowerCase())
       }
 
       const res = await apiFetch(`/api/v1/orders?${searchParams.toString()}`)
 
       if (!res.ok) {
-        throw new Error(`Failed to fetch orders: ${res.status} ${res.statusText}`)
+        const errorJson = await res.json().catch(() => null)
+        throw new Error(errorJson?.message?.toLowerCase() || `failed to fetch orders: ${res.status}`)
       }
 
       const json = await res.json()
@@ -88,11 +118,11 @@ export const useOrderEngine = () => {
         orders.value = json.data
         totalFilteredCount.value = json.pagination?.total ?? json.data.length
       } else {
-        throw new Error(json.message || 'API responded with success: false')
+        throw new Error((json.message || 'api responded with success: false').toLowerCase())
       }
     } catch (err: any) {
       console.error('Error fetching orders:', err)
-      errorMsg.value = err.message || 'An error occurred while fetching order data'
+      errorMsg.value = (err.message || 'an error occurred while fetching order data').toLowerCase()
     } finally {
       isLoading.value = false
     }
@@ -106,18 +136,19 @@ export const useOrderEngine = () => {
     try {
       const res = await apiFetch(`/api/v1/orders/${id}`)
       if (!res.ok) {
-        throw new Error(`Failed to fetch order: ${res.status} ${res.statusText}`)
+        const errorJson = await res.json().catch(() => null)
+        throw new Error(errorJson?.message?.toLowerCase() || `failed to fetch order: ${res.status}`)
       }
 
       const json = await res.json()
       if (json.success && json.data) {
         return json.data
       } else {
-        throw new Error(json.message || 'Order not found')
+        throw new Error((json.message || 'order not found').toLowerCase())
       }
     } catch (err: any) {
       console.error('Error fetching order by ID:', err)
-      errorMsg.value = err.message || 'An error occurred while fetching order details'
+      errorMsg.value = (err.message || 'an error occurred while fetching order details').toLowerCase()
       return null
     } finally {
       isLoading.value = false
@@ -129,15 +160,21 @@ export const useOrderEngine = () => {
     isLoading.value = true
     errorMsg.value = null
 
+    const payload = {
+      ...data,
+      status: (data.status || 'pending').toLowerCase(),
+      payment_channel: (data.payment_channel || 'cash').toLowerCase()
+    }
+
     try {
       const res = await apiFetch('/api/v1/orders', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       })
 
       if (!res.ok) {
-        const errorJson = await res.json().catch(() => ({}))
-        throw new Error(errorJson.message || `Failed to create order: ${res.status}`)
+        const errorJson = await res.json().catch(() => null)
+        throw new Error(errorJson?.message?.toLowerCase() || `failed to create order: ${res.status}`)
       }
 
       const json = await res.json()
@@ -145,11 +182,11 @@ export const useOrderEngine = () => {
         await fetchOrders()
         return json.data
       } else {
-        throw new Error(json.message || 'Failed to create order')
+        throw new Error((json.message || 'failed to create order').toLowerCase())
       }
     } catch (err: any) {
       console.error('Error adding order:', err)
-      errorMsg.value = err.message || 'An error occurred while creating the order'
+      errorMsg.value = (err.message || 'an error occurred while creating the order').toLowerCase()
       throw err
     } finally {
       isLoading.value = false
@@ -161,15 +198,21 @@ export const useOrderEngine = () => {
     isLoading.value = true
     errorMsg.value = null
 
+    const payload = {
+      ...data,
+      status: (data.status || 'pending').toLowerCase(),
+      payment_channel: (data.payment_channel || 'cash').toLowerCase()
+    }
+
     try {
       const res = await apiFetch(`/api/v1/orders/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       })
 
       if (!res.ok) {
-        const errorJson = await res.json().catch(() => ({}))
-        throw new Error(errorJson.message || `Failed to update order: ${res.status}`)
+        const errorJson = await res.json().catch(() => null)
+        throw new Error(errorJson?.message?.toLowerCase() || `failed to update order: ${res.status}`)
       }
 
       const json = await res.json()
@@ -177,18 +220,18 @@ export const useOrderEngine = () => {
         await fetchOrders()
         return json.data
       } else {
-        throw new Error(json.message || 'Failed to update order')
+        throw new Error((json.message || 'failed to update order').toLowerCase())
       }
     } catch (err: any) {
       console.error('Error updating order:', err)
-      errorMsg.value = err.message || 'An error occurred while updating the order'
+      errorMsg.value = (err.message || 'an error occurred while updating the order').toLowerCase()
       throw err
     } finally {
       isLoading.value = false
     }
   }
 
-  // Delete Order (DELETE)
+  // Delete Order (DELETE) with robust JSON error parsing
   const deleteOrder = async (id: string): Promise<boolean> => {
     isLoading.value = true
     errorMsg.value = null
@@ -198,21 +241,23 @@ export const useOrderEngine = () => {
         method: 'DELETE'
       })
 
+      const json = await res.json().catch(() => null)
+
       if (!res.ok) {
-        const errorJson = await res.json().catch(() => ({}))
-        throw new Error(errorJson.message || `Failed to delete order: ${res.status}`)
+        const detailMsg = json?.message || json?.error || `failed to delete order: ${res.status}`
+        throw new Error(String(detailMsg).toLowerCase())
       }
 
-      const json = await res.json()
-      if (json.success) {
+      if (json && json.success !== false) {
         await fetchOrders()
         return true
       } else {
-        throw new Error(json.message || 'Failed to delete order')
+        const failMsg = json?.message || 'failed to delete order'
+        throw new Error(String(failMsg).toLowerCase())
       }
     } catch (err: any) {
       console.error('Error deleting order:', err)
-      errorMsg.value = err.message || 'An error occurred while deleting the order'
+      errorMsg.value = (err.message || 'an error occurred while deleting the order').toLowerCase()
       return false
     } finally {
       isLoading.value = false
@@ -247,6 +292,7 @@ export const useOrderEngine = () => {
     deleteOrder,
     calculateItemSubtotal,
     calculateOrderTotal,
-    getTodayDateString
+    getTodayDateString,
+    formatDeliveryDate
   }
 }

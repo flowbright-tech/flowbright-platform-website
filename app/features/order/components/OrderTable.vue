@@ -25,15 +25,15 @@
         </div>
       </template>
 
-      <!-- Delivery Date cell -->
+      <!-- Delivery Date cell (Formatted as DD-MMM-YYYY) -->
       <template #delivery_date-cell="{ row }">
-        <div class="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300 text-xs">
+        <div class="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300 text-xs font-mono">
           <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-indigo-500 shrink-0" />
-          <span>{{ formatDateOnly(row.original.delivery_date) }}</span>
+          <span>{{ formatDeliveryDate(row.original.delivery_date) }}</span>
         </div>
       </template>
 
-      <!-- Payment Channel cell -->
+      <!-- Payment Channel cell (3 types: Cash, Credit Card, Internet Banking) -->
       <template #payment_channel-cell="{ row }">
         <UBadge :color="getPaymentBadgeColor(row.original.payment_channel)" variant="soft" size="xs" class="capitalize">
           <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-3.5 h-3.5 mr-1" />
@@ -106,6 +106,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Order } from '../types'
+import { formatDeliveryDate } from '../composables/useOrderEngine'
 
 const props = defineProps<{
   orders: Order[]
@@ -129,12 +130,6 @@ const columns = computed(() => [
   { accessorKey: 'total_amount', header: t('orders.col_total') || 'Total Amount' },
   { accessorKey: 'actions', header: t('orders.col_actions') || 'Actions' }
 ])
-
-const formatDateOnly = (dateStr: string) => {
-  if (!dateStr) return '-'
-  // Extract YYYY-MM-DD
-  return dateStr.split('T')[0]
-}
 
 const formatCurrency = (val: number) => {
   return Number(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -162,30 +157,27 @@ const formatStatus = (status: string) => {
 
 const getPaymentBadgeColor = (channel: string) => {
   switch (channel?.toLowerCase()) {
-    case 'bank_transfer': return 'primary'
-    case 'promptpay': return 'success'
-    case 'credit_card': return 'secondary'
     case 'cash': return 'warning'
+    case 'credit_card': return 'primary'
+    case 'internet_banking': return 'info'
     default: return 'neutral'
   }
 }
 
 const getPaymentIcon = (channel: string) => {
   switch (channel?.toLowerCase()) {
-    case 'bank_transfer': return 'i-heroicons-building-library'
-    case 'promptpay': return 'i-heroicons-qr-code'
-    case 'credit_card': return 'i-heroicons-credit-card'
     case 'cash': return 'i-heroicons-banknotes'
+    case 'credit_card': return 'i-heroicons-credit-card'
+    case 'internet_banking': return 'i-heroicons-globe-alt'
     default: return 'i-heroicons-currency-dollar'
   }
 }
 
 const formatPaymentChannel = (channel: string) => {
   switch (channel?.toLowerCase()) {
-    case 'bank_transfer': return t('orders.payment_bank_transfer') || 'Bank Transfer'
-    case 'promptpay': return t('orders.payment_promptpay') || 'PromptPay'
-    case 'credit_card': return t('orders.payment_credit_card') || 'Credit Card'
     case 'cash': return t('orders.payment_cash') || 'Cash'
+    case 'credit_card': return t('orders.payment_credit_card') || 'Credit Card'
+    case 'internet_banking': return t('orders.payment_internet_banking') || 'Internet Banking'
     default: return channel || '-'
   }
 }

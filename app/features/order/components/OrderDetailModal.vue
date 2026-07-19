@@ -45,15 +45,15 @@
             </div>
           </div>
 
-          <!-- Delivery Details -->
+          <!-- Delivery Details (DD-MMM-YYYY format) -->
           <div class="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-2">
             <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <UIcon name="i-heroicons-truck" class="w-4 h-4 text-emerald-500" />
               {{ $t('orders.sec_delivery') || 'Delivery & Payment' }}
             </div>
-            <div class="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm">
+            <div class="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm font-mono">
               <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-indigo-500" />
-              <span>{{ formatDateOnly(order.delivery_date) }}</span>
+              <span>{{ formatDeliveryDate(order.delivery_date) }}</span>
             </div>
             <div class="text-xs text-slate-600 dark:text-slate-400">
               <span class="font-semibold">Channel:</span> {{ formatPaymentChannel(order.payment_channel) }}
@@ -129,6 +129,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import type { Order } from '../types'
+import { formatDeliveryDate } from '../composables/useOrderEngine'
 
 const isOpen = defineModel<boolean>('open', { default: false })
 
@@ -137,11 +138,6 @@ defineProps<{
 }>()
 
 const { t, locale } = useI18n()
-
-const formatDateOnly = (dateStr?: string) => {
-  if (!dateStr) return '-'
-  return dateStr.split('T')[0]
-}
 
 const formatCurrency = (val?: number) => {
   return Number(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -169,20 +165,18 @@ const formatStatus = (status?: string) => {
 
 const getPaymentBadgeColor = (channel?: string) => {
   switch (channel?.toLowerCase()) {
-    case 'bank_transfer': return 'primary'
-    case 'promptpay': return 'success'
-    case 'credit_card': return 'secondary'
     case 'cash': return 'warning'
+    case 'credit_card': return 'primary'
+    case 'internet_banking': return 'info'
     default: return 'neutral'
   }
 }
 
 const formatPaymentChannel = (channel?: string) => {
   switch (channel?.toLowerCase()) {
-    case 'bank_transfer': return t('orders.payment_bank_transfer') || 'Bank Transfer'
-    case 'promptpay': return t('orders.payment_promptpay') || 'PromptPay'
-    case 'credit_card': return t('orders.payment_credit_card') || 'Credit Card'
     case 'cash': return t('orders.payment_cash') || 'Cash'
+    case 'credit_card': return t('orders.payment_credit_card') || 'Credit Card'
+    case 'internet_banking': return t('orders.payment_internet_banking') || 'Internet Banking'
     default: return channel || '-'
   }
 }
