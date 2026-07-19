@@ -58,13 +58,15 @@
       <!-- Actions cell -->
       <template #actions-cell="{ row }">
         <div class="flex items-center justify-end gap-1">
-          <UButton color="neutral" variant="ghost" icon="i-heroicons-printer" size="xs"
+          <UButton color="neutral" variant="ghost" icon="i-heroicons-identification" size="md"
+            :title="$t('orders.print_document') || 'Print Document'" @click="$emit('printDocument', row.original)" />
+          <UButton color="neutral" variant="ghost" icon="i-heroicons-printer" size="md"
             :title="$t('orders.print_invoice') || 'Print Invoice'" @click="$emit('print', row.original)" />
-          <UButton color="neutral" variant="ghost" icon="i-heroicons-eye" size="xs"
+          <UButton color="neutral" variant="ghost" icon="i-heroicons-eye" size="md"
             :title="$t('orders.view_detail') || 'View Details'" @click="$emit('view', row.original)" />
-          <UButton color="primary" variant="ghost" icon="i-heroicons-pencil-square" size="xs"
+          <UButton color="primary" variant="ghost" icon="i-heroicons-pencil-square" size="md"
             @click="$emit('edit', row.original)" />
-          <UButton color="error" variant="ghost" icon="i-heroicons-trash" size="xs"
+          <UButton color="error" variant="ghost" icon="i-heroicons-trash" size="md"
             @click="$emit('delete', row.original.id)" />
         </div>
       </template>
@@ -96,6 +98,7 @@ defineEmits<{
   (e: 'edit', order: Order): void
   (e: 'delete', id: string): void
   (e: 'print', order: Order): void
+  (e: 'printDocument', order: Order): void
 }>()
 
 const { t } = useI18n()

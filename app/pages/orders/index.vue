@@ -57,6 +57,7 @@
       @edit="handleEditOrder"
       @delete="handleConfirmDelete"
       @print="handlePrintInvoice"
+      @print-document="handlePrintDocument"
     />
 
     <!-- Pagination -->
@@ -147,6 +148,13 @@ const handleViewOrder = (order: Order) => {
 const handlePrintInvoice = (order: Order) => {
   if (import.meta.client) {
     const routeUrl = localePath(`/orders/${order.id}/invoice`)
+    window.open(routeUrl, '_blank')
+  }
+}
+
+const handlePrintDocument = (order: Order) => {
+  if (import.meta.client) {
+    const routeUrl = localePath(`/orders/${order.id}/document`)
     window.open(routeUrl, '_blank')
   }
 }

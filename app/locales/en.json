@@ -434,7 +434,8 @@
     "err_quantity_invalid": "Item quantity must be greater than 0",
     "view_detail": "View Details",
     "order_detail_title": "Order Specification Detail",
-    "print_invoice": "Print Invoice"
+    "print_invoice": "Print Invoice",
+    "print_document": "Print Document"
   },
   "errors": {
     "bad_request_title": "Invalid Request (400)",
