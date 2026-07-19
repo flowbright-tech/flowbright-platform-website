@@ -58,10 +58,10 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLocalePath } from '#imports'
-import { useOrderEngine } from '../../features/order/composables/useOrderEngine'
-import type { Order, OrderFormData } from '../../features/order/types'
-import OrderForm from '../../features/order/components/OrderForm.vue'
-import { useAppToast } from '../../composables/useAppToast'
+import { useOrderEngine } from '../../../features/order/composables/useOrderEngine'
+import type { Order, OrderFormData } from '../../../features/order/types'
+import OrderForm from '../../../features/order/components/OrderForm.vue'
+import { useAppToast } from '../../../composables/useAppToast'
 
 const route = useRoute()
 const router = useRouter()
