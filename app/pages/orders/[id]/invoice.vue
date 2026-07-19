@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-slate-100 dark:bg-slate-900 py-6 no-print flex flex-col items-center">
+  <div class="min-h-screen bg-slate-100 dark:bg-slate-900 py-6 flex flex-col items-center">
     <!-- Top Action bar (hidden on print) -->
-    <div class="w-full max-w-[210mm] mb-6 flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700">
+    <div class="no-print w-full max-w-[210mm] mb-6 flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700">
       <div class="flex items-center gap-3">
         <UButton
           color="neutral"
@@ -10,7 +10,7 @@
           size="sm"
           @click="goBack"
         >
-          {{ $t('common.back') || 'Back to Orders' }}
+          {{ $t('common.back') || 'Back' }}
         </UButton>
         <span class="text-sm font-bold text-slate-700 dark:text-slate-200">
           Invoice Printing Preview
@@ -64,19 +64,23 @@
     </div>
 
     <!-- Invoice Sheet (Print target) -->
-    <div v-else class="a4-page-container">
+    <div v-else class="a4-page-container w-full max-w-[210mm]">
       <div class="a4-page print-content">
         <!-- Logo & Header Section -->
         <div class="flex gap-5 items-start">
-          <!-- SVG Clinic Logo (Mockup match) -->
+          <!-- SVG Clinic Logo or Image logo -->
           <div class="shrink-0">
-            <svg width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <img
+              v-if="company?.image_url"
+              :src="company.image_url"
+              class="w-[68px] h-[68px] object-contain rounded-xl"
+              alt="Logo"
+            />
+            <svg v-else width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="68" height="68" rx="14" fill="#0F172A" />
-              <!-- Test tube silhouette -->
               <path d="M30 16H38V22H30V16Z" fill="#38BDF8" />
               <path d="M30 22V44C30 48.4183 33.5817 52 38 52C42.4183 52 46 48.4183 46 44V22H30Z" fill="white" fill-opacity="0.25" />
               <path d="M26 16C26 14.8954 26.8954 14 28 14H40C41.1046 14 42 14.8954 42 16C42 17.1046 41.1046 18 40 18H28C26.8954 18 26 17.1046 26 16Z" fill="#38BDF8" />
-              <!-- Blood droplets / Cross -->
               <circle cx="34" cy="38" r="4" fill="#EF4444" />
               <circle cx="38" cy="46" r="3.5" fill="#EF4444" />
             </svg>
@@ -84,19 +88,19 @@
           <!-- Clinic Details (TH & EN) -->
           <div class="flex-1 space-y-1 text-slate-800">
             <h1 class="text-base font-extrabold leading-tight tracking-tight">
-              คลินิก เอ็ม.ที อินเตอร์แล็บ ( M.T.INTER MEDICAL LABORATORY CLINIC )
+              {{ company?.name_th || 'คลินิก เอ็ม.ที อินเตอร์แล็บ ( M.T.INTER MEDICAL LABORATORY CLINIC )' }}
             </h1>
             <h2 class="text-[13px] font-bold leading-tight">
-              บริษัท เมโทรเมด จำกัด (สำนักงานใหญ่) ( METRO MED COMPANY LIMITED )
+              {{ company?.name_en || 'บริษัท เมโทรเมด จำกัด (สำนักงานใหญ่) ( METRO MED COMPANY LIMITED )' }}
             </h2>
-            <p class="text-[10px] leading-snug text-slate-600 font-medium">
-              193/421 หมู่ 10 ต.หนองปรือ อ.บางละมุง จ.ชลบุรี 20150 โทร. : 082-4956642
+            <p class="text-[10px] leading-snug text-slate-600 font-medium whitespace-pre-line">
+              {{ company?.address_th || '193/421 หมู่ 10 ต.หนองปรือ อ.บางละมุง จ.ชลบุรี 20150' }} <span v-if="company?.phone">โทร. : {{ company.phone }}</span>
             </p>
-            <p class="text-[10px] leading-snug text-slate-600 font-medium">
-              193/421 Moo.10 Nongprue,Banglamung Chonburi Thailand 20150 Tel. : (+66) 082-4956642
+            <p class="text-[10px] leading-snug text-slate-600 font-medium whitespace-pre-line">
+              {{ company?.address_en || '193/421 Moo.10 Nongprue,Banglamung Chonburi Thailand 20150' }} <span v-if="company?.phone">Tel. : {{ company.phone }}</span>
             </p>
             <p class="text-[9.5px] text-slate-500 font-semibold flex items-center gap-4 pt-0.5">
-              <span>Email : mtinterlab.pattaya@gmail.com</span>
+              <span v-if="company?.email">Email : {{ company.email.trim() }}</span>
               <span>Website : https://mtinterlab.co</span>
             </p>
           </div>
@@ -113,7 +117,7 @@
           </div>
           <div class="text-[12.5px] font-bold text-center text-slate-800">
             เลขที่ <span class="text-[11px] text-slate-500 font-medium">(Billing No.)</span>
-            <span class="font-mono ml-1.5 text-slate-900 font-extrabold">{{ invoice?.code || invoice?.order_number || '-' }}</span>
+            <span class="font-mono ml-1.5 text-slate-900 font-extrabold">{{ invoice?.order_number || invoice?.code || '-' }}</span>
           </div>
           <div class="text-[12.5px] font-bold text-right text-slate-800">
             วันที่ <span class="text-[11px] text-slate-500 font-medium">(Billing Date.)</span>
@@ -127,7 +131,9 @@
             <div>
               <span class="font-bold text-slate-800">ได้รับเงินจาก</span>
               <span class="text-[10px] text-slate-500 font-semibold ml-1">( Received from ) :</span>
-              <span class="font-extrabold text-slate-900 ml-1.5 text-[12.5px]">{{ invoice?.customer_name || '-' }}</span>
+              <span class="font-extrabold text-slate-900 ml-1.5 text-[12.5px]">
+                {{ getCustomerFullName() }}
+              </span>
             </div>
             <div>
               <span class="font-bold text-slate-800">ช่องทางการชำระเงิน</span>
@@ -139,7 +145,7 @@
           <div class="grid grid-cols-4 gap-4 text-[11px]">
             <div>
               <span class="font-bold text-slate-700">HN :</span>
-              <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
+              <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
             </div>
             <div>
               <span class="font-bold text-slate-700">วันเดือนปีเกิด</span>
@@ -174,7 +180,7 @@
                 <td class="px-4 py-3 text-center font-semibold font-mono">{{ index + 1 }}</td>
                 <td class="px-4 py-3">
                   <div class="font-extrabold text-slate-950 text-[12px]">
-                    {{ locale === 'th' ? (item.package_name_th || (item as any).package?.name_th || (item as any).name_th || item.package_name_en || (item as any).package?.name_en || item.package_id) : (item.package_name_en || (item as any).package?.name_en || (item as any).name_en || item.package_name_th || (item as any).package?.name_th || item.package_id) }}
+                    {{ locale === 'th' ? (item.package?.name_th || item.package_name_th || item.package_id) : (item.package?.name_en || item.package_name_en || item.package_id) }}
                   </div>
                   <div v-if="item.notes" class="text-[10px] text-slate-500 italic mt-0.5 font-medium">
                     {{ item.notes }}
@@ -228,6 +234,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useLocalePath } from '#imports'
 import { useI18n } from 'vue-i18n'
 import { useApiFetch } from '../../../composables/useApiFetch'
+import { useAuthEngine } from '../../../features/auth/composables/useAuthEngine'
 import { formatDeliveryDate, safeLowerCase } from '../../../features/order/composables/useOrderEngine'
 
 // Disable layouts entirely for A4 print page
@@ -240,11 +247,13 @@ const router = useRouter()
 const localePath = useLocalePath()
 const { locale } = useI18n()
 const { apiFetch } = useApiFetch()
+const { company: authCompany } = useAuthEngine()
 
 const orderId = String(route.params.id)
 const isLoading = ref(true)
 const errorMsg = ref<string | null>(null)
 const invoice = ref<any>(null)
+const company = ref<any>(null)
 const customer = ref<any>(null)
 const printDate = ref('')
 
@@ -257,16 +266,11 @@ const fetchInvoiceData = async () => {
     if (res && res.ok) {
       const json = await res.json()
       if (json.success && json.data) {
-        invoice.value = json.data
-        if (invoice.value.customer_id) {
-          const custRes = await apiFetch(`/api/v1/customers/${invoice.value.customer_id}`).catch(() => null)
-          if (custRes && custRes.ok) {
-            const custJson = await custRes.json()
-            if (custJson.success && custJson.data) {
-              customer.value = custJson.data
-            }
-          }
-        }
+        // Map according to exact API structure: { company, order }
+        invoice.value = json.data.order
+        company.value = json.data.company
+        customer.value = json.data.order?.customer
+        isLoading.value = false
         return
       }
     }
@@ -277,15 +281,8 @@ const fetchInvoiceData = async () => {
       const orderJson = await orderRes.json()
       if (orderJson.success && orderJson.data) {
         invoice.value = orderJson.data
-        if (invoice.value.customer_id) {
-          const custRes = await apiFetch(`/api/v1/customers/${invoice.value.customer_id}`).catch(() => null)
-          if (custRes && custRes.ok) {
-            const custJson = await custRes.json()
-            if (custJson.success && custJson.data) {
-              customer.value = custJson.data
-            }
-          }
-        }
+        customer.value = orderJson.data?.customer
+        company.value = authCompany.value
       } else {
         throw new Error('Order details not found')
       }
@@ -309,6 +306,24 @@ const formatInvoiceDate = (dateStr?: string) => {
 const formatBirthDate = (dateStr?: string) => {
   if (!dateStr) return '-'
   return formatDeliveryDate(dateStr).replace(/-/g, '/')
+}
+
+const getCustomerFullName = () => {
+  if (!customer.value) return invoice.value?.customer_name || '-'
+  const prefix = locale.value === 'th'
+    ? customer.value.prefix_th || ''
+    : customer.value.prefix_en || ''
+  
+  const firstName = locale.value === 'th'
+    ? customer.value.first_name_th || customer.value.first_name_en || ''
+    : customer.value.first_name_en || customer.value.first_name_th || ''
+  
+  const lastName = locale.value === 'th'
+    ? customer.value.last_name_th || customer.value.last_name_en || ''
+    : customer.value.last_name_en || customer.value.last_name_th || ''
+  
+  const combined = `${prefix} ${firstName} ${lastName}`.trim()
+  return combined || invoice.value?.customer_name || '-'
 }
 
 const calculateAge = (birthDateStr?: string) => {
@@ -400,6 +415,7 @@ onMounted(() => {
 
   .a4-page-container {
     width: 100% !important;
+    max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
     box-shadow: none !important;
