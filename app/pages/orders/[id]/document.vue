@@ -89,18 +89,18 @@
           <div class="space-y-3 border-y border-slate-200 py-3.5 text-slate-800 text-[11.5px] font-medium">
             <!-- Row 1 -->
             <div class="flex justify-between items-center w-full">
-              <div class="w-[35%] text-left whitespace-nowrap">
+              <div class="w-[32%] text-left whitespace-nowrap">
                 <span class="font-bold text-slate-800">วันที่</span>
                 <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Billing Date. )</span>
                 <span class="text-slate-800 font-bold ml-0.5">:</span>
                 <span class="font-mono font-bold text-slate-900 ml-1.5">{{ formatInvoiceDate(invoice?.delivery_date) }}</span>
               </div>
-              <div class="w-[30%] text-center whitespace-nowrap">
+              <div class="w-[20%] text-center whitespace-nowrap">
                 <span class="font-bold text-slate-800">HN</span>
                 <span class="text-slate-800 font-bold ml-0.5">:</span>
                 <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
               </div>
-              <div class="w-[35%] text-right whitespace-nowrap">
+              <div class="w-[48%] text-right whitespace-nowrap">
                 <span class="font-bold text-slate-800">ช่องทางการชำระเงิน</span>
                 <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Payment Channel )</span>
                 <span class="text-slate-800 font-bold ml-0.5">:</span>
