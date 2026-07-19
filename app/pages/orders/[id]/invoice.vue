@@ -473,7 +473,7 @@ onMounted(() => {
   .a4-page {
     width: 100% !important;
     min-height: auto !important;
-    padding: 0 !important;
+    padding: 12mm 10mm !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
@@ -481,7 +481,7 @@ onMounted(() => {
 
   @page {
     size: A4;
-    margin: 15mm 10mm;
+    margin: 0;
   }
 }
 </style>
