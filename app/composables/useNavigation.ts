@@ -61,14 +61,14 @@ export const useNavigation = () => {
           labelKey: 'nav.packages',
           icon: 'i-heroicons-gift',
           to: localePath('/packages')
-        },
-        {
-          key: 'orders',
-          labelKey: 'nav.orders',
-          icon: 'i-heroicons-clipboard-document-check',
-          to: localePath('/orders')
         }
       ]
+    },
+    {
+      key: 'orders',
+      labelKey: 'nav.orders',
+      icon: 'i-heroicons-clipboard-document-check',
+      to: localePath('/orders')
     }
   ])
 

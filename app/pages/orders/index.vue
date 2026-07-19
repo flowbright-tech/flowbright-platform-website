@@ -27,8 +27,6 @@
     <!-- Search & Filter Controls -->
     <OrderFilter
       v-model:search-query="searchQuery"
-      v-model:status-filter="statusFilter"
-      v-model:payment-channel-filter="paymentChannelFilter"
       @create="handleOpenCreate"
     />
 

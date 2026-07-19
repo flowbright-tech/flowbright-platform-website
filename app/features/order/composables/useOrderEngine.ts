@@ -7,6 +7,22 @@ import { useApiFetch } from '../../../composables/useApiFetch'
 /**
  * Pure calculation and utility helpers
  */
+export const safeLowerCase = (val: any): string => {
+  if (val === null || val === undefined) return ''
+  if (typeof val === 'string') return val.toLowerCase()
+  if (typeof val === 'number' || typeof val === 'boolean') return String(val).toLowerCase()
+  if (typeof val === 'object') {
+    if (val.message && typeof val.message === 'string') return val.message.toLowerCase()
+    if (val.error && typeof val.error === 'string') return val.error.toLowerCase()
+    try {
+      return JSON.stringify(val).toLowerCase()
+    } catch {
+      return String(val).toLowerCase()
+    }
+  }
+  return String(val).toLowerCase()
+}
+
 export const calculateItemSubtotal = (quantity: number, unitPrice: number): number => {
   const q = Math.max(0, Number(quantity) || 0)
   const p = Math.max(0, Number(unitPrice) || 0)
@@ -79,7 +95,7 @@ export const useOrderEngine = () => {
   const currentPage = ref(1)
   const pageSize = ref(10)
 
-  // API Call to fetch orders (list with pagination & status filters)
+  // API Call to fetch orders (list with pagination)
   const fetchOrders = async () => {
     const token = session.value?.token
     if (!token) {
@@ -97,20 +113,15 @@ export const useOrderEngine = () => {
       searchParams.append('limit', String(pageSize.value))
 
       if (searchQuery.value) {
-        searchParams.append('search', searchQuery.value.toLowerCase())
-      }
-      if (statusFilter.value) {
-        searchParams.append('status', statusFilter.value.toLowerCase())
-      }
-      if (paymentChannelFilter.value) {
-        searchParams.append('payment_channel', paymentChannelFilter.value.toLowerCase())
+        searchParams.append('search', safeLowerCase(searchQuery.value))
       }
 
       const res = await apiFetch(`/api/v1/orders?${searchParams.toString()}`)
 
       if (!res.ok) {
-        const errorJson = await res.json().catch(() => null)
-        throw new Error(errorJson?.message?.toLowerCase() || `failed to fetch orders: ${res.status}`)
+        const errorJson = await res.json().catch(() => ({}))
+        const msg = errorJson?.message || errorJson?.error || `failed to fetch orders: ${res.status}`
+        throw new Error(safeLowerCase(msg))
       }
 
       const json = await res.json()
@@ -118,11 +129,11 @@ export const useOrderEngine = () => {
         orders.value = json.data
         totalFilteredCount.value = json.pagination?.total ?? json.data.length
       } else {
-        throw new Error((json.message || 'api responded with success: false').toLowerCase())
+        throw new Error(safeLowerCase(json.message || 'api responded with success: false'))
       }
     } catch (err: any) {
       console.error('Error fetching orders:', err)
-      errorMsg.value = (err.message || 'an error occurred while fetching order data').toLowerCase()
+      errorMsg.value = safeLowerCase(err?.message || err || 'an error occurred while fetching order data')
     } finally {
       isLoading.value = false
     }
@@ -136,19 +147,20 @@ export const useOrderEngine = () => {
     try {
       const res = await apiFetch(`/api/v1/orders/${id}`)
       if (!res.ok) {
-        const errorJson = await res.json().catch(() => null)
-        throw new Error(errorJson?.message?.toLowerCase() || `failed to fetch order: ${res.status}`)
+        const errorJson = await res.json().catch(() => ({}))
+        const msg = errorJson?.message || errorJson?.error || `failed to fetch order: ${res.status}`
+        throw new Error(safeLowerCase(msg))
       }
 
       const json = await res.json()
       if (json.success && json.data) {
         return json.data
       } else {
-        throw new Error((json.message || 'order not found').toLowerCase())
+        throw new Error(safeLowerCase(json.message || 'order not found'))
       }
     } catch (err: any) {
       console.error('Error fetching order by ID:', err)
-      errorMsg.value = (err.message || 'an error occurred while fetching order details').toLowerCase()
+      errorMsg.value = safeLowerCase(err?.message || err || 'an error occurred while fetching order details')
       return null
     } finally {
       isLoading.value = false
@@ -162,8 +174,8 @@ export const useOrderEngine = () => {
 
     const payload = {
       ...data,
-      status: (data.status || 'pending').toLowerCase(),
-      payment_channel: (data.payment_channel || 'cash').toLowerCase()
+      status: safeLowerCase(data.status || 'pending'),
+      payment_channel: safeLowerCase(data.payment_channel || 'cash')
     }
 
     try {
@@ -173,20 +185,25 @@ export const useOrderEngine = () => {
       })
 
       if (!res.ok) {
-        const errorJson = await res.json().catch(() => null)
-        throw new Error(errorJson?.message?.toLowerCase() || `failed to create order: ${res.status}`)
+        const errorJson = await res.json().catch(() => ({}))
+        const msg = errorJson?.message || errorJson?.error || `failed to create order: ${res.status}`
+        throw new Error(safeLowerCase(msg))
       }
 
-      const json = await res.json()
-      if (json.success && json.data) {
+      const json = await res.json().catch(() => ({}))
+      if (json && json.success !== false && (json.data || json.id)) {
+        await fetchOrders()
+        return json.data || json
+      } else if (json && json.data) {
         await fetchOrders()
         return json.data
       } else {
-        throw new Error((json.message || 'failed to create order').toLowerCase())
+        await fetchOrders()
+        return json as any
       }
     } catch (err: any) {
       console.error('Error adding order:', err)
-      errorMsg.value = (err.message || 'an error occurred while creating the order').toLowerCase()
+      errorMsg.value = safeLowerCase(err?.message || err || 'an error occurred while creating the order')
       throw err
     } finally {
       isLoading.value = false
@@ -200,8 +217,8 @@ export const useOrderEngine = () => {
 
     const payload = {
       ...data,
-      status: (data.status || 'pending').toLowerCase(),
-      payment_channel: (data.payment_channel || 'cash').toLowerCase()
+      status: safeLowerCase(data.status || 'pending'),
+      payment_channel: safeLowerCase(data.payment_channel || 'cash')
     }
 
     try {
@@ -211,27 +228,28 @@ export const useOrderEngine = () => {
       })
 
       if (!res.ok) {
-        const errorJson = await res.json().catch(() => null)
-        throw new Error(errorJson?.message?.toLowerCase() || `failed to update order: ${res.status}`)
+        const errorJson = await res.json().catch(() => ({}))
+        const msg = errorJson?.message || errorJson?.error || `failed to update order: ${res.status}`
+        throw new Error(safeLowerCase(msg))
       }
 
-      const json = await res.json()
-      if (json.success && json.data) {
+      const json = await res.json().catch(() => ({}))
+      if (json && json.success !== false) {
         await fetchOrders()
-        return json.data
+        return json.data || json
       } else {
-        throw new Error((json.message || 'failed to update order').toLowerCase())
+        throw new Error(safeLowerCase(json.message || 'failed to update order'))
       }
     } catch (err: any) {
       console.error('Error updating order:', err)
-      errorMsg.value = (err.message || 'an error occurred while updating the order').toLowerCase()
+      errorMsg.value = safeLowerCase(err?.message || err || 'an error occurred while updating the order')
       throw err
     } finally {
       isLoading.value = false
     }
   }
 
-  // Delete Order (DELETE) with robust JSON error parsing
+  // Delete Order (DELETE) with robust error & response parsing
   const deleteOrder = async (id: string): Promise<boolean> => {
     isLoading.value = true
     errorMsg.value = null
@@ -241,31 +259,29 @@ export const useOrderEngine = () => {
         method: 'DELETE'
       })
 
-      const json = await res.json().catch(() => null)
-
       if (!res.ok) {
-        const detailMsg = json?.message || json?.error || `failed to delete order: ${res.status}`
-        throw new Error(String(detailMsg).toLowerCase())
+        const errData = await res.json().catch(() => ({}))
+        const detailMsg = errData?.message || errData?.error || `failed to delete order: ${res.status}`
+        throw new Error(safeLowerCase(detailMsg))
       }
 
-      if (json && json.success !== false) {
-        await fetchOrders()
-        return true
-      } else {
-        const failMsg = json?.message || 'failed to delete order'
-        throw new Error(String(failMsg).toLowerCase())
+      if (orders.value.length === 1 && currentPage.value > 1) {
+        currentPage.value--
       }
+
+      await fetchOrders()
+      return true
     } catch (err: any) {
       console.error('Error deleting order:', err)
-      errorMsg.value = (err.message || 'an error occurred while deleting the order').toLowerCase()
+      errorMsg.value = safeLowerCase(err?.message || err || 'an error occurred while deleting the order')
       return false
     } finally {
       isLoading.value = false
     }
   }
 
-  // Auto refetch when debounced search or filters change
-  watch([debouncedSearchQuery, statusFilter, paymentChannelFilter], () => {
+  // Auto refetch when debounced search changes
+  watch(debouncedSearchQuery, () => {
     currentPage.value = 1
     fetchOrders()
   })
@@ -293,6 +309,7 @@ export const useOrderEngine = () => {
     calculateItemSubtotal,
     calculateOrderTotal,
     getTodayDateString,
-    formatDeliveryDate
+    formatDeliveryDate,
+    safeLowerCase
   }
 }

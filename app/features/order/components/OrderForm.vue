@@ -270,7 +270,7 @@
 import { reactive, watch, ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Order, OrderFormData } from '../types'
-import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString } from '../composables/useOrderEngine'
+import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, safeLowerCase } from '../composables/useOrderEngine'
 import { useApiFetch } from '../../../composables/useApiFetch'
 import { useAppToast } from '../../../composables/useAppToast'
 import type { Customer } from '../../customer/types'
@@ -526,38 +526,38 @@ const submitForm = () => {
   let isValid = true
 
   if (!form.customer_name.trim()) {
-    errors.customer_name = (t('orders.err_customer_required') || 'please select or specify customer information').toLowerCase()
+    errors.customer_name = safeLowerCase(t('orders.err_customer_required') || 'please select or specify customer information')
     isValid = false
   }
 
   if (!form.delivery_date) {
-    errors.delivery_date = (t('orders.err_delivery_date_required') || 'delivery date is required').toLowerCase()
+    errors.delivery_date = safeLowerCase(t('orders.err_delivery_date_required') || 'delivery date is required')
     isValid = false
   }
 
   if (form.items.length === 0) {
-    errors.items = (t('orders.err_items_empty') || 'order must contain at least one package item').toLowerCase()
+    errors.items = safeLowerCase(t('orders.err_items_empty') || 'order must contain at least one package item')
     isValid = false
   }
 
   for (let i = 0; i < form.items.length; i++) {
     if (form.items[i].quantity <= 0) {
-      errors.items = `${(t('orders.err_quantity_invalid') || 'quantity must be greater than 0').toLowerCase()} (row ${i + 1})`
+      errors.items = `${safeLowerCase(t('orders.err_quantity_invalid') || 'quantity must be greater than 0')} (row ${i + 1})`
       isValid = false
       break
     }
   }
 
   if (!isValid) {
-    showError((t('common.form_invalid') || 'please resolve form errors before submitting').toLowerCase())
+    showError(safeLowerCase(t('common.form_invalid') || 'please resolve form errors before submitting'))
     return
   }
 
   recalculateOrderTotal()
   emit('save', {
     ...form,
-    status: form.status.toLowerCase(),
-    payment_channel: form.payment_channel.toLowerCase()
+    status: safeLowerCase(form.status || 'pending'),
+    payment_channel: safeLowerCase(form.payment_channel || 'cash')
   })
 }
 </script>
