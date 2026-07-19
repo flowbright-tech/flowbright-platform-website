@@ -472,11 +472,65 @@ onMounted(() => {
 
   .a4-page {
     width: 100% !important;
-    min-height: auto !important;
-    padding: 12mm 10mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    padding: 10mm 10mm !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Optimize layout density to strictly fit A4 single page */
+  .a4-page img,
+  .a4-page svg {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .a4-page hr {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .mb-4 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .p-3\.5 {
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0 !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .mt-6 {
+    margin-top: 0.75rem !important;
+  }
+
+  .mt-4 {
+    margin-top: 0.5rem !important;
+  }
+
+  .a4-page th,
+  .a4-page td {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .mt-20 {
+    margin-top: auto !important; /* Push to bottom of flex container */
+    padding-top: 1.5rem !important;
+  }
+
+  .space-y-16 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0 !important;
+    margin-top: 2rem !important; /* Reduce space between signature and date stamp */
   }
 
   @page {

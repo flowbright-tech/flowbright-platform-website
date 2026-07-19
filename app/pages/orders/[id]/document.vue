@@ -400,11 +400,48 @@ onMounted(() => {
 
   .a4-page {
     width: 100% !important;
+    height: 297mm !important;
     min-height: 297mm !important;
-    padding: 12mm 10mm !important;
+    max-height: 297mm !important;
+    padding: 10mm 10mm !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+
+  /* Optimize layout density to strictly fit A4 single page */
+  .a4-page img,
+  .a4-page div.w-\[100mm\] {
+    max-height: 40mm !important;
+    height: 40mm !important;
+  }
+
+  .a4-page th,
+  .a4-page td {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  /* Shrink margins to prevent overflow */
+  .mb-6 {
+    margin-bottom: 0.75rem !important;
+  }
+  .mt-6 {
+    margin-top: 0.75rem !important;
+  }
+  .mt-4 {
+    margin-top: 0.5rem !important;
+  }
+  .mt-24 {
+    margin-top: auto !important; /* Let flex push it down if there is space */
+    padding-top: 1rem !important;
+  }
+  .mt-12 {
+    margin-top: 1rem !important;
   }
 
   @page {

@@ -51,7 +51,10 @@
     <!-- Order Table -->
     <OrderTable
       v-else
+      v-model:page="currentPage"
       :orders="paginatedOrders"
+      :total="totalFilteredCount"
+      :page-size="pageSize"
       :is-loading="isLoading"
       @view="handleViewOrder"
       @edit="handleEditOrder"
@@ -59,19 +62,6 @@
       @print="handlePrintInvoice"
       @print-document="handlePrintDocument"
     />
-
-    <!-- Pagination -->
-    <div v-if="totalFilteredCount > pageSize" class="flex items-center justify-between pt-4">
-      <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-        Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, totalFilteredCount) }} of {{ totalFilteredCount }} orders
-      </div>
-      <UPagination
-        v-model:page="currentPage"
-        :total="totalFilteredCount"
-        :items-per-page="pageSize"
-        size="sm"
-      />
-    </div>
 
     <!-- Reusable Confirm Modal for Deletion -->
     <ConfirmModal

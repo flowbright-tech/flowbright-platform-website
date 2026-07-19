@@ -1,5 +1,6 @@
 <template>
-  <div class="glass-panel rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
+  <div class="space-y-4">
+    <div class="glass-panel rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
     <UTable :data="orders" :columns="columns" :loading="isLoading">
       <!-- Customer & Order Info column (Only Order Number / Customer Name) -->
       <template #customer_name-cell="{ row }">
@@ -72,12 +73,26 @@
       </template>
     </UTable>
 
-    <!-- Empty State -->
-    <div v-if="!isLoading && orders.length === 0" class="p-12 text-center space-y-3">
-      <UIcon name="i-heroicons-clipboard-document-list" class="w-12 h-12 text-slate-400 mx-auto" />
-      <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
-        {{ $t('common.no_data') || 'No orders found' }}
+      <!-- Empty State -->
+      <div v-if="!isLoading && orders.length === 0" class="p-12 text-center space-y-3">
+        <UIcon name="i-heroicons-clipboard-document-list" class="w-12 h-12 text-slate-400 mx-auto" />
+        <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+          {{ $t('common.no_data') || 'No orders found' }}
+        </div>
       </div>
+    </div>
+
+    <!-- Pagination & Stats Bar -->
+    <div v-if="total > 0" class="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-1">
+      <div class="text-xs text-slate-500 dark:text-slate-400">
+        {{ $t('common.showing_results', {
+          from: ((page - 1) * pageSize) + 1, to: Math.min(page * pageSize, total), total
+        })
+        }}
+      </div>
+
+      <UPagination v-model:page="page" :items-per-page="pageSize" :total="total" size="sm"
+        :active-button="{ color: 'primary' }" />
     </div>
   </div>
 </template>
@@ -90,8 +105,12 @@ import { formatDeliveryDate } from '../composables/useOrderEngine'
 
 const props = defineProps<{
   orders: Order[]
+  total: number
+  pageSize: number
   isLoading?: boolean
 }>()
+
+const page = defineModel<number>('page', { default: 1 })
 
 defineEmits<{
   (e: 'view', order: Order): void
