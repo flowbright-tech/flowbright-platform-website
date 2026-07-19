@@ -13,10 +13,10 @@
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <UBadge :color="getStatusBadgeColor(order.status)" variant="solid" size="md" class="capitalize font-bold">
+            <UBadge :color="getStatusBadgeColor(order.status)" variant="solid" size="md" class="capitalize font-bold px-3 py-1 text-xs sm:text-sm">
               {{ formatStatus(order.status) }}
             </UBadge>
-            <UBadge :color="getPaymentBadgeColor(order.payment_channel)" variant="soft" size="md" class="capitalize">
+            <UBadge :color="getPaymentBadgeColor(order.payment_channel)" variant="soft" size="md" class="capitalize font-bold px-3 py-1 text-xs sm:text-sm">
               {{ formatPaymentChannel(order.payment_channel) }}
             </UBadge>
           </div>

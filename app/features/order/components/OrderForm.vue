@@ -12,7 +12,7 @@
 
           <div class="space-y-4">
             <!-- Customer Dropdown Search -->
-            <UFormField :error="errors.customer || undefined">
+            <UFormField :error="errors.customer_name || undefined">
               <template #label>
                 <span>{{ $t('orders.select_customer') || 'Select Customer from Database' }}</span>
                 <span class="text-red-500 font-bold ml-0.5">*</span>
@@ -22,7 +22,7 @@
                 v-model="selectedCustomer"
                 v-model:search-term="customerSearchQuery"
                 :items="customerOptions"
-                :placeholder="$t('orders.select_customer') || 'Type to search customer by name, email, phone...'"
+                :placeholder="$t('orders.select_customer') || 'Type to search customer by code or name...'"
                 size="md"
                 class="w-full"
                 label-key="label"
@@ -93,13 +93,18 @@
               />
             </UFormField>
 
-            <!-- Payment Channel (Searchable Dropdown) -->
-            <UFormField :label="$t('orders.payment_channel') || 'Payment Channel'">
+            <!-- Payment Channel (Required, No Default) -->
+            <UFormField :error="errors.payment_channel || undefined">
+              <template #label>
+                <span>{{ $t('orders.payment_channel') || 'Payment Channel' }}</span>
+                <span class="text-red-500 font-bold ml-0.5">*</span>
+              </template>
               <USelectMenu
                 v-model="form.payment_channel"
                 :items="paymentOptions"
                 value-key="value"
                 label-key="label"
+                placeholder="Select payment channel..."
                 size="md"
                 class="w-full"
               />
@@ -124,7 +129,8 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-slate-800">
             <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <UIcon name="i-heroicons-gift" class="w-5 h-5 text-indigo-500" />
-              {{ $t('orders.sec_items') || 'Order Package Items' }}
+              <span>{{ $t('orders.sec_items') || 'Order Package Items' }}</span>
+              <span class="text-red-500 font-bold ml-0.5">*</span>
             </h3>
 
             <!-- Package Search & Dropdown -->
@@ -251,12 +257,18 @@
           />
         </div>
 
-        <!-- Action Buttons -->
+        <!-- Action Buttons (Save Button with Check Icon) -->
         <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
           <UButton type="button" color="neutral" variant="ghost" @click="$emit('cancel')">
             {{ $t('common.cancel') || 'Cancel' }}
           </UButton>
-          <UButton type="submit" color="primary" class="px-6 font-semibold" :loading="isLoading">
+          <UButton
+            type="submit"
+            color="primary"
+            icon="i-heroicons-check"
+            class="px-6 font-semibold"
+            :loading="isLoading"
+          >
             {{ $t('common.save') || 'Save Order' }}
           </UButton>
         </div>
@@ -290,14 +302,14 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Form reactive state - Status defaults strictly to 'pending', Payment channel to 3 options
+// Form reactive state - Payment channel has NO DEFAULT value (required field), Status defaults to 'pending'
 const form = reactive<OrderFormData>({
   customer_id: '',
   customer_name: '',
   customer_email: '',
   customer_phone: '',
   delivery_date: getTodayDateString(), // Default today date
-  payment_channel: 'cash',
+  payment_channel: '', // No default value
   status: 'pending', // Default pending
   notes: '',
   total_amount: 0,
@@ -309,6 +321,7 @@ const errors = reactive({
   customer: '',
   customer_name: '',
   delivery_date: '',
+  payment_channel: '',
   items: ''
 })
 
@@ -349,7 +362,7 @@ function debounce(fn: Function, delay = 300) {
   }
 }
 
-// Dynamic Customer API Query
+// Dynamic Customer API Query (Shows Customer Code + Name)
 const fetchCustomerOptions = async (query: string) => {
   isSearchingCustomers.value = true
   try {
@@ -361,9 +374,10 @@ const fetchCustomerOptions = async (query: string) => {
           const name = locale.value === 'th'
             ? `${c.first_name_th || ''} ${c.last_name_th || ''}`.trim() || c.first_name_en || c.email
             : `${c.first_name_en || ''} ${c.last_name_en || ''}`.trim() || c.email
+          const displayLabel = c.code ? `[${c.code}] ${name}` : name
           return {
             id: c.id,
-            label: `${name} (${c.phone || c.email || 'No contact'})`,
+            label: displayLabel,
             name,
             email: c.email || '',
             phone: c.phone || ''
@@ -496,7 +510,7 @@ watch(() => props.orderToEdit, (newVal) => {
     form.customer_email = newVal.customer_email || ''
     form.customer_phone = newVal.customer_phone || ''
     form.delivery_date = newVal.delivery_date ? newVal.delivery_date.split('T')[0] : getTodayDateString()
-    form.payment_channel = (newVal.payment_channel || 'cash').toLowerCase()
+    form.payment_channel = newVal.payment_channel ? newVal.payment_channel.toLowerCase() : ''
     form.status = (newVal.status || 'pending').toLowerCase()
     form.notes = newVal.notes || ''
     form.total_amount = newVal.total_amount || 0
@@ -515,12 +529,13 @@ watch(() => props.orderToEdit, (newVal) => {
   }
 }, { immediate: true })
 
-// Form Submission with lowercased error strings
+// Form Submission with required field validation and lowercased error strings
 const submitForm = () => {
   // Clear previous errors
   errors.customer = ''
   errors.customer_name = ''
   errors.delivery_date = ''
+  errors.payment_channel = ''
   errors.items = ''
 
   let isValid = true
@@ -532,6 +547,11 @@ const submitForm = () => {
 
   if (!form.delivery_date) {
     errors.delivery_date = safeLowerCase(t('orders.err_delivery_date_required') || 'delivery date is required')
+    isValid = false
+  }
+
+  if (!form.payment_channel) {
+    errors.payment_channel = safeLowerCase(t('orders.err_payment_channel_required') || 'please select a payment channel')
     isValid = false
   }
 
@@ -557,7 +577,7 @@ const submitForm = () => {
   emit('save', {
     ...form,
     status: safeLowerCase(form.status || 'pending'),
-    payment_channel: safeLowerCase(form.payment_channel || 'cash')
+    payment_channel: safeLowerCase(form.payment_channel)
   })
 }
 </script>

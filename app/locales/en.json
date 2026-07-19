@@ -428,6 +428,7 @@
     "confirm_delete_desc": "Are you sure you want to permanently delete this order? This action cannot be undone.",
     "err_customer_required": "Please select or specify customer information",
     "err_delivery_date_required": "Delivery date is required",
+    "err_payment_channel_required": "Please select a payment channel",
     "err_items_empty": "Order must contain at least one package item",
     "err_quantity_invalid": "Item quantity must be greater than 0",
     "view_detail": "View Details",

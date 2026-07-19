@@ -1,27 +1,15 @@
 <template>
   <div class="glass-panel rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
     <UTable :data="orders" :columns="columns" :loading="isLoading">
-      <!-- Customer & Order Info column -->
+      <!-- Customer & Order Info column (Only Order Number / Customer Name) -->
       <template #customer_name-cell="{ row }">
-        <div class="flex flex-col py-1">
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-slate-900 dark:text-white text-sm">
-              {{ row.original.customer_name || 'N/A' }}
-            </span>
-            <UBadge v-if="row.original.code || row.original.order_number" color="neutral" variant="subtle" size="xs" class="font-mono">
-              {{ row.original.code || row.original.order_number }}
-            </UBadge>
-          </div>
-          <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            <span v-if="row.original.customer_email" class="flex items-center gap-1">
-              <UIcon name="i-heroicons-envelope" class="w-3.5 h-3.5 text-slate-400" />
-              {{ row.original.customer_email }}
-            </span>
-            <span v-if="row.original.customer_phone" class="flex items-center gap-1">
-              <UIcon name="i-heroicons-phone" class="w-3.5 h-3.5 text-slate-400" />
-              {{ row.original.customer_phone }}
-            </span>
-          </div>
+        <div class="flex items-center gap-2 py-1">
+          <span class="font-bold text-slate-900 dark:text-white text-sm">
+            {{ row.original.customer_name || 'N/A' }}
+          </span>
+          <UBadge v-if="row.original.code || row.original.order_number" color="neutral" variant="subtle" size="xs" class="font-mono">
+            {{ row.original.code || row.original.order_number }}
+          </UBadge>
         </div>
       </template>
 
@@ -33,17 +21,17 @@
         </div>
       </template>
 
-      <!-- Payment Channel cell (3 types: Cash, Credit Card, Internet Banking) -->
+      <!-- Payment Channel cell (Increased badge size) -->
       <template #payment_channel-cell="{ row }">
-        <UBadge :color="getPaymentBadgeColor(row.original.payment_channel)" variant="soft" size="xs" class="capitalize">
-          <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-3.5 h-3.5 mr-1" />
+        <UBadge :color="getPaymentBadgeColor(row.original.payment_channel)" variant="soft" size="sm" class="capitalize font-bold px-2.5 py-1">
+          <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-4 h-4 mr-1" />
           {{ formatPaymentChannel(row.original.payment_channel) }}
         </UBadge>
       </template>
 
-      <!-- Status cell -->
+      <!-- Status cell (Increased badge size) -->
       <template #status-cell="{ row }">
-        <UBadge :color="getStatusBadgeColor(row.original.status)" variant="solid" size="xs" class="capitalize font-semibold">
+        <UBadge :color="getStatusBadgeColor(row.original.status)" variant="solid" size="sm" class="capitalize font-bold px-2.5 py-1">
           <span class="w-1.5 h-1.5 rounded-full bg-white mr-1.5 inline-block animate-pulse"></span>
           {{ formatStatus(row.original.status) }}
         </UBadge>
@@ -51,7 +39,7 @@
 
       <!-- Items Count cell -->
       <template #items-cell="{ row }">
-        <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+        <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
           {{ row.original.items?.length || 0 }} {{ $t('orders.col_items') || 'Items' }}
         </span>
       </template>
