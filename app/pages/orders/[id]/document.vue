@@ -88,35 +88,40 @@
           <!-- Document Profile Metadata (2 Clean Rows) -->
           <div class="space-y-3 border-y border-slate-200 py-3.5 text-slate-800 text-[11.5px] font-medium">
             <!-- Row 1 -->
-            <div class="grid grid-cols-12 gap-2 items-center">
-              <div class="col-span-4 whitespace-nowrap">
-                <span class="font-bold">วันที่</span>
-                <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( Billing Date. ) :</span>
+            <div class="flex justify-between items-center w-full">
+              <div class="w-[35%] text-left whitespace-nowrap">
+                <span class="font-bold text-slate-800">วันที่</span>
+                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Billing Date. )</span>
+                <span class="text-slate-800 font-bold ml-0.5">:</span>
                 <span class="font-mono font-bold text-slate-900 ml-1.5">{{ formatInvoiceDate(invoice?.delivery_date) }}</span>
               </div>
-              <div class="col-span-3 whitespace-nowrap text-center">
-                <span class="font-bold">HN :</span>
+              <div class="w-[30%] text-center whitespace-nowrap">
+                <span class="font-bold text-slate-800">HN</span>
+                <span class="text-slate-800 font-bold ml-0.5">:</span>
                 <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
               </div>
-              <div class="col-span-5 whitespace-nowrap text-right">
-                <span class="font-bold">ช่องทางการชำระเงิน</span>
-                <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( Payment Channel ) :</span>
+              <div class="w-[35%] text-right whitespace-nowrap">
+                <span class="font-bold text-slate-800">ช่องทางการชำระเงิน</span>
+                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Payment Channel )</span>
+                <span class="text-slate-800 font-bold ml-0.5">:</span>
                 <span class="font-bold text-slate-900 ml-1.5 capitalize">{{ formatPaymentChannel(invoice?.payment_channel) }}</span>
               </div>
             </div>
 
             <!-- Row 2 -->
-            <div class="grid grid-cols-12 gap-2 items-center">
-              <div class="col-span-6 whitespace-nowrap">
-                <span class="font-bold">ชื่อ</span>
-                <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( Name ) :</span>
+            <div class="flex justify-between items-center w-full">
+              <div class="w-[60%] text-left whitespace-nowrap">
+                <span class="font-bold text-slate-800">ชื่อ</span>
+                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Name )</span>
+                <span class="text-slate-800 font-bold ml-0.5">:</span>
                 <span class="font-extrabold text-slate-955 ml-1.5 text-[12px]">
                   {{ getCustomerFullName() }}
                 </span>
               </div>
-              <div class="col-span-6 whitespace-nowrap text-right">
-                <span class="font-bold">อายุ</span>
-                <span class="text-[9.5px] text-slate-500 font-semibold ml-0.5">( Age ) :</span>
+              <div class="w-[40%] text-right whitespace-nowrap">
+                <span class="font-bold text-slate-800">อายุ</span>
+                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Age )</span>
+                <span class="text-slate-800 font-bold ml-0.5">:</span>
                 <span class="font-bold text-slate-900 ml-1.5">{{ calculatePreciseAge(customer?.birth_date, invoice?.created_at) }}</span>
               </div>
             </div>
