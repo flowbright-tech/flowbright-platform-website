@@ -7,7 +7,7 @@
           <span class="font-bold text-slate-900 dark:text-white text-sm">
             {{ row.original.customer_name || 'N/A' }}
           </span>
-          <UBadge v-if="row.original.code || row.original.order_number" color="neutral" variant="subtle" size="xs" class="font-mono">
+          <UBadge v-if="row.original.code || row.original.order_number" color="neutral" variant="soft" size="md" class="font-mono font-bold text-xs sm:text-sm px-2.5 py-1">
             {{ row.original.code || row.original.order_number }}
           </UBadge>
         </div>

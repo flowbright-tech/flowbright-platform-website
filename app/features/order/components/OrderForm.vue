@@ -180,18 +180,16 @@
                   <tr v-for="(item, index) in form.items" :key="item.package_id">
                     <td class="px-4 py-3">
                       <div class="font-bold text-sm text-slate-900 dark:text-white">
-                        {{ locale === 'th' ? item.package_name_th : item.package_name_en }}
+                        {{ locale === 'th' ? (item.package_name_th || item.package_name_en) : (item.package_name_en || item.package_name_th) }}
                       </div>
                     </td>
                     <td class="px-4 py-3">
                       <UInput
                         v-model.number="item.unit_price"
                         type="number"
-                        min="0"
-                        step="any"
+                        disabled
                         size="xs"
-                        class="w-24 font-bold font-mono"
-                        @input="recalculateItemSubtotal(item)"
+                        class="w-24 font-bold font-mono bg-slate-100 dark:bg-slate-800 cursor-not-allowed"
                       />
                     </td>
                     <td class="px-4 py-3">
@@ -201,7 +199,6 @@
                         min="1"
                         size="xs"
                         class="w-20 font-bold font-mono"
-                        @input="recalculateItemSubtotal(item)"
                       />
                     </td>
                     <td class="px-4 py-3 font-mono font-bold text-indigo-600 dark:text-indigo-400 text-sm">
@@ -284,13 +281,11 @@ import { useI18n } from 'vue-i18n'
 import type { Order, OrderFormData } from '../types'
 import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, safeLowerCase } from '../composables/useOrderEngine'
 import { useApiFetch } from '../../../composables/useApiFetch'
-import { useAppToast } from '../../../composables/useAppToast'
 import type { Customer } from '../../customer/types'
 import type { Package } from '../../package/types'
 
 const { t, locale } = useI18n()
 const { apiFetch } = useApiFetch()
-const { showError } = useAppToast()
 
 const props = defineProps<{
   orderToEdit?: Order | null
@@ -477,12 +472,21 @@ watch(selectedPackage, (val) => {
   }
 })
 
-// Helper methods
-const recalculateItemSubtotal = (item: any) => {
-  item.subtotal = calculateItemSubtotal(item.quantity, item.unit_price)
-  recalculateOrderTotal()
-}
+// Deep watcher on form.items to automatically recalculate item subtotals and total amount whenever quantity changes
+watch(
+  () => form.items,
+  (newItems) => {
+    if (Array.isArray(newItems)) {
+      newItems.forEach(item => {
+        item.subtotal = calculateItemSubtotal(item.quantity, item.unit_price)
+      })
+      form.total_amount = calculateOrderTotal(newItems)
+    }
+  },
+  { deep: true }
+)
 
+// Helper methods
 const recalculateOrderTotal = () => {
   form.total_amount = calculateOrderTotal(form.items)
 }
@@ -502,7 +506,7 @@ onMounted(() => {
   fetchPackageOptions('')
 })
 
-// Watch editing prop
+// Watch editing prop to populate form on edit
 watch(() => props.orderToEdit, (newVal) => {
   if (newVal) {
     form.customer_id = newVal.customer_id || ''
@@ -521,15 +525,15 @@ watch(() => props.orderToEdit, (newVal) => {
           unit_price: item.unit_price || 0,
           subtotal: item.subtotal || calculateItemSubtotal(item.quantity || 1, item.unit_price || 0),
           notes: item.notes || '',
-          package_name_en: item.package_name_en || item.package_id,
-          package_name_th: item.package_name_th || item.package_id
+          package_name_en: item.package_name_en || (item as any).package?.name_en || (item as any).name_en || item.package_id,
+          package_name_th: item.package_name_th || (item as any).package?.name_th || (item as any).name_th || item.package_id
         }))
       : []
     recalculateOrderTotal()
   }
 }, { immediate: true })
 
-// Form Submission with required field validation and lowercased error strings
+// Form Submission with required field validation
 const submitForm = () => {
   // Clear previous errors
   errors.customer = ''
@@ -569,7 +573,6 @@ const submitForm = () => {
   }
 
   if (!isValid) {
-    showError(safeLowerCase(t('common.form_invalid') || 'please resolve form errors before submitting'))
     return
   }
 
