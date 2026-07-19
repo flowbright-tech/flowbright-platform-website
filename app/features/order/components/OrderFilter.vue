@@ -1,28 +1,22 @@
 <template>
-  <div class="flex flex-col sm:flex-row items-center justify-between gap-4 glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-    <!-- Search Input -->
-    <div class="relative w-full sm:w-96">
-      <UInput
-        v-model="searchQuery"
-        icon="i-heroicons-magnifying-glass"
-        :placeholder="$t('orders.search_placeholder') || 'Search orders...'"
-        size="md"
-        class="w-full"
-      />
+  <div
+    class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 glass-panel rounded-2xl mb-6">
+    <!-- Search Bar -->
+    <div class="flex-1 max-w-md">
+      <UInput v-model="searchQuery" trailing-icon="i-heroicons-magnifying-glass"
+        :placeholder="$t('orders.search_placeholder') || 'Search orders...'" size="md" class="w-full">
+        <template #trailing>
+          <UButton v-if="searchQuery" color="gray" variant="ghost" icon="i-lucide-circle-x" size="xs" class="mr-1"
+            @click="searchQuery = ''" />
+        </template>
+      </UInput>
     </div>
 
-    <!-- Action Button -->
-    <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
-      <UButton
-        color="primary"
-        icon="i-heroicons-plus-circle"
-        size="md"
-        class="font-semibold shadow-sm px-5 w-full sm:w-auto justify-center"
-        @click="$emit('create')"
-      >
-        {{ $t('orders.add_order') || 'Create Order' }}
-      </UButton>
-    </div>
+    <!-- Create Order Button -->
+    <UButton color="primary" icon="i-heroicons-plus" size="md" class="font-semibold shadow-sm shrink-0"
+      @click="$emit('open-create')">
+      {{ $t('orders.add_order') || 'Add Order' }}
+    </UButton>
   </div>
 </template>
 
@@ -30,6 +24,6 @@
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
 
 defineEmits<{
-  (e: 'create'): void
+  (e: 'open-create'): void
 }>()
 </script>

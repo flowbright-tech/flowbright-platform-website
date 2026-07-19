@@ -27,7 +27,7 @@
     <!-- Search & Filter Controls -->
     <OrderFilter
       v-model:search-query="searchQuery"
-      @create="handleOpenCreate"
+      @open-create="handleOpenCreate"
     />
 
     <!-- Skeleton Loader for async data fetching -->
