@@ -68,6 +68,7 @@
     "forecast_subtitle": "Actual revenue performance vs AI projection trend",
     "daily_chart_title": "Daily Revenue & Net Profit Breakdown",
     "daily_chart_subtitle": "Comparison of daily net revenue, total cost, net profit, and forecast target",
+    "revenue_in_thb": "Revenue in THB",
     "no_daily_data": "No daily financial data recorded yet",
     "top_sales_packages": "Top Sales Packages",
     "top_packages_subtitle": "Best performing product packages by sales volume and revenue",

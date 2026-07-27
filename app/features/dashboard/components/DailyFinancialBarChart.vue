@@ -1,5 +1,5 @@
 <template>
-  <UCard class="glass-panel">
+  <UCard class="glass-panel relative">
     <template #header>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
@@ -29,7 +29,7 @@
       </div>
     </template>
 
-    <div v-if="!byDate || byDate.length === 0" class="h-64 flex items-center justify-center text-slate-400 text-base font-semibold">
+    <div v-if="!byDate || byDate.length === 0" class="h-72 flex items-center justify-center text-slate-400 text-base font-semibold">
       {{ $t('dashboard.no_daily_data') }}
     </div>
 
@@ -50,9 +50,14 @@
         </div>
       </div>
 
-      <!-- Theme-Reactive Responsive SVG Grouped Bar Chart with Native X-Axis Date Labels -->
-      <div class="w-full h-72 pt-2">
-        <svg class="w-full h-full overflow-visible" viewBox="0 0 700 240" preserveAspectRatio="none">
+      <!-- Responsive SVG Bar Chart with Left Y-Axis Values & Floating Numerical Values -->
+      <div class="relative w-full h-80 pt-2">
+        <svg
+          class="w-full h-full overflow-visible"
+          viewBox="0 0 760 260"
+          preserveAspectRatio="none"
+          @mouseleave="hoveredIdx = null"
+        >
           <defs>
             <linearGradient id="incomeBarGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#6366f1" />
@@ -64,30 +69,66 @@
             </linearGradient>
           </defs>
 
-          <!-- Horizontal Grid Lines -->
-          <g class="stroke-slate-200/60 dark:stroke-slate-800/80" stroke-dasharray="4 4" stroke-width="1">
-            <line x1="0" y1="20" x2="700" y2="20" />
-            <line x1="0" y1="65" x2="700" y2="65" />
-            <line x1="0" y1="110" x2="700" y2="110" />
-            <line x1="0" y1="155" x2="700" y2="155" />
+          <!-- Y-Axis Title -->
+          <text
+            x="12"
+            y="12"
+            class="fill-slate-400 dark:fill-slate-500 font-sans text-[11px] font-bold uppercase tracking-wider"
+          >
+            {{ $t('dashboard.revenue_in_thb') }}
+          </text>
+
+          <!-- Y-Axis Numerical Gridlines & Labels -->
+          <g v-for="(tick, tIdx) in yTicks" :key="tIdx">
+            <line
+              x1="70"
+              :y1="tick.y"
+              x2="760"
+              :y2="tick.y"
+              class="stroke-slate-200/80 dark:stroke-slate-800/80"
+              stroke-dasharray="4 4"
+              stroke-width="1"
+            />
+            <text
+              x="62"
+              :y="tick.y + 4"
+              text-anchor="end"
+              class="fill-slate-400 dark:fill-slate-500 font-sans text-[11px] font-semibold"
+            >
+              {{ tick.label }}
+            </text>
           </g>
 
           <!-- Baseline Axis Line -->
-          <line x1="0" y1="180" x2="700" y2="180" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
+          <line x1="70" y1="200" x2="760" y2="200" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
 
           <!-- Forecast Baseline Target Line -->
           <line
-            x1="0"
+            x1="70"
             :y1="forecastLineY"
-            x2="700"
+            x2="760"
             :y2="forecastLineY"
             class="stroke-amber-400 dark:stroke-amber-500"
             stroke-width="2.5"
             stroke-dasharray="6 4"
           />
 
-          <!-- Grouped Bars & Beautified X-Axis Date Labels -->
-          <g v-for="(group, idx) in barGroups" :key="idx">
+          <!-- Grouped Bars, Numerical Labels, and Hover Overlay -->
+          <g
+            v-for="(group, idx) in barGroups"
+            :key="idx"
+            @mouseenter="hoveredIdx = idx"
+          >
+            <!-- Hover Background Highlight Column -->
+            <rect
+              v-if="hoveredIdx === idx"
+              :x="group.groupCenterX - group.groupWidth / 2"
+              y="20"
+              :width="group.groupWidth"
+              height="180"
+              class="fill-indigo-500/5 dark:fill-indigo-400/10 rx-md"
+            />
+
             <!-- Income Bar -->
             <rect
               :x="group.xIncome"
@@ -96,10 +137,19 @@
               :height="group.hIncome"
               rx="4"
               fill="url(#incomeBarGrad)"
-              class="transition-all hover:opacity-85 cursor-pointer"
+              class="transition-all hover:opacity-90 cursor-pointer"
+            />
+
+            <!-- Floating Numerical Value above Income Bar -->
+            <text
+              v-if="group.item.net_revenue > 0"
+              :x="group.xIncome + group.barWidth / 2"
+              :y="group.yIncome - 6"
+              text-anchor="middle"
+              class="fill-indigo-600 dark:fill-indigo-400 font-sans text-[11px] font-black"
             >
-              <title>{{ group.date }}: Revenue {{ formatVal(group.item.net_revenue) }}</title>
-            </rect>
+              {{ formatValCompact(group.item.net_revenue) }}
+            </text>
 
             <!-- Profit Bar -->
             <rect
@@ -109,35 +159,76 @@
               :height="group.hProfit"
               rx="4"
               fill="url(#profitBarGrad)"
-              class="transition-all hover:opacity-85 cursor-pointer"
+              class="transition-all hover:opacity-90 cursor-pointer"
+            />
+
+            <!-- Floating Numerical Value above Profit Bar -->
+            <text
+              v-if="group.item.total_profit > 0"
+              :x="group.xProfit + group.barWidth / 2"
+              :y="group.yProfit - 6"
+              text-anchor="middle"
+              class="fill-emerald-600 dark:fill-emerald-400 font-sans text-[11px] font-black"
             >
-              <title>{{ group.date }}: Profit {{ formatVal(group.item.total_profit) }}</title>
-            </rect>
+              {{ formatValCompact(group.item.total_profit) }}
+            </text>
 
             <!-- Aligned Beautified X-Axis Date Text -->
             <text
-              :x="group.centerX"
-              y="208"
+              :x="group.groupCenterX"
+              y="226"
               text-anchor="middle"
-              class="fill-slate-700 dark:fill-slate-200 font-sans text-[13px] font-extrabold tracking-wide"
+              class="fill-slate-700 dark:fill-slate-200 font-sans text-[12px] font-extrabold tracking-wide"
             >
               {{ formatDateLabel(group.date) }}
             </text>
           </g>
         </svg>
+
+        <!-- Mouse Hover Interactive Detail Tooltip Card -->
+        <div
+          v-if="hoveredGroup"
+          class="absolute z-20 pointer-events-none bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3.5 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 space-y-1.5 transition-all text-xs"
+          :style="tooltipStyle"
+        >
+          <p class="font-extrabold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-1 flex items-center justify-between gap-3">
+            <span>{{ hoveredGroup.date }}</span>
+            <span class="text-indigo-600 dark:text-indigo-400 font-mono">{{ hoveredGroup.item.total_orders }} {{ $t('dashboard.orders_unit') }}</span>
+          </p>
+          <div class="flex items-center justify-between gap-4 font-semibold">
+            <span class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+              <span class="w-2.5 h-2.5 rounded bg-indigo-500"></span>
+              {{ $t('dashboard.daily_income_legend') }}:
+            </span>
+            <span class="font-extrabold text-indigo-600 dark:text-indigo-400">{{ formatVal(hoveredGroup.item.net_revenue) }}</span>
+          </div>
+          <div class="flex items-center justify-between gap-4 font-semibold">
+            <span class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+              <span class="w-2.5 h-2.5 rounded bg-emerald-500"></span>
+              {{ $t('dashboard.daily_profit_legend') }}:
+            </span>
+            <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ formatVal(hoveredGroup.item.total_profit) }}</span>
+          </div>
+          <div class="flex items-center justify-between gap-4 text-[11px] text-slate-500 dark:text-slate-400">
+            <span>Cost: {{ formatVal(hoveredGroup.item.total_cost) }}</span>
+            <span>Margin: {{ calculateMargin(hoveredGroup.item) }}%</span>
+          </div>
+        </div>
       </div>
     </div>
   </UCard>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import type { FinancialByDate, ForecastTrendItem } from '../types'
 
 const props = defineProps<{
   byDate: FinancialByDate[]
   forecastTrend?: ForecastTrendItem[]
 }>()
+
+const hoveredIdx = ref<number | null>(null)
 
 const totalIncome = computed(() => {
   return (props.byDate || []).reduce((acc, i) => acc + i.net_revenue, 0)
@@ -154,7 +245,23 @@ const totalOrders = computed(() => {
 const maxVal = computed(() => {
   if (!props.byDate || props.byDate.length === 0) return 30000
   const maxInDate = Math.max(...props.byDate.map(d => Math.max(d.net_revenue, d.total_profit)))
-  return maxInDate > 0 ? maxInDate * 1.2 : 30000
+  return maxInDate > 0 ? maxInDate * 1.25 : 30000
+})
+
+const yTicks = computed(() => {
+  const count = 4
+  const max = maxVal.value
+  const ticks = []
+  for (let i = 0; i <= count; i++) {
+    const val = (max / count) * i
+    const y = 200 - (val / max) * 180
+    ticks.push({
+      val,
+      y,
+      label: formatValCompact(val)
+    })
+  }
+  return ticks
 })
 
 const forecastTargetValue = computed(() => {
@@ -164,30 +271,32 @@ const forecastTargetValue = computed(() => {
 })
 
 const forecastLineY = computed(() => {
-  return 180 - (forecastTargetValue.value / maxVal.value) * 155
+  return 200 - (forecastTargetValue.value / maxVal.value) * 180
 })
 
 const barGroups = computed(() => {
   if (!props.byDate || props.byDate.length === 0) return []
-  const chartWidth = 700
+  const startX = 70
+  const chartWidth = 690
   const count = props.byDate.length
   const groupWidth = chartWidth / count
   const barWidth = Math.min(groupWidth * 0.32, 34)
 
   return props.byDate.map((item, i) => {
-    const centerX = i * groupWidth + groupWidth / 2
-    const xIncome = centerX - barWidth - 3
-    const xProfit = centerX + 3
+    const groupCenterX = startX + i * groupWidth + groupWidth / 2
+    const xIncome = groupCenterX - barWidth - 3
+    const xProfit = groupCenterX + 3
 
-    const hIncome = Math.max((item.net_revenue / maxVal.value) * 155, 4)
-    const yIncome = 180 - hIncome
+    const hIncome = Math.max((item.net_revenue / maxVal.value) * 180, 4)
+    const yIncome = 200 - hIncome
 
-    const hProfit = Math.max((item.total_profit / maxVal.value) * 155, 4)
-    const yProfit = 180 - hProfit
+    const hProfit = Math.max((item.total_profit / maxVal.value) * 180, 4)
+    const yProfit = 200 - hProfit
 
     return {
       date: item.date,
-      centerX,
+      groupCenterX,
+      groupWidth,
       xIncome,
       yIncome,
       hIncome,
@@ -199,6 +308,26 @@ const barGroups = computed(() => {
     }
   })
 })
+
+const hoveredGroup = computed(() => {
+  if (hoveredIdx.value === null || !barGroups.value[hoveredIdx.value]) return null
+  return barGroups.value[hoveredIdx.value]
+})
+
+const tooltipStyle = computed(() => {
+  if (!hoveredGroup.value) return {}
+  const leftPct = (hoveredGroup.value.groupCenterX / 760) * 100
+  return {
+    left: `${Math.min(Math.max(leftPct, 15), 75)}%`,
+    top: '25px',
+    transform: 'translateX(-50%)'
+  }
+})
+
+const calculateMargin = (item: FinancialByDate) => {
+  if (!item.net_revenue || item.net_revenue === 0) return 0
+  return Math.round((item.total_profit / item.net_revenue) * 100)
+}
 
 const formatDateLabel = (dateStr: string) => {
   if (!dateStr) return ''
@@ -214,5 +343,11 @@ const formatDateLabel = (dateStr: string) => {
 
 const formatVal = (val: number) => {
   return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(val || 0)
+}
+
+const formatValCompact = (val: number) => {
+  if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`
+  if (val >= 1000) return `${(val / 1000).toFixed(1)}k`
+  return `${Math.round(val)}`
 }
 </script>
