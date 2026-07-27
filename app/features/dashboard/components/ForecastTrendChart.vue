@@ -28,9 +28,9 @@
       {{ $t('dashboard.no_data') }}
     </div>
 
-    <!-- SVG Multi-Series Line Chart -->
-    <div v-else class="relative w-full h-64 pt-4">
-      <svg class="w-full h-full overflow-visible" viewBox="0 0 700 220" preserveAspectRatio="none">
+    <!-- Theme-Reactive SVG Multi-Series Line Chart with Native X-Axis Period Labels -->
+    <div v-else class="w-full h-72 pt-3">
+      <svg class="w-full h-full overflow-visible" viewBox="0 0 700 240" preserveAspectRatio="none">
         <defs>
           <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stop-color="#10b981" stop-opacity="0.35" />
@@ -40,11 +40,14 @@
 
         <!-- Horizontal Grid lines -->
         <g class="stroke-slate-200/60 dark:stroke-slate-800/80" stroke-dasharray="4 4" stroke-width="1">
-          <line x1="0" y1="30" x2="700" y2="30" />
-          <line x1="0" y1="75" x2="700" y2="75" />
-          <line x1="0" y1="120" x2="700" y2="120" />
-          <line x1="0" y1="165" x2="700" y2="165" />
+          <line x1="0" y1="20" x2="700" y2="20" />
+          <line x1="0" y1="65" x2="700" y2="65" />
+          <line x1="0" y1="110" x2="700" y2="110" />
+          <line x1="0" y1="155" x2="700" y2="155" />
         </g>
+
+        <!-- Baseline Axis Line -->
+        <line x1="0" y1="180" x2="700" y2="180" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
 
         <!-- Forecast Line (Dashed) -->
         <polyline
@@ -71,7 +74,7 @@
           stroke-linejoin="round"
         />
 
-        <!-- Data Point Nodes -->
+        <!-- Data Point Nodes & Aligned Period Labels -->
         <g v-for="(node, idx) in chartNodes" :key="idx">
           <!-- Forecast Node -->
           <circle
@@ -93,13 +96,18 @@
           >
             <title>{{ node.period }}: {{ $t('dashboard.actual') }} {{ formatVal(node.item.actual_revenue) }}</title>
           </circle>
+
+          <!-- Beautified Native X-Axis Label -->
+          <text
+            :x="node.x"
+            y="208"
+            text-anchor="middle"
+            class="fill-slate-700 dark:fill-slate-200 font-sans text-[13px] font-extrabold tracking-wide"
+          >
+            {{ formatPeriodLabel(node.period) }}
+          </text>
         </g>
       </svg>
-
-      <!-- Period Labels -->
-      <div class="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-bold px-2 mt-4">
-        <span v-for="item in items" :key="item.period">{{ item.period }}</span>
-      </div>
     </div>
   </UCard>
 </template>
@@ -124,12 +132,12 @@ const chartNodes = computed(() => {
   if (!props.items || props.items.length === 0) return []
   const width = 700
   const count = props.items.length
-  const step = (width - 40) / Math.max(count - 1, 1)
+  const step = (width - 60) / Math.max(count - 1, 1)
 
   return props.items.map((item, i) => {
-    const x = 20 + i * step
-    const yActual = 185 - (item.actual_revenue / maxVal.value) * 155
-    const yForecast = 185 - (item.forecast_revenue / maxVal.value) * 155
+    const x = 30 + i * step
+    const yActual = 180 - (item.actual_revenue / maxVal.value) * 155
+    const yForecast = 180 - (item.forecast_revenue / maxVal.value) * 155
     return {
       x,
       yActual,
@@ -153,8 +161,21 @@ const actualAreaPoints = computed(() => {
   const firstX = chartNodes.value[0].x
   const lastX = chartNodes.value[chartNodes.value.length - 1].x
   const pts = chartNodes.value.map(n => `${n.x},${n.yActual}`).join(' ')
-  return `${firstX},185 ${pts} ${lastX},185`
+  return `${firstX},180 ${pts} ${lastX},180`
 })
+
+const formatPeriodLabel = (periodStr: string) => {
+  if (!periodStr) return ''
+  const parts = periodStr.split('-')
+  if (parts.length === 2) {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const mIdx = parseInt(parts[1], 10) - 1
+    if (mIdx >= 0 && mIdx < 12) {
+      return `${monthNames[mIdx]} '${parts[0].substring(2)}`
+    }
+  }
+  return periodStr
+}
 
 const formatVal = (val: number) => {
   return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(val)
