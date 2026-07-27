@@ -36,7 +36,7 @@
         <div class="flex items-center gap-3.5 min-w-0">
           <div
             class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-xs"
-            :class="item.stock <= 0 ? 'bg-rose-500/15 text-rose-600 dark:bg-rose-500/25 dark:text-rose-400 border border-rose-500/30' : 'bg-amber-500/15 text-amber-600 dark:bg-amber-500/25 dark:text-amber-400 border border-amber-500/30'"
+            :class="item.stock <= 0 ? 'bg-rose-500/15 text-rose-600 dark:bg-rose-500/25 dark:text-rose-400 border border-rose-500/40' : 'bg-amber-500/15 text-amber-600 dark:bg-amber-500/25 dark:text-amber-400 border border-amber-500/40'"
           >
             <UIcon :name="item.entity_type === 'bom_item' ? 'i-heroicons-beaker' : 'i-heroicons-archive-box'" class="w-6 h-6" />
           </div>
@@ -63,7 +63,7 @@
 
         <div class="flex items-center gap-4 self-end sm:self-center shrink-0">
           <div class="text-right">
-            <div class="text-sm sm:text-base font-extrabold" :class="item.stock <= 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-200'">
+            <div class="text-sm sm:text-base font-extrabold" :class="item.stock <= 0 ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'">
               {{ $t('dashboard.stock_label') }} <span class="font-mono">{{ item.stock }}</span> {{ item.unit }}
             </div>
             <div class="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">
@@ -71,15 +71,27 @@
             </div>
           </div>
 
-          <!-- Prominently Enlarged Status Badge for Out of Stock & Low Stock -->
+          <!-- Color-coded High Contrast Badges for Out of Stock (Rose Red) & Low Stock (Warning Amber) -->
           <UBadge
-            :color="item.stock <= 0 ? 'rose' : 'amber'"
+            v-if="item.stock <= 0"
+            color="rose"
             variant="solid"
             size="md"
-            class="font-extrabold text-xs sm:text-sm px-3.5 py-1.5 rounded-xl uppercase tracking-wider shadow-sm flex items-center shrink-0"
+            class="font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl uppercase tracking-wider shadow-sm shadow-rose-500/25 text-white flex items-center shrink-0"
           >
-            <UIcon :name="item.stock <= 0 ? 'i-heroicons-x-circle' : 'i-heroicons-exclamation-triangle'" class="w-4 h-4 mr-1.5 shrink-0" />
-            {{ item.stock <= 0 ? $t('dashboard.out_of_stock') : $t('dashboard.low_stock') }}
+            <UIcon name="i-heroicons-x-circle" class="w-4 h-4 mr-1.5 text-white shrink-0" />
+            {{ $t('dashboard.out_of_stock') }}
+          </UBadge>
+
+          <UBadge
+            v-else
+            color="amber"
+            variant="solid"
+            size="md"
+            class="font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl uppercase tracking-wider shadow-sm shadow-amber-500/25 text-slate-950 flex items-center shrink-0"
+          >
+            <UIcon name="i-heroicons-exclamation-triangle" class="w-4 h-4 mr-1.5 text-slate-950 shrink-0" />
+            {{ $t('dashboard.low_stock') }}
           </UBadge>
         </div>
       </div>
