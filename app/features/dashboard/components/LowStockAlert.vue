@@ -38,7 +38,7 @@
           : 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-900/60 shadow-xs'"
       >
         <!-- Item Info (Left) -->
-        <div class="flex items-start sm:items-center gap-3.5 min-w-0">
+        <div class="flex items-center gap-3.5 min-w-0">
           <div
             class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm"
             :class="item.stock <= 0
@@ -48,23 +48,18 @@
             <UIcon :name="item.stock <= 0 ? 'i-heroicons-x-circle' : 'i-heroicons-exclamation-triangle'" class="w-6.5 h-6.5" />
           </div>
 
-          <div class="min-w-0 space-y-1">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="font-black text-base sm:text-lg text-slate-900 dark:text-white truncate">
-                {{ item.name }}
-              </span>
-              <span
-                class="px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider"
-                :class="item.entity_type === 'bom_item'
-                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300'
-                  : 'bg-sky-100 text-sky-700 dark:bg-sky-900/60 dark:text-sky-300'"
-              >
-                {{ item.entity_type.replace('_', ' ') }}
-              </span>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400">
-              {{ $t('dashboard.id_label') }} <span class="font-mono font-bold text-slate-700 dark:text-slate-300">{{ item.id }}</span>
-            </p>
+          <div class="min-w-0 flex flex-wrap items-center gap-2">
+            <span class="font-black text-base sm:text-lg text-slate-900 dark:text-white truncate">
+              {{ item.name }}
+            </span>
+            <span
+              class="px-2.5 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider shrink-0"
+              :class="item.entity_type === 'bom_item'
+                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300'
+                : 'bg-sky-100 text-sky-700 dark:bg-sky-900/60 dark:text-sky-300'"
+            >
+              {{ item.entity_type.replace('_', ' ') }}
+            </span>
           </div>
         </div>
 
