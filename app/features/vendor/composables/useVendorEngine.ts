@@ -1,127 +1,217 @@
-import { ref, computed } from 'vue'
-import { useState } from '#imports'
-import type { Vendor, VendorFormData, SupplyCategory } from '../types'
+import { ref, watch } from 'vue'
+import { useState, useRuntimeConfig } from '#imports'
+import type { Vendor, VendorFormData } from '../types'
 import { useAuthEngine } from '../../auth/composables/useAuthEngine'
-
-const INITIAL_VENDORS: Vendor[] = [
-  {
-    id: 'vnd-01',
-    code: 'VND-TH-101',
-    name: 'Siam Industrial Polymers PCL',
-    taxId: '0107537000889',
-    regId: 'REG-2024-8890',
-    phone: '+66 2 987 6543',
-    category: 'raw_materials',
-    tenantId: 'tenant-bkk-01',
-    createdAt: '2026-01-10'
-  },
-  {
-    id: 'vnd-02',
-    code: 'VND-TH-102',
-    name: 'Advance Network Infrastructure Ltd.',
-    taxId: '0105558012341',
-    regId: 'REG-2025-1234',
-    phone: '+66 2 456 7890',
-    category: 'it_hardware',
-    tenantId: 'tenant-bkk-01',
-    createdAt: '2026-02-14'
-  },
-  {
-    id: 'vnd-03',
-    code: 'VND-TH-103',
-    name: 'FastFreight Logistics (Thailand) Co.',
-    taxId: '0105561099882',
-    regId: 'REG-2025-9988',
-    phone: '+66 2 331 9900',
-    category: 'logistics',
-    tenantId: 'tenant-bkk-01',
-    createdAt: '2026-03-01'
-  },
-  {
-    id: 'vnd-04',
-    code: 'VND-SG-101',
-    name: 'Asia Pacific Office Systems Pte Ltd',
-    taxId: 'M90345678X',
-    regId: '201987654E',
-    phone: '+65 6543 2100',
-    category: 'office_supplies',
-    tenantId: 'tenant-sg-02',
-    createdAt: '2026-02-20'
-  }
-]
+import { useDebounce } from '../../../composables/useDebounce'
+import { useApiFetch } from '../../../composables/useApiFetch'
 
 export const useVendorEngine = () => {
-  const { activeTenant } = useAuthEngine()
+  const { session } = useAuthEngine()
+  const config = useRuntimeConfig()
+  const apiDomain = config?.public?.apiDomain || 'https://flowbright-platform-api.onrender.com'
+  const { apiFetch } = useApiFetch()
 
-  const vendors = useState<Vendor[]>('srp_vendors_master', () => INITIAL_VENDORS)
+  // State refs
+  const vendors = useState<Vendor[]>('srp_vendors_list', () => [])
+  const totalFilteredCount = useState<number>('srp_vendors_total', () => 0)
+  const isLoading = useState<boolean>('srp_vendors_loading', () => false)
+  const errorMsg = useState<string | null>('srp_vendors_error', () => null)
 
   const searchQuery = ref('')
-  const selectedCategory = ref<string>('all')
+  const debouncedSearchQuery = useDebounce(searchQuery, 500)
   const currentPage = ref(1)
-  const pageSize = ref(5)
+  const pageSize = ref(10)
+  const selectedCategory = ref('all')
 
-  const tenantVendors = computed(() => {
-    const tenantId = activeTenant.value.id
-    if (tenantId === '2f2b761e-4a80-449b-ae7e-e93b33313230') {
-      return vendors.value.filter(v => v.tenantId === 'tenant-bkk-01' || v.tenantId === tenantId)
+  // API Call to fetch vendors (list)
+  const fetchVendors = async () => {
+    const token = session.value?.token
+    if (!token) {
+      vendors.value = []
+      totalFilteredCount.value = 0
+      return
     }
-    return vendors.value.filter(v => v.tenantId === tenantId)
-  })
 
-  const filteredVendors = computed(() => {
-    return tenantVendors.value.filter(vendor => {
-      const matchesSearch = searchQuery.value === '' ||
-        vendor.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        vendor.taxId.includes(searchQuery.value) ||
-        vendor.code.toLowerCase().includes(searchQuery.value.toLowerCase())
+    isLoading.value = true
+    errorMsg.value = null
 
-      const matchesCategory = selectedCategory.value === 'all' || vendor.category === selectedCategory.value
+    try {
+      const searchParams = new URLSearchParams()
+      searchParams.append('page', String(currentPage.value))
+      searchParams.append('limit', String(pageSize.value))
 
-      return matchesSearch && matchesCategory
-    })
-  })
+      if (searchQuery.value) {
+        searchParams.append('search', searchQuery.value)
+      }
 
-  const paginatedVendors = computed(() => {
-    const start = (currentPage.value - 1) * pageSize.value
-    return filteredVendors.value.slice(start, start + pageSize.value)
-  })
+      const res = await apiFetch(`/api/v1/vendors?${searchParams.toString()}`)
 
-  const totalFilteredCount = computed(() => filteredVendors.value.length)
+      if (!res.ok) {
+        throw new Error(`Failed to fetch vendors: ${res.status} ${res.statusText}`)
+      }
+
+      const json = await res.json()
+      if (json.success && Array.isArray(json.data)) {
+        vendors.value = json.data
+        totalFilteredCount.value = json.pagination?.total ?? json.data.length
+      } else {
+        throw new Error(json.message || 'API responded with success: false')
+      }
+    } catch (err: any) {
+      console.error('Error fetching vendors:', err)
+      errorMsg.value = err.message || 'An error occurred while fetching vendor data'
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // API Call to fetch a single vendor details by ID
+  const fetchVendorById = async (id: string): Promise<Vendor | null> => {
+    isLoading.value = true
+    errorMsg.value = null
+
+    try {
+      const res = await apiFetch(`/api/v1/vendors/${id}`)
+      if (!res.ok) {
+        throw new Error(`Failed to fetch vendor: ${res.status} ${res.statusText}`)
+      }
+
+      const json = await res.json()
+      if (json.success && json.data) {
+        return json.data
+      } else {
+        throw new Error(json.message || 'Vendor not found')
+      }
+    } catch (err: any) {
+      console.error('Error fetching vendor by ID:', err)
+      errorMsg.value = err.message || 'An error occurred while fetching vendor details'
+      return null
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Add Vendor (POST to /api/v1/vendors)
+  const addVendor = async (data: VendorFormData) => {
+    isLoading.value = true
+    errorMsg.value = null
+
+    const payload: VendorFormData = {
+      address_en: data.address_en || '',
+      address_th: data.address_th || '',
+      contact_name: data.contact_name || '',
+      email: data.email || '',
+      image_url: data.image_url || '',
+      name_en: data.name_en || '',
+      name_th: data.name_th || '',
+      phone: data.phone || '',
+      tax_id: data.tax_id || '',
+      type: data.type || 'company'
+    }
+
+    try {
+      const res = await apiFetch('/api/v1/vendors', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.message || `Failed to create vendor: ${res.status}`)
+      }
+
+      // Reset page to 1 on new addition and reload
+      currentPage.value = 1
+      await fetchVendors()
+    } catch (err: any) {
+      console.error('Error adding vendor:', err)
+      errorMsg.value = err.message || 'Failed to create vendor'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Update Vendor (PUT to /api/v1/vendors/:id)
+  const updateVendor = async (id: string, data: Partial<VendorFormData>) => {
+    isLoading.value = true
+    errorMsg.value = null
+
+    try {
+      const res = await apiFetch(`/api/v1/vendors/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.message || `Failed to update vendor: ${res.status}`)
+      }
+
+      await fetchVendors()
+    } catch (err: any) {
+      console.error('Error updating vendor:', err)
+      errorMsg.value = err.message || 'Failed to update vendor'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Delete Vendor (DELETE to /api/v1/vendors/:id)
+  const deleteVendor = async (id: string) => {
+    isLoading.value = true
+    errorMsg.value = null
+
+    try {
+      const res = await apiFetch(`/api/v1/vendors/${id}`, {
+        method: 'DELETE'
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.message || `Failed to delete vendor: ${res.status}`)
+      }
+
+      // Adjust page if we deleted the last item on the page
+      if (vendors.value.length === 1 && currentPage.value > 1) {
+        currentPage.value--
+      } else {
+        await fetchVendors()
+      }
+    } catch (err: any) {
+      console.error('Error deleting vendor:', err)
+      errorMsg.value = err.message || 'Failed to delete vendor'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
 
   const validateTaxId = (taxId: string): boolean => {
-    // Basic tax ID format checker (minimum 8 chars)
     return !!taxId && taxId.length >= 8
   }
 
-  const addVendor = (data: VendorFormData) => {
-    const newId = `vnd-${Date.now()}`
-    const newVendor: Vendor = {
-      id: newId,
-      code: `VND-${activeTenant.value.code.split('-')[1] || 'TH'}-${Math.floor(100 + Math.random() * 900)}`,
-      name: data.name,
-      taxId: data.taxId,
-      regId: data.regId,
-      phone: data.phone,
-      category: data.category,
-      tenantId: activeTenant.value.id,
-      createdAt: new Date().toISOString().split('T')[0]
-    }
-    vendors.value = [newVendor, ...vendors.value]
-    return newVendor
-  }
+  // Watch filters, search, and page changes to automatically load from server (client-only)
+  if (import.meta.client) {
+    watch(debouncedSearchQuery, () => {
+      currentPage.value = 1 // Reset page to 1
+      fetchVendors()
+    })
 
-  const updateVendor = (id: string, data: Partial<VendorFormData>) => {
-    const idx = vendors.value.findIndex(v => v.id === id)
-    if (idx !== -1) {
-      vendors.value[idx] = {
-        ...vendors.value[idx],
-        ...data
+    watch(currentPage, () => {
+      fetchVendors()
+    })
+
+    watch(() => session.value?.token, (newToken) => {
+      if (newToken) {
+        currentPage.value = 1
+        fetchVendors()
+      } else {
+        vendors.value = []
+        totalFilteredCount.value = 0
       }
-    }
-  }
-
-  const deleteVendor = (id: string) => {
-    vendors.value = vendors.value.filter(v => v.id !== id)
+    })
   }
 
   return {
@@ -129,13 +219,15 @@ export const useVendorEngine = () => {
     selectedCategory,
     currentPage,
     pageSize,
-    tenantVendors,
-    filteredVendors,
-    paginatedVendors,
+    isLoading,
+    errorMsg,
+    fetchVendors,
+    fetchVendorById,
+    paginatedVendors: vendors,
     totalFilteredCount,
-    validateTaxId,
     addVendor,
     updateVendor,
-    deleteVendor
+    deleteVendor,
+    validateTaxId
   }
 }

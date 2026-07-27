@@ -6,68 +6,93 @@
         :columns="columns"
         :empty-state="{ icon: 'i-heroicons-building-storefront', label: $t('common.no_data') }"
       >
-        <!-- Name Column -->
-        <template #name-cell="{ row }">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">
-              {{ row.original.name.charAt(0) }}
-            </div>
-            <div>
-              <div class="font-bold text-slate-900 dark:text-white text-sm">
-                {{ row.original.name }}
-              </div>
-              <div class="text-[11px] font-mono text-slate-400">
-                {{ row.original.code }} • {{ row.original.phone }}
-              </div>
-            </div>
+        <!-- Code Column -->
+        <template #code-cell="{ row }">
+          <span class="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
+            {{ row.original.code || '-' }}
+          </span>
+        </template>
+
+        <!-- Name EN Column -->
+        <template #name_en-cell="{ row }">
+          <div class="flex items-center gap-2">
+            <UAvatar
+              v-if="row.original.image_url"
+              :src="row.original.image_url"
+              :alt="row.original.name_en"
+              size="xs"
+              class="shrink-0"
+            />
+            <span class="text-sm font-semibold text-slate-900 dark:text-white">
+              {{ row.original.name_en || '-' }}
+            </span>
           </div>
         </template>
 
-        <!-- Tax ID Column -->
-        <template #taxId-cell="{ row }">
-          <span class="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
-            {{ row.original.taxId }}
+        <!-- Name TH Column -->
+        <template #name_th-cell="{ row }">
+          <span class="text-sm text-slate-700 dark:text-slate-300">
+            {{ row.original.name_th || '-' }}
           </span>
         </template>
 
-        <!-- Reg ID Column -->
-        <template #regId-cell="{ row }">
-          <span class="font-mono text-xs text-slate-500">
-            {{ row.original.regId }}
+        <!-- Contact Name Column -->
+        <template #contact_name-cell="{ row }">
+          <span class="text-xs font-semibold text-slate-800 dark:text-slate-200">
+            {{ row.original.contact_name || '-' }}
           </span>
         </template>
 
-        <!-- Category Column -->
-        <template #category-cell="{ row }">
+        <!-- Phone Column -->
+        <template #phone-cell="{ row }">
+          <span class="text-xs font-mono text-slate-600 dark:text-slate-300">
+            {{ row.original.phone || '-' }}
+          </span>
+        </template>
+
+        <!-- Email Column -->
+        <template #email-cell="{ row }">
+          <span class="text-slate-600 dark:text-slate-300 text-xs font-medium">
+            {{ row.original.email || '-' }}
+          </span>
+        </template>
+
+        <!-- Type Column -->
+        <template #type-cell="{ row }">
           <UBadge
-            :color="
-              row.original.category === 'raw_materials' ? 'amber' :
-              row.original.category === 'it_hardware' ? 'indigo' :
-              row.original.category === 'logistics' ? 'emerald' : 'sky'
-            "
+            :color="row.original.type === 'company' ? 'indigo' : 'sky'"
             variant="subtle"
             size="xs"
-            class="capitalize font-semibold"
+            class="uppercase text-[10px] font-extrabold px-2 py-0.5"
           >
-            {{ $t(`vendors.cat_${row.original.category}`) }}
+            {{ row.original.type || 'company' }}
           </UBadge>
+        </template>
+
+        <!-- Created Date Column -->
+        <template #created_at-cell="{ row }">
+          <span class="text-slate-500 dark:text-slate-400 text-xs">
+            {{ formatDateTime(row.original.created_at) }}
+          </span>
         </template>
 
         <!-- Actions Column -->
         <template #actions-cell="{ row }">
           <div class="flex items-center justify-end gap-2">
+            <!-- Edit Button -->
             <UButton
-              color="gray"
+              color="secondary"
               variant="ghost"
               icon="i-heroicons-pencil-square"
-              size="xs"
+              size="md"
               @click="$emit('edit', row.original)"
             />
+            <!-- Delete Button -->
             <UButton
-              color="rose"
+              color="error"
               variant="ghost"
               icon="i-heroicons-trash"
-              size="xs"
+              size="md"
               @click="$emit('delete', row.original)"
             />
           </div>
@@ -75,10 +100,13 @@
       </UTable>
     </UCard>
 
-    <!-- Pagination & Stats -->
+    <!-- Pagination & Stats Bar -->
     <div v-if="total > 0" class="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-1">
       <div class="text-xs text-slate-500 dark:text-slate-400">
-        {{ $t('common.showing_results', { from: ((page - 1) * pageSize) + 1, to: Math.min(page * pageSize, total), total }) }}
+        {{ $t('common.showing_results', {
+          from: ((page - 1) * pageSize) + 1, to: Math.min(page * pageSize, total), total
+        })
+        }}
       </div>
 
       <UPagination
@@ -112,11 +140,30 @@ defineEmits<{
   (e: 'delete', vendor: Vendor): void
 }>()
 
+const formatDateTime = (dateStr?: string) => {
+  if (!dateStr) return '-'
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return '-'
+    const day = String(date.getDate()).padStart(2, '0')
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const month = months[date.getMonth()]
+    const year = date.getFullYear()
+    return `${day}-${month}-${year}`
+  } catch (e) {
+    return '-'
+  }
+}
+
 const columns = computed(() => [
-  { accessorKey: 'name', header: t('vendors.col_name') },
-  { accessorKey: 'taxId', header: t('vendors.col_tax_id') },
-  { accessorKey: 'regId', header: t('vendors.col_reg_id') },
-  { accessorKey: 'category', header: t('vendors.col_category') },
-  { accessorKey: 'actions', header: t('vendors.col_actions'), class: 'text-right' }
+  { accessorKey: 'code', header: t('vendors.col_code') || 'Code' },
+  { accessorKey: 'name_en', header: t('vendors.col_name_en') || 'Name (EN)' },
+  { accessorKey: 'name_th', header: t('vendors.col_name_th') || 'Name (TH)' },
+  { accessorKey: 'contact_name', header: t('vendors.col_contact_name') || 'Contact Person' },
+  { accessorKey: 'phone', header: t('vendors.col_phone') || 'Phone' },
+  { accessorKey: 'email', header: t('vendors.col_email') || 'Email' },
+  { accessorKey: 'type', header: t('vendors.col_type') || 'Type' },
+  { accessorKey: 'created_at', header: t('vendors.col_created_at') || 'Created Date' },
+  { accessorKey: 'actions', header: t('vendors.col_actions') || 'Actions', class: 'text-right' }
 ])
 </script>
