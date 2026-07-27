@@ -1,46 +1,46 @@
 <template>
   <UCard class="glass-panel h-full flex flex-col">
     <template #header>
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between gap-2">
         <div>
-          <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <UIcon name="i-heroicons-trophy" class="w-6 h-6 text-amber-500" />
+          <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <UIcon name="i-heroicons-trophy" class="w-5.5 h-5.5 text-amber-500" />
             {{ $t('dashboard.top_sales_packages') }}
           </h2>
-          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             {{ $t('dashboard.top_packages_subtitle') }}
           </p>
         </div>
-        <UBadge color="amber" variant="subtle" size="sm" class="font-bold px-2.5 py-1">
+        <UBadge color="amber" variant="subtle" size="md" class="font-extrabold text-sm sm:text-base px-3 py-1.5 rounded-xl uppercase tracking-wider shrink-0">
           {{ $t('dashboard.top_sales_badge') }}
         </UBadge>
       </div>
     </template>
 
-    <div v-if="!packages || packages.length === 0" class="py-8 text-center text-slate-400 text-base font-semibold">
+    <div v-if="!packages || packages.length === 0" class="py-8 text-center text-slate-400 text-sm font-semibold">
       {{ $t('dashboard.no_packages_sold') }}
     </div>
 
-    <div v-else class="space-y-4 my-auto">
+    <div v-else class="space-y-3.5 my-auto">
       <div
         v-for="(item, idx) in packages"
         :key="item.package_id"
-        class="p-4 rounded-xl border border-slate-200/60 dark:border-slate-800/80 bg-white/40 dark:bg-slate-900/40 hover:bg-indigo-50/30 dark:hover:bg-slate-800/40 transition-colors"
+        class="p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-800/80 bg-white/40 dark:bg-slate-900/40 hover:bg-indigo-50/30 dark:hover:bg-slate-800/40 transition-colors"
       >
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-3 min-w-0">
+        <div class="flex items-center justify-between mb-1.5">
+          <div class="flex items-center gap-2.5 min-w-0">
             <span
-              class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black shrink-0"
+              class="w-6.5 h-6.5 rounded-lg flex items-center justify-center text-xs font-black shrink-0"
               :class="rankBadgeClass(idx)"
             >
               #{{ idx + 1 }}
             </span>
-            <span class="font-bold text-base sm:text-lg text-slate-900 dark:text-white truncate">
+            <span class="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">
               {{ item.package_name }}
             </span>
           </div>
 
-          <span class="text-sm font-bold text-slate-600 dark:text-slate-300 shrink-0 ml-2">
+          <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 shrink-0 ml-2">
             {{ item.quantity_sold }} {{ $t('dashboard.sold') }}
           </span>
         </div>
@@ -54,9 +54,9 @@
           ></div>
         </div>
 
-        <div class="flex justify-between items-center mt-2.5 text-sm font-semibold">
+        <div class="flex justify-between items-center mt-2 text-xs sm:text-sm font-semibold">
           <span class="text-slate-500 dark:text-slate-400">{{ $t('dashboard.revenue_label') }}</span>
-          <span class="font-extrabold text-base text-slate-900 dark:text-white">
+          <span class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
             {{ formatCurrency(item.total_revenue) }}
           </span>
         </div>

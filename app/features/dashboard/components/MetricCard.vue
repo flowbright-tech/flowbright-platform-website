@@ -1,34 +1,34 @@
 <template>
-  <UCard class="glass-panel hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition-all duration-200 group relative overflow-hidden p-1">
+  <UCard class="glass-panel hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition-all duration-200 group relative overflow-hidden">
     <div class="absolute -right-6 -top-6 w-28 h-28 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/15 transition-all"></div>
 
     <div class="flex items-center justify-between">
-      <span class="text-sm font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+      <span class="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
         {{ $t(`dashboard.${metric.key}`) }}
       </span>
       <div 
-        class="w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shrink-0"
+        class="w-11 h-11 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shrink-0"
         :class="iconBgClass"
       >
-        <UIcon :name="metric.icon" class="w-6 h-6" />
+        <UIcon :name="metric.icon" class="w-5.5 h-5.5" />
       </div>
     </div>
 
-    <div class="mt-4">
-      <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+    <div class="mt-3">
+      <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
         {{ metric.value }}
       </div>
 
-      <div v-if="metric.subTextKey" class="mt-2 flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400">
+      <div v-if="metric.subTextKey" class="mt-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
         <span>{{ $t(`dashboard.${metric.subTextKey}`) }}</span>
-        <span class="font-extrabold text-slate-800 dark:text-slate-200">{{ metric.subTextVal }}</span>
+        <span class="font-bold text-slate-800 dark:text-slate-200">{{ metric.subTextVal }}</span>
       </div>
 
-      <div v-else-if="metric.subText" class="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+      <div v-else-if="metric.subText" class="mt-1.5 text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
         {{ metric.subText }}
       </div>
 
-      <div v-else-if="metric.change" class="mt-2 flex items-center gap-2">
+      <div v-else-if="metric.change" class="mt-1.5 flex items-center gap-2">
         <UBadge
           :color="metric.isPositive ? 'emerald' : 'rose'"
           variant="subtle"
