@@ -38,11 +38,11 @@
       <div class="grid grid-cols-3 gap-3 p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
         <div class="text-center">
           <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">{{ $t('dashboard.total_income_header') }}</p>
-          <p class="text-base sm:text-xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">{{ formatVal(totalIncome) }}</p>
+          <p class="text-base sm:text-xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">{{ formatFullVal(totalIncome) }}</p>
         </div>
         <div class="text-center border-x border-slate-200/60 dark:border-slate-800/60">
           <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">{{ $t('dashboard.total_profit_header') }}</p>
-          <p class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">{{ formatVal(totalProfit) }}</p>
+          <p class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">{{ formatFullVal(totalProfit) }}</p>
         </div>
         <div class="text-center">
           <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">{{ $t('dashboard.orders_executed_header') }}</p>
@@ -50,11 +50,11 @@
         </div>
       </div>
 
-      <!-- Responsive SVG Bar Chart with Left Y-Axis Values & Floating Numerical Values -->
-      <div class="relative w-full h-80 pt-2">
+      <!-- Responsive SVG Bar Chart with Vertical Y-Axis Title & Clean Full Numbers -->
+      <div class="relative w-full h-84 pt-2">
         <svg
           class="w-full h-full overflow-visible"
-          viewBox="0 0 760 260"
+          viewBox="0 0 800 270"
           preserveAspectRatio="none"
           @mouseleave="hoveredIdx = null"
         >
@@ -69,51 +69,53 @@
             </linearGradient>
           </defs>
 
-          <!-- Y-Axis Title -->
+          <!-- Beautified Vertical Y-Axis Title -->
           <text
-            x="12"
-            y="12"
-            class="fill-slate-400 dark:fill-slate-500 font-sans text-[11px] font-bold uppercase tracking-wider"
+            x="-115"
+            y="22"
+            transform="rotate(-90)"
+            text-anchor="middle"
+            class="fill-slate-400 dark:fill-slate-500 font-sans text-[11px] font-extrabold uppercase tracking-widest"
           >
             {{ $t('dashboard.revenue_in_thb') }}
           </text>
 
-          <!-- Y-Axis Numerical Gridlines & Labels -->
+          <!-- Y-Axis Full Numerical Gridlines & Labels -->
           <g v-for="(tick, tIdx) in yTicks" :key="tIdx">
             <line
-              x1="70"
+              x1="95"
               :y1="tick.y"
-              x2="760"
+              x2="780"
               :y2="tick.y"
               class="stroke-slate-200/80 dark:stroke-slate-800/80"
               stroke-dasharray="4 4"
               stroke-width="1"
             />
             <text
-              x="62"
+              x="88"
               :y="tick.y + 4"
               text-anchor="end"
-              class="fill-slate-400 dark:fill-slate-500 font-sans text-[11px] font-semibold"
+              class="fill-slate-500 dark:fill-slate-400 font-mono text-[11px] font-semibold"
             >
               {{ tick.label }}
             </text>
           </g>
 
           <!-- Baseline Axis Line -->
-          <line x1="70" y1="200" x2="760" y2="200" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
+          <line x1="95" y1="210" x2="780" y2="210" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
 
           <!-- Forecast Baseline Target Line -->
           <line
-            x1="70"
+            x1="95"
             :y1="forecastLineY"
-            x2="760"
+            x2="780"
             :y2="forecastLineY"
             class="stroke-amber-400 dark:stroke-amber-500"
             stroke-width="2.5"
             stroke-dasharray="6 4"
           />
 
-          <!-- Grouped Bars, Numerical Labels, and Hover Overlay -->
+          <!-- Grouped Bars, Floating Full Numbers, and Hover Overlay -->
           <g
             v-for="(group, idx) in barGroups"
             :key="idx"
@@ -123,9 +125,9 @@
             <rect
               v-if="hoveredIdx === idx"
               :x="group.groupCenterX - group.groupWidth / 2"
-              y="20"
+              y="25"
               :width="group.groupWidth"
-              height="180"
+              height="185"
               class="fill-indigo-500/5 dark:fill-indigo-400/10 rx-md"
             />
 
@@ -140,15 +142,15 @@
               class="transition-all hover:opacity-90 cursor-pointer"
             />
 
-            <!-- Floating Numerical Value above Income Bar -->
+            <!-- Floating Full Numerical Value above Income Bar -->
             <text
               v-if="group.item.net_revenue > 0"
               :x="group.xIncome + group.barWidth / 2"
-              :y="group.yIncome - 6"
+              :y="group.yIncome - 7"
               text-anchor="middle"
-              class="fill-indigo-600 dark:fill-indigo-400 font-sans text-[11px] font-black"
+              class="fill-indigo-600 dark:fill-indigo-400 font-mono text-[11px] font-extrabold"
             >
-              {{ formatValCompact(group.item.net_revenue) }}
+              {{ formatVal(group.item.net_revenue) }}
             </text>
 
             <!-- Profit Bar -->
@@ -162,21 +164,21 @@
               class="transition-all hover:opacity-90 cursor-pointer"
             />
 
-            <!-- Floating Numerical Value above Profit Bar -->
+            <!-- Floating Full Numerical Value above Profit Bar -->
             <text
               v-if="group.item.total_profit > 0"
               :x="group.xProfit + group.barWidth / 2"
-              :y="group.yProfit - 6"
+              :y="group.yProfit - 7"
               text-anchor="middle"
-              class="fill-emerald-600 dark:fill-emerald-400 font-sans text-[11px] font-black"
+              class="fill-emerald-600 dark:fill-emerald-400 font-mono text-[11px] font-extrabold"
             >
-              {{ formatValCompact(group.item.total_profit) }}
+              {{ formatVal(group.item.total_profit) }}
             </text>
 
             <!-- Aligned Beautified X-Axis Date Text -->
             <text
               :x="group.groupCenterX"
-              y="226"
+              y="238"
               text-anchor="middle"
               class="fill-slate-700 dark:fill-slate-200 font-sans text-[12px] font-extrabold tracking-wide"
             >
@@ -200,17 +202,17 @@
               <span class="w-2.5 h-2.5 rounded bg-indigo-500"></span>
               {{ $t('dashboard.daily_income_legend') }}:
             </span>
-            <span class="font-extrabold text-indigo-600 dark:text-indigo-400">{{ formatVal(hoveredGroup.item.net_revenue) }}</span>
+            <span class="font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">{{ formatFullVal(hoveredGroup.item.net_revenue) }}</span>
           </div>
           <div class="flex items-center justify-between gap-4 font-semibold">
             <span class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
               <span class="w-2.5 h-2.5 rounded bg-emerald-500"></span>
               {{ $t('dashboard.daily_profit_legend') }}:
             </span>
-            <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ formatVal(hoveredGroup.item.total_profit) }}</span>
+            <span class="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">{{ formatFullVal(hoveredGroup.item.total_profit) }}</span>
           </div>
-          <div class="flex items-center justify-between gap-4 text-[11px] text-slate-500 dark:text-slate-400">
-            <span>Cost: {{ formatVal(hoveredGroup.item.total_cost) }}</span>
+          <div class="flex items-center justify-between gap-4 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+            <span>Cost: {{ formatFullVal(hoveredGroup.item.total_cost) }}</span>
             <span>Margin: {{ calculateMargin(hoveredGroup.item) }}%</span>
           </div>
         </div>
@@ -242,42 +244,46 @@ const totalOrders = computed(() => {
   return (props.byDate || []).reduce((acc, i) => acc + i.total_orders, 0)
 })
 
-const maxVal = computed(() => {
+// Calculate clean rounded maximum Y value (e.g. 30,000.00 or 25,000.00)
+const roundedMaxVal = computed(() => {
   if (!props.byDate || props.byDate.length === 0) return 30000
   const maxInDate = Math.max(...props.byDate.map(d => Math.max(d.net_revenue, d.total_profit)))
-  return maxInDate > 0 ? maxInDate * 1.25 : 30000
+  if (maxInDate <= 0) return 30000
+  const target = maxInDate * 1.15
+  const magnitude = Math.pow(10, Math.floor(Math.log10(target)))
+  return Math.ceil(target / (magnitude / 2)) * (magnitude / 2)
 })
 
 const yTicks = computed(() => {
-  const count = 4
-  const max = maxVal.value
+  const count = 5
+  const max = roundedMaxVal.value
   const ticks = []
   for (let i = 0; i <= count; i++) {
     const val = (max / count) * i
-    const y = 200 - (val / max) * 180
+    const y = 210 - (val / max) * 180
     ticks.push({
       val,
       y,
-      label: formatValCompact(val)
+      label: formatFullVal(val)
     })
   }
-  return ticks
+  return ticks.reverse()
 })
 
 const forecastTargetValue = computed(() => {
-  if (!props.forecastTrend || props.forecastTrend.length === 0) return maxVal.value * 0.4
+  if (!props.forecastTrend || props.forecastTrend.length === 0) return roundedMaxVal.value * 0.4
   const latestForecast = props.forecastTrend.find(f => f.forecast_revenue > 0)
-  return latestForecast ? latestForecast.forecast_revenue / 30 : maxVal.value * 0.4
+  return latestForecast ? latestForecast.forecast_revenue / 30 : roundedMaxVal.value * 0.4
 })
 
 const forecastLineY = computed(() => {
-  return 200 - (forecastTargetValue.value / maxVal.value) * 180
+  return 210 - (forecastTargetValue.value / roundedMaxVal.value) * 180
 })
 
 const barGroups = computed(() => {
   if (!props.byDate || props.byDate.length === 0) return []
-  const startX = 70
-  const chartWidth = 690
+  const startX = 95
+  const chartWidth = 685
   const count = props.byDate.length
   const groupWidth = chartWidth / count
   const barWidth = Math.min(groupWidth * 0.32, 34)
@@ -287,11 +293,11 @@ const barGroups = computed(() => {
     const xIncome = groupCenterX - barWidth - 3
     const xProfit = groupCenterX + 3
 
-    const hIncome = Math.max((item.net_revenue / maxVal.value) * 180, 4)
-    const yIncome = 200 - hIncome
+    const hIncome = Math.max((item.net_revenue / roundedMaxVal.value) * 180, 4)
+    const yIncome = 210 - hIncome
 
-    const hProfit = Math.max((item.total_profit / maxVal.value) * 180, 4)
-    const yProfit = 200 - hProfit
+    const hProfit = Math.max((item.total_profit / roundedMaxVal.value) * 180, 4)
+    const yProfit = 210 - hProfit
 
     return {
       date: item.date,
@@ -316,10 +322,10 @@ const hoveredGroup = computed(() => {
 
 const tooltipStyle = computed(() => {
   if (!hoveredGroup.value) return {}
-  const leftPct = (hoveredGroup.value.groupCenterX / 760) * 100
+  const leftPct = (hoveredGroup.value.groupCenterX / 800) * 100
   return {
-    left: `${Math.min(Math.max(leftPct, 15), 75)}%`,
-    top: '25px',
+    left: `${Math.min(Math.max(leftPct, 18), 75)}%`,
+    top: '30px',
     transform: 'translateX(-50%)'
   }
 })
@@ -342,12 +348,10 @@ const formatDateLabel = (dateStr: string) => {
 }
 
 const formatVal = (val: number) => {
-  return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(val || 0)
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val || 0)
 }
 
-const formatValCompact = (val: number) => {
-  if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`
-  if (val >= 1000) return `${(val / 1000).toFixed(1)}k`
-  return `${Math.round(val)}`
+const formatFullVal = (val: number) => {
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val || 0)
 }
 </script>

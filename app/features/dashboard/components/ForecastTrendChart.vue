@@ -28,11 +28,11 @@
       {{ $t('dashboard.no_data') }}
     </div>
 
-    <!-- Theme-Reactive SVG Multi-Series Line Chart with Y-Axis Values, Floating Numbers & Mouse Hover -->
-    <div v-else class="relative w-full h-80 pt-3">
+    <!-- Theme-Reactive SVG Multi-Series Line Chart with Full Y-Axis Numbers & Vertical Title -->
+    <div v-else class="relative w-full h-84 pt-3">
       <svg
         class="w-full h-full overflow-visible"
-        viewBox="0 0 760 260"
+        viewBox="0 0 800 270"
         preserveAspectRatio="none"
         @mouseleave="hoveredIdx = null"
       >
@@ -43,38 +43,40 @@
           </linearGradient>
         </defs>
 
-        <!-- Y-Axis Title -->
+        <!-- Beautified Vertical Y-Axis Title -->
         <text
-          x="12"
-          y="12"
-          class="fill-slate-400 dark:fill-slate-500 font-sans text-[11px] font-bold uppercase tracking-wider"
+          x="-115"
+          y="22"
+          transform="rotate(-90)"
+          text-anchor="middle"
+          class="fill-slate-400 dark:fill-slate-500 font-sans text-[11px] font-extrabold uppercase tracking-widest"
         >
           {{ $t('dashboard.revenue_in_thb') }}
         </text>
 
-        <!-- Y-Axis Numerical Gridlines & Labels -->
+        <!-- Y-Axis Full Numerical Gridlines & Labels -->
         <g v-for="(tick, tIdx) in yTicks" :key="tIdx">
           <line
-            x1="70"
+            x1="95"
             :y1="tick.y"
-            x2="760"
+            x2="780"
             :y2="tick.y"
             class="stroke-slate-200/80 dark:stroke-slate-800/80"
             stroke-dasharray="4 4"
             stroke-width="1"
           />
           <text
-            x="62"
+            x="88"
             :y="tick.y + 4"
             text-anchor="end"
-            class="fill-slate-400 dark:fill-slate-500 font-sans text-[11px] font-semibold"
+            class="fill-slate-500 dark:fill-slate-400 font-mono text-[11px] font-semibold"
           >
             {{ tick.label }}
           </text>
         </g>
 
         <!-- Baseline Axis Line -->
-        <line x1="70" y1="200" x2="760" y2="200" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
+        <line x1="95" y1="210" x2="780" y2="210" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
 
         <!-- Forecast Line (Dashed) -->
         <polyline
@@ -105,9 +107,9 @@
         <g v-if="hoveredNode">
           <line
             :x1="hoveredNode.x"
-            y1="20"
+            y1="25"
             :x2="hoveredNode.x"
-            y2="200"
+            y2="210"
             class="stroke-indigo-400 dark:stroke-indigo-500"
             stroke-dasharray="3 3"
             stroke-width="1.5"
@@ -119,9 +121,9 @@
           <!-- Hit Target Area -->
           <rect
             :x="node.x - 20"
-            y="20"
+            y="25"
             width="40"
-            height="180"
+            height="185"
             fill="transparent"
             class="cursor-pointer"
           />
@@ -138,11 +140,11 @@
           <text
             v-if="node.item.forecast_revenue > 0"
             :x="node.x"
-            :y="node.yForecast - 8"
+            :y="node.yForecast - 9"
             text-anchor="middle"
-            class="fill-indigo-600 dark:fill-indigo-400 font-sans text-[11px] font-bold"
+            class="fill-indigo-600 dark:fill-indigo-400 font-mono text-[11px] font-bold"
           >
-            {{ formatValCompact(node.item.forecast_revenue) }}
+            {{ formatVal(node.item.forecast_revenue) }}
           </text>
 
           <!-- Actual Node -->
@@ -158,17 +160,17 @@
           <text
             v-if="node.item.actual_revenue > 0"
             :x="node.x"
-            :y="node.yActual - 10"
+            :y="node.yActual - 11"
             text-anchor="middle"
-            class="fill-emerald-600 dark:fill-emerald-400 font-sans text-[11px] font-black"
+            class="fill-emerald-600 dark:fill-emerald-400 font-mono text-[11px] font-extrabold"
           >
-            {{ formatValCompact(node.item.actual_revenue) }}
+            {{ formatVal(node.item.actual_revenue) }}
           </text>
 
           <!-- Beautified Native X-Axis Label -->
           <text
             :x="node.x"
-            y="226"
+            y="238"
             text-anchor="middle"
             class="fill-slate-700 dark:fill-slate-200 font-sans text-[12px] font-extrabold tracking-wide"
           >
@@ -194,14 +196,14 @@
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
             {{ $t('dashboard.actual_revenue_legend') }}:
           </span>
-          <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ formatVal(hoveredNode.item.actual_revenue) }}</span>
+          <span class="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">{{ formatFullVal(hoveredNode.item.actual_revenue) }}</span>
         </div>
         <div class="flex items-center justify-between gap-4 font-semibold">
           <span class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
             <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
             {{ $t('dashboard.forecast_revenue_legend') }}:
           </span>
-          <span class="font-extrabold text-indigo-600 dark:text-indigo-400">{{ formatVal(hoveredNode.item.forecast_revenue) }}</span>
+          <span class="font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">{{ formatFullVal(hoveredNode.item.forecast_revenue) }}</span>
         </div>
       </div>
     </div>
@@ -218,41 +220,45 @@ const props = defineProps<{
 
 const hoveredIdx = ref<number | null>(null)
 
-const maxVal = computed(() => {
+// Calculate clean rounded maximum Y value (e.g. 30,000.00 or 25,000.00)
+const roundedMaxVal = computed(() => {
   if (!props.items || props.items.length === 0) return 30000
   const max = Math.max(
     ...props.items.map(i => Math.max(i.actual_revenue, i.forecast_revenue))
   )
-  return max > 0 ? max * 1.2 : 30000
+  if (max <= 0) return 30000
+  const target = max * 1.15
+  const magnitude = Math.pow(10, Math.floor(Math.log10(target)))
+  return Math.ceil(target / (magnitude / 2)) * (magnitude / 2)
 })
 
 const yTicks = computed(() => {
-  const count = 4
-  const max = maxVal.value
+  const count = 5
+  const max = roundedMaxVal.value
   const ticks = []
   for (let i = 0; i <= count; i++) {
     const val = (max / count) * i
-    const y = 200 - (val / max) * 180
+    const y = 210 - (val / max) * 185
     ticks.push({
       val,
       y,
-      label: formatValCompact(val)
+      label: formatFullVal(val)
     })
   }
-  return ticks
+  return ticks.reverse()
 })
 
 const chartNodes = computed(() => {
   if (!props.items || props.items.length === 0) return []
-  const startX = 80
+  const startX = 105
   const chartWidth = 660
   const count = props.items.length
   const step = chartWidth / Math.max(count - 1, 1)
 
   return props.items.map((item, i) => {
     const x = startX + i * step
-    const yActual = 200 - (item.actual_revenue / maxVal.value) * 180
-    const yForecast = 200 - (item.forecast_revenue / maxVal.value) * 180
+    const yActual = 210 - (item.actual_revenue / roundedMaxVal.value) * 185
+    const yForecast = 210 - (item.forecast_revenue / roundedMaxVal.value) * 185
     return {
       x,
       yActual,
@@ -276,7 +282,7 @@ const actualAreaPoints = computed(() => {
   const firstX = chartNodes.value[0].x
   const lastX = chartNodes.value[chartNodes.value.length - 1].x
   const pts = chartNodes.value.map(n => `${n.x},${n.yActual}`).join(' ')
-  return `${firstX},200 ${pts} ${lastX},200`
+  return `${firstX},210 ${pts} ${lastX},210`
 })
 
 const hoveredNode = computed(() => {
@@ -286,10 +292,10 @@ const hoveredNode = computed(() => {
 
 const tooltipStyle = computed(() => {
   if (!hoveredNode.value) return {}
-  const leftPct = (hoveredNode.value.x / 760) * 100
+  const leftPct = (hoveredNode.value.x / 800) * 100
   return {
-    left: `${Math.min(Math.max(leftPct, 15), 75)}%`,
-    top: '25px',
+    left: `${Math.min(Math.max(leftPct, 18), 75)}%`,
+    top: '30px',
     transform: 'translateX(-50%)'
   }
 })
@@ -308,12 +314,10 @@ const formatPeriodLabel = (periodStr: string) => {
 }
 
 const formatVal = (val: number) => {
-  return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 2 }).format(val)
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(val)
 }
 
-const formatValCompact = (val: number) => {
-  if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`
-  if (val >= 1000) return `${(val / 1000).toFixed(1)}k`
-  return `${Math.round(val)}`
+const formatFullVal = (val: number) => {
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)
 }
 </script>
