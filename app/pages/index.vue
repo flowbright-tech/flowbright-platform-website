@@ -71,6 +71,14 @@
       />
     </div>
 
+    <!-- Daily Financial Income & Profit Bar Chart -->
+    <div class="grid grid-cols-1 gap-6">
+      <DailyFinancialBarChart
+        :by-date="dailyFinancialRecords"
+        :forecast-trend="dashboardData?.forecast_trend || []"
+      />
+    </div>
+
     <!-- Main Section Grid: Forecast & Revenue Trend vs Top Sales Packages -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2">
@@ -89,24 +97,32 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthEngine } from '../features/auth/composables/useAuthEngine'
 import { useDashboardEngine } from '../features/dashboard/composables/useDashboardEngine'
 import MetricCard from '../features/dashboard/components/MetricCard.vue'
+import DailyFinancialBarChart from '../features/dashboard/components/DailyFinancialBarChart.vue'
 import ForecastTrendChart from '../features/dashboard/components/ForecastTrendChart.vue'
 import TopSalesPackages from '../features/dashboard/components/TopSalesPackages.vue'
 import LowStockAlert from '../features/dashboard/components/LowStockAlert.vue'
 
 const { locale } = useI18n()
 const { user, company, activeTenant } = useAuthEngine()
-const { dashboardData, isLoading, errorMsg, selectedPeriod, metrics, fetchDashboard } = useDashboardEngine()
+const { dashboardData, isLoading, errorMsg, selectedPeriod, metrics, dailyFinancialRecords, fetchDashboard } = useDashboardEngine()
 
 const periodOptions = [
   { value: 'daily', labelKey: 'dashboard.period_daily' },
   { value: 'monthly', labelKey: 'dashboard.period_monthly' },
   { value: 'yearly', labelKey: 'dashboard.period_yearly' }
 ] as const
+
+// Always fetch fresh dashboard data whenever entering the dashboard page
+if (import.meta.client) {
+  onMounted(() => {
+    fetchDashboard()
+  })
+}
 
 const handleImageError = (e: Event) => {
   const target = e.target as HTMLImageElement

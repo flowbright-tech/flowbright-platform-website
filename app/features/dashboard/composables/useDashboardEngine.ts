@@ -1,6 +1,6 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useState } from '#imports'
-import type { DashboardData, DashboardMetric, FinancialPeriodMetrics } from '../types'
+import type { DashboardData, DashboardMetric, FinancialPeriodMetrics, FinancialByDate } from '../types'
 import { useAuthEngine } from '../../auth/composables/useAuthEngine'
 import { useApiFetch } from '../../../composables/useApiFetch'
 
@@ -49,6 +49,11 @@ export const useDashboardEngine = () => {
       return { net_revenue: 0, total_cost: 0, total_profit: 0, total_orders: 0 }
     }
     return dashboardData.value.financial[selectedPeriod.value] || dashboardData.value.financial.monthly
+  })
+
+  // Daily by_date records
+  const dailyFinancialRecords = computed<FinancialByDate[]>(() => {
+    return dashboardData.value?.financial?.by_date || []
   })
 
   // Format THB currency
@@ -105,9 +110,8 @@ export const useDashboardEngine = () => {
   // Client lifecycle fetching & watchers
   if (import.meta.client) {
     onMounted(() => {
-      if (!dashboardData.value) {
-        fetchDashboard()
-      }
+      // Always call /api/v1/dashboard when accessing dashboard page
+      fetchDashboard()
     })
 
     watch(() => session.value?.token, (newToken) => {
@@ -125,6 +129,7 @@ export const useDashboardEngine = () => {
     errorMsg,
     selectedPeriod,
     currentFinancial,
+    dailyFinancialRecords,
     metrics,
     fetchDashboard,
     formatCurrency

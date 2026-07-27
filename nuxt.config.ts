@@ -14,6 +14,15 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt'
   ],
 
+  icon: {
+    clientBundle: {
+      scan: true
+    },
+    serverBundle: {
+      collections: ['heroicons', 'lucide']
+    }
+  },
+
   pwa: {
     manifest: {
       name: 'Flow Bright SRP',
