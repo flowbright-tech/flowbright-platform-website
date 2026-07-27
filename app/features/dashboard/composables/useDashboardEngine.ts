@@ -1,4 +1,4 @@
-import { ref, computed, watch, onMounted } from 'vue'
+import { computed, watch } from 'vue'
 import { useState } from '#imports'
 import type { DashboardData, DashboardMetric, FinancialPeriodMetrics, FinancialByDate } from '../types'
 import { useAuthEngine } from '../../auth/composables/useAuthEngine'
@@ -11,7 +11,6 @@ export const useDashboardEngine = () => {
   const dashboardData = useState<DashboardData | null>('srp_dashboard_data', () => null)
   const isLoading = useState<boolean>('srp_dashboard_loading', () => false)
   const errorMsg = useState<string | null>('srp_dashboard_error', () => null)
-  const selectedPeriod = ref<'daily' | 'monthly' | 'yearly'>('monthly')
 
   const fetchDashboard = async () => {
     const token = session.value?.token
@@ -43,12 +42,12 @@ export const useDashboardEngine = () => {
     }
   }
 
-  // Selected period financial metrics getter
+  // Financial metrics getter (default monthly / overall)
   const currentFinancial = computed<FinancialPeriodMetrics>(() => {
     if (!dashboardData.value?.financial) {
       return { net_revenue: 0, total_cost: 0, total_profit: 0, total_orders: 0 }
     }
-    return dashboardData.value.financial[selectedPeriod.value] || dashboardData.value.financial.monthly
+    return dashboardData.value.financial.monthly || dashboardData.value.financial.yearly || { net_revenue: 0, total_cost: 0, total_profit: 0, total_orders: 0 }
   })
 
   // Daily by_date records
@@ -76,7 +75,8 @@ export const useDashboardEngine = () => {
         id: 'net_revenue',
         key: 'net_revenue',
         value: formatCurrency(fin.net_revenue),
-        subText: `Cost: ${formatCurrency(fin.total_cost)}`,
+        subTextKey: 'cost_prefix',
+        subTextVal: formatCurrency(fin.total_cost),
         icon: 'i-heroicons-banknotes',
         color: 'emerald'
       },
@@ -84,7 +84,8 @@ export const useDashboardEngine = () => {
         id: 'total_profit',
         key: 'total_profit',
         value: formatCurrency(fin.total_profit),
-        subText: `${fin.total_orders} Completed Orders`,
+        subTextVal: `${fin.total_orders}`,
+        subTextKey: 'completed_orders',
         icon: 'i-heroicons-chart-bar',
         color: 'indigo'
       },
@@ -92,7 +93,8 @@ export const useDashboardEngine = () => {
         id: 'orders_summary',
         key: 'orders_summary',
         value: String(ord?.total_orders ?? 0),
-        subText: `${ord?.pending_orders ?? 0} Pending`,
+        subTextVal: `${ord?.pending_orders ?? 0}`,
+        subTextKey: 'pending_label',
         icon: 'i-heroicons-shopping-bag',
         color: 'amber'
       },
@@ -100,20 +102,16 @@ export const useDashboardEngine = () => {
         id: 'customer_total',
         key: 'customer_total',
         value: String(cust?.total ?? 0),
-        subText: `+${cust?.monthly ?? 0} this month`,
+        subTextVal: `+${cust?.monthly ?? 0}`,
+        subTextKey: 'this_month_label',
         icon: 'i-heroicons-user-group',
         color: 'sky'
       }
     ]
   })
 
-  // Client lifecycle fetching & watchers
+  // Watch session token changes only (page mount triggers explicit single fetch)
   if (import.meta.client) {
-    onMounted(() => {
-      // Always call /api/v1/dashboard when accessing dashboard page
-      fetchDashboard()
-    })
-
     watch(() => session.value?.token, (newToken) => {
       if (newToken) {
         fetchDashboard()
@@ -127,7 +125,6 @@ export const useDashboardEngine = () => {
     dashboardData,
     isLoading,
     errorMsg,
-    selectedPeriod,
     currentFinancial,
     dailyFinancialRecords,
     metrics,

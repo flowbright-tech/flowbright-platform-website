@@ -1,52 +1,52 @@
 <template>
   <UCard class="glass-panel">
     <template #header>
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <UIcon name="i-heroicons-chart-bar-square" class="w-5 h-5 text-indigo-500" />
+          <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <UIcon name="i-heroicons-chart-bar-square" class="w-6 h-6 text-indigo-500" />
             {{ $t('dashboard.daily_chart_title') }}
           </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             {{ $t('dashboard.daily_chart_subtitle') }}
           </p>
         </div>
 
-        <div class="flex items-center gap-4 text-xs font-medium">
+        <div class="flex flex-wrap items-center gap-4 text-xs sm:text-sm font-semibold">
           <span class="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-            <span class="w-3 h-3 rounded bg-indigo-500"></span>
-            Daily Income (Net Revenue)
+            <span class="w-3.5 h-3.5 rounded bg-indigo-500"></span>
+            {{ $t('dashboard.daily_income_legend') }}
           </span>
           <span class="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-            <span class="w-3 h-3 rounded bg-emerald-500"></span>
-            Daily Net Profit
+            <span class="w-3.5 h-3.5 rounded bg-emerald-500"></span>
+            {{ $t('dashboard.daily_profit_legend') }}
           </span>
           <span class="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-            <span class="w-3 h-0.5 bg-amber-400 border border-dashed border-amber-500"></span>
-            Forecast Target
+            <span class="w-4 h-0.5 bg-amber-400 border border-dashed border-amber-500"></span>
+            {{ $t('dashboard.forecast_target_legend') }}
           </span>
         </div>
       </div>
     </template>
 
-    <div v-if="!byDate || byDate.length === 0" class="h-64 flex items-center justify-center text-slate-400 text-sm">
+    <div v-if="!byDate || byDate.length === 0" class="h-64 flex items-center justify-center text-slate-400 text-base font-semibold">
       {{ $t('dashboard.no_daily_data') }}
     </div>
 
-    <div v-else class="space-y-4">
+    <div v-else class="space-y-5">
       <!-- Summary metrics header line -->
-      <div class="grid grid-cols-3 gap-2 p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
+      <div class="grid grid-cols-3 gap-3 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
         <div class="text-center">
-          <p class="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-semibold">Total Income</p>
-          <p class="text-sm font-black text-indigo-600 dark:text-indigo-400 mt-0.5">{{ formatVal(totalIncome) }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">{{ $t('dashboard.total_income_header') }}</p>
+          <p class="text-base sm:text-xl font-black text-indigo-600 dark:text-indigo-400 mt-1">{{ formatVal(totalIncome) }}</p>
         </div>
         <div class="text-center border-x border-slate-200/60 dark:border-slate-800/60">
-          <p class="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-semibold">Total Profit</p>
-          <p class="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-0.5">{{ formatVal(totalProfit) }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">{{ $t('dashboard.total_profit_header') }}</p>
+          <p class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{{ formatVal(totalProfit) }}</p>
         </div>
         <div class="text-center">
-          <p class="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-semibold">Orders Executed</p>
-          <p class="text-sm font-black text-slate-900 dark:text-white mt-0.5">{{ totalOrders }} orders</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">{{ $t('dashboard.orders_executed_header') }}</p>
+          <p class="text-base sm:text-xl font-black text-slate-900 dark:text-white mt-1">{{ totalOrders }} {{ $t('dashboard.orders_unit') }}</p>
         </div>
       </div>
 
@@ -79,7 +79,7 @@
             x2="700"
             :y2="forecastLineY"
             class="stroke-amber-400 dark:stroke-amber-500"
-            stroke-width="2"
+            stroke-width="2.5"
             stroke-dasharray="6 4"
           />
 
@@ -91,11 +91,11 @@
               :y="group.yIncome"
               :width="group.barWidth"
               :height="group.hIncome"
-              rx="3"
+              rx="4"
               fill="url(#incomeBarGrad)"
               class="transition-all hover:opacity-80 cursor-pointer"
             >
-              <title>{{ group.date }}: Net Revenue {{ formatVal(group.item.net_revenue) }} (Cost: {{ formatVal(group.item.total_cost) }})</title>
+              <title>{{ group.date }}: Revenue {{ formatVal(group.item.net_revenue) }}</title>
             </rect>
 
             <!-- Profit Bar -->
@@ -104,19 +104,19 @@
               :y="group.yProfit"
               :width="group.barWidth"
               :height="group.hProfit"
-              rx="3"
+              rx="4"
               fill="url(#profitBarGrad)"
               class="transition-all hover:opacity-80 cursor-pointer"
             >
-              <title>{{ group.date }}: Profit {{ formatVal(group.item.total_profit) }} ({{ group.item.total_orders }} orders)</title>
+              <title>{{ group.date }}: Profit {{ formatVal(group.item.total_profit) }}</title>
             </rect>
           </g>
         </svg>
 
         <!-- Date Labels -->
-        <div class="flex justify-around text-xs text-slate-500 dark:text-slate-400 font-medium px-2 mt-3">
+        <div class="flex justify-around text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-bold px-2 mt-3">
           <div v-for="item in byDate" :key="item.date" class="text-center">
-            <span class="font-mono text-[11px] font-bold">{{ formatDateLabel(item.date) }}</span>
+            <span class="font-mono">{{ formatDateLabel(item.date) }}</span>
           </div>
         </div>
       </div>
@@ -166,12 +166,12 @@ const barGroups = computed(() => {
   const chartWidth = 700
   const count = props.byDate.length
   const groupWidth = chartWidth / count
-  const barWidth = Math.min(groupWidth * 0.3, 30)
+  const barWidth = Math.min(groupWidth * 0.32, 34)
 
   return props.byDate.map((item, i) => {
     const groupCenterX = i * groupWidth + groupWidth / 2
-    const xIncome = groupCenterX - barWidth - 2
-    const xProfit = groupCenterX + 2
+    const xIncome = groupCenterX - barWidth - 3
+    const xProfit = groupCenterX + 3
 
     const hIncome = Math.max((item.net_revenue / maxVal.value) * 150, 4)
     const yIncome = 170 - hIncome

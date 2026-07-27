@@ -1,30 +1,30 @@
 <template>
   <UCard class="glass-panel">
     <template #header>
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <UIcon name="i-heroicons-presentation-chart-line" class="w-5 h-5 text-indigo-500" />
+          <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <UIcon name="i-heroicons-presentation-chart-line" class="w-6 h-6 text-indigo-500" />
             {{ $t('dashboard.forecast_trend') }}
           </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             {{ $t('dashboard.forecast_subtitle') }}
           </p>
         </div>
-        <div class="flex items-center gap-4 text-xs font-medium">
+        <div class="flex items-center gap-4 text-xs sm:text-sm font-semibold">
           <span class="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-            <span class="w-3 h-1 rounded-full bg-emerald-500"></span>
-            Actual Revenue
+            <span class="w-3.5 h-1.5 rounded-full bg-emerald-500"></span>
+            {{ $t('dashboard.actual_revenue_legend') }}
           </span>
           <span class="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-            <span class="w-3 h-1 rounded-full bg-indigo-500 border border-dashed border-indigo-400"></span>
-            Forecast Revenue
+            <span class="w-3.5 h-1.5 rounded-full bg-indigo-500 border border-dashed border-indigo-400"></span>
+            {{ $t('dashboard.forecast_revenue_legend') }}
           </span>
         </div>
       </div>
     </template>
 
-    <div v-if="!items || items.length === 0" class="h-64 flex items-center justify-center text-slate-400 text-sm">
+    <div v-if="!items || items.length === 0" class="h-64 flex items-center justify-center text-slate-400 text-base font-semibold">
       {{ $t('dashboard.no_data') }}
     </div>
 
@@ -33,7 +33,7 @@
       <svg class="w-full h-full overflow-visible" viewBox="0 0 700 220" preserveAspectRatio="none">
         <defs>
           <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#10b981" stop-opacity="0.3" />
+            <stop offset="0%" stop-color="#10b981" stop-opacity="0.35" />
             <stop offset="100%" stop-color="#10b981" stop-opacity="0.0" />
           </linearGradient>
         </defs>
@@ -51,7 +51,7 @@
           :points="forecastPoints"
           fill="none"
           class="stroke-indigo-500 dark:stroke-indigo-400"
-          stroke-width="2.5"
+          stroke-width="3"
           stroke-dasharray="6 4"
         />
 
@@ -66,7 +66,7 @@
           :points="actualPoints"
           fill="none"
           class="stroke-emerald-500 dark:stroke-emerald-400"
-          stroke-width="3.5"
+          stroke-width="4"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
@@ -77,10 +77,10 @@
           <circle
             :cx="node.x"
             :cy="node.yForecast"
-            r="4"
-            class="fill-white dark:fill-slate-900 stroke-indigo-500 stroke-2 hover:r-6 transition-all"
+            r="5"
+            class="fill-white dark:fill-slate-900 stroke-indigo-500 stroke-2 hover:r-7 transition-all"
           >
-            <title>{{ node.period }}: Forecast {{ formatVal(node.item.forecast_revenue) }}</title>
+            <title>{{ node.period }}: {{ $t('dashboard.forecast') }} {{ formatVal(node.item.forecast_revenue) }}</title>
           </circle>
 
           <!-- Actual Node -->
@@ -88,16 +88,16 @@
             v-if="node.item.actual_revenue > 0"
             :cx="node.x"
             :cy="node.yActual"
-            r="5"
-            class="fill-white dark:fill-slate-900 stroke-emerald-500 stroke-[3] hover:r-7 transition-all cursor-pointer"
+            r="6"
+            class="fill-white dark:fill-slate-900 stroke-emerald-500 stroke-[3] hover:r-8 transition-all cursor-pointer"
           >
-            <title>{{ node.period }}: Actual {{ formatVal(node.item.actual_revenue) }}</title>
+            <title>{{ node.period }}: {{ $t('dashboard.actual') }} {{ formatVal(node.item.actual_revenue) }}</title>
           </circle>
         </g>
       </svg>
 
       <!-- Period Labels -->
-      <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 font-medium px-2 mt-3">
+      <div class="flex justify-between text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-bold px-2 mt-4">
         <span v-for="item in items" :key="item.period">{{ item.period }}</span>
       </div>
     </div>

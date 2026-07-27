@@ -88,6 +88,8 @@ export interface DashboardMetric {
   id: string
   key: string
   value: string | number
+  subTextKey?: string
+  subTextVal?: string
   subText?: string
   change?: string
   isPositive?: boolean

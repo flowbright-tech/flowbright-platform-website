@@ -48,8 +48,8 @@ describe('Dashboard Analytics Engine', () => {
     expect(formatted).toContain('23,700')
   })
 
-  it('should calculate current financial metrics based on selected period', () => {
-    const { dashboardData, selectedPeriod, currentFinancial } = useDashboardEngine()
+  it('should calculate current financial metrics for dashboard', () => {
+    const { dashboardData, currentFinancial } = useDashboardEngine()
     const mockData: DashboardData = {
       financial: {
         daily: { net_revenue: 100, total_cost: 20, total_profit: 80, total_orders: 1 },
@@ -66,10 +66,6 @@ describe('Dashboard Analytics Engine', () => {
     }
 
     dashboardData.value = mockData
-    selectedPeriod.value = 'daily'
-    expect(currentFinancial.value.net_revenue).toBe(100)
-
-    selectedPeriod.value = 'monthly'
     expect(currentFinancial.value.net_revenue).toBe(23700)
     expect(currentFinancial.value.total_profit).toBe(22900)
   })
