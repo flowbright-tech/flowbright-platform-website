@@ -82,7 +82,10 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Customer } from '../types'
 
+import { useFormatter } from '../../../composables/useFormatter'
+
 const { t } = useI18n()
+const { formatDate, formatDateTime } = useFormatter()
 
 defineProps<{
   customers: Customer[]
@@ -110,38 +113,6 @@ const getNameTh = (customer: Customer) => {
   const first = customer.first_name_th || ''
   const last = customer.last_name_th || ''
   return `${prefix}${first} ${last}`.trim() || '-'
-}
-
-const formatDate = (dateStr?: string) => {
-  if (!dateStr) return '-'
-  try {
-    const date = new Date(dateStr)
-    if (isNaN(date.getTime())) return '-'
-    const day = String(date.getDate()).padStart(2, '0')
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const month = months[date.getMonth()]
-    const year = date.getFullYear()
-    return `${day}-${month}-${year}`
-  } catch (e) {
-    return '-'
-  }
-}
-
-const formatDateTime = (dateStr?: string) => {
-  if (!dateStr) return '-'
-  try {
-    const date = new Date(dateStr)
-    if (isNaN(date.getTime())) return '-'
-    const day = String(date.getDate()).padStart(2, '0')
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const month = months[date.getMonth()]
-    const year = date.getFullYear()
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${day}-${month}-${year} ${hours}:${minutes}`
-  } catch (e) {
-    return '-'
-  }
 }
 
 const columns = computed(() => [

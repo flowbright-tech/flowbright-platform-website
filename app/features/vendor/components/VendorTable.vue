@@ -6,13 +6,6 @@
         :columns="columns"
         :empty-state="{ icon: 'i-heroicons-building-storefront', label: $t('common.no_data') }"
       >
-        <!-- Code Column -->
-        <template #code-cell="{ row }">
-          <span class="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
-            {{ row.original.code || '-' }}
-          </span>
-        </template>
-
         <!-- Name EN Column -->
         <template #name_en-cell="{ row }">
           <div class="flex items-center gap-2">
@@ -69,9 +62,9 @@
           </UBadge>
         </template>
 
-        <!-- Created Date Column -->
+        <!-- Created Date Column formatted as dd-mmm-yy hh:mm -->
         <template #created_at-cell="{ row }">
-          <span class="text-slate-500 dark:text-slate-400 text-xs">
+          <span class="text-slate-500 dark:text-slate-400 text-xs font-mono">
             {{ formatDateTime(row.original.created_at) }}
           </span>
         </template>
@@ -124,8 +117,10 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Vendor } from '../types'
+import { useFormatter } from '../../../composables/useFormatter'
 
 const { t } = useI18n()
+const { formatDateTime } = useFormatter()
 
 defineProps<{
   vendors: Vendor[]
@@ -140,23 +135,7 @@ defineEmits<{
   (e: 'delete', vendor: Vendor): void
 }>()
 
-const formatDateTime = (dateStr?: string) => {
-  if (!dateStr) return '-'
-  try {
-    const date = new Date(dateStr)
-    if (isNaN(date.getTime())) return '-'
-    const day = String(date.getDate()).padStart(2, '0')
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const month = months[date.getMonth()]
-    const year = date.getFullYear()
-    return `${day}-${month}-${year}`
-  } catch (e) {
-    return '-'
-  }
-}
-
 const columns = computed(() => [
-  { accessorKey: 'code', header: t('vendors.col_code') || 'Code' },
   { accessorKey: 'name_en', header: t('vendors.col_name_en') || 'Name (EN)' },
   { accessorKey: 'name_th', header: t('vendors.col_name_th') || 'Name (TH)' },
   { accessorKey: 'contact_name', header: t('vendors.col_contact_name') || 'Contact Person' },
