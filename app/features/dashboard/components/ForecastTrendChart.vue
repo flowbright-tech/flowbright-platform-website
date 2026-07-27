@@ -28,12 +28,12 @@
       {{ $t('dashboard.no_data') }}
     </div>
 
-    <!-- Touch & Scroll-Optimized Responsive Chart Viewport for Mobile -->
+    <!-- Touch & Responsive Chart Viewport with Zero Overlap Y-Axis -->
     <div v-else class="relative w-full overflow-x-auto scrollbar-thin pt-3">
-      <div class="min-w-[540px] sm:min-w-full h-72 sm:h-84">
+      <div class="min-w-[580px] sm:min-w-full h-72 sm:h-84">
         <svg
           class="w-full h-full overflow-visible"
-          viewBox="0 0 760 260"
+          viewBox="0 0 800 260"
           preserveAspectRatio="none"
           @mouseleave="hoveredIdx = null"
         >
@@ -44,40 +44,39 @@
             </linearGradient>
           </defs>
 
-          <!-- Vertical Y-Axis Title -->
+          <!-- Clean Top-Left Y-Axis Header Label -->
           <text
-            x="-110"
-            y="18"
-            transform="rotate(-90)"
-            text-anchor="middle"
-            class="fill-slate-400 dark:fill-slate-500 font-sans text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest"
+            x="88"
+            y="14"
+            text-anchor="end"
+            class="fill-slate-400 dark:fill-slate-500 font-sans text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider"
           >
             {{ $t('dashboard.revenue_in_thb') }}
           </text>
 
-          <!-- Y-Axis Gridlines & Clean Ticks -->
+          <!-- Y-Axis Gridlines & Spaced Numbers -->
           <g v-for="(tick, tIdx) in yTicks" :key="tIdx">
             <line
-              x1="80"
+              x1="100"
               :y1="tick.y"
-              x2="750"
+              x2="780"
               :y2="tick.y"
               class="stroke-slate-200/80 dark:stroke-slate-800/80"
               stroke-dasharray="4 4"
               stroke-width="1"
             />
             <text
-              x="74"
+              x="88"
               :y="tick.y + 4"
               text-anchor="end"
-              class="fill-slate-500 dark:fill-slate-400 font-mono text-[10px] sm:text-[11px] font-semibold"
+              class="fill-slate-500 dark:fill-slate-400 font-mono text-[10px] sm:text-[11px] font-bold"
             >
               {{ tick.label }}
             </text>
           </g>
 
           <!-- Baseline Axis Line -->
-          <line x1="80" y1="205" x2="750" y2="205" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
+          <line x1="100" y1="210" x2="780" y2="210" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
 
           <!-- Forecast Line (Dashed) -->
           <polyline
@@ -108,9 +107,9 @@
           <g v-if="hoveredNode">
             <line
               :x1="hoveredNode.x"
-              y1="20"
+              y1="25"
               :x2="hoveredNode.x"
-              y2="205"
+              y2="210"
               class="stroke-indigo-400 dark:stroke-indigo-500"
               stroke-dasharray="3 3"
               stroke-width="1.5"
@@ -128,7 +127,7 @@
             <!-- Hit Target Area -->
             <rect
               :x="node.x - 20"
-              y="20"
+              y="25"
               width="40"
               height="185"
               fill="transparent"
@@ -177,7 +176,7 @@
             <!-- Beautified Native X-Axis Label -->
             <text
               :x="node.x"
-              y="232"
+              y="238"
               text-anchor="middle"
               class="fill-slate-700 dark:fill-slate-200 font-sans text-[11px] sm:text-[12px] font-extrabold tracking-wide"
             >
@@ -246,7 +245,7 @@ const yTicks = computed(() => {
   const ticks = []
   for (let i = 0; i <= count; i++) {
     const val = (max / count) * i
-    const y = 205 - (val / max) * 180
+    const y = 210 - (val / max) * 180
     ticks.push({
       val,
       y,
@@ -258,15 +257,15 @@ const yTicks = computed(() => {
 
 const chartNodes = computed(() => {
   if (!props.items || props.items.length === 0) return []
-  const startX = 90
-  const chartWidth = 650
+  const startX = 100
+  const chartWidth = 660
   const count = props.items.length
   const step = chartWidth / Math.max(count - 1, 1)
 
   return props.items.map((item, i) => {
     const x = startX + i * step
-    const yActual = 205 - (item.actual_revenue / roundedMaxVal.value) * 180
-    const yForecast = 205 - (item.forecast_revenue / roundedMaxVal.value) * 180
+    const yActual = 210 - (item.actual_revenue / roundedMaxVal.value) * 180
+    const yForecast = 210 - (item.forecast_revenue / roundedMaxVal.value) * 180
     return {
       x,
       yActual,
@@ -290,7 +289,7 @@ const actualAreaPoints = computed(() => {
   const firstX = chartNodes.value[0].x
   const lastX = chartNodes.value[chartNodes.value.length - 1].x
   const pts = chartNodes.value.map(n => `${n.x},${n.yActual}`).join(' ')
-  return `${firstX},205 ${pts} ${lastX},205`
+  return `${firstX},210 ${pts} ${lastX},210`
 })
 
 const hoveredNode = computed(() => {
@@ -300,7 +299,7 @@ const hoveredNode = computed(() => {
 
 const tooltipStyle = computed(() => {
   if (!hoveredNode.value) return {}
-  const leftPct = (hoveredNode.value.x / 760) * 100
+  const leftPct = (hoveredNode.value.x / 800) * 100
   return {
     left: `${Math.min(Math.max(leftPct, 15), 75)}%`,
     top: '25px',

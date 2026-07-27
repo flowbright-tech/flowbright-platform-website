@@ -35,7 +35,7 @@
     </div>
 
     <div v-else class="space-y-4">
-      <!-- Summary metrics header line (Mobile Responsive Grid) -->
+      <!-- Summary metrics header line -->
       <div class="grid grid-cols-3 gap-2 sm:gap-3 p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
         <div class="text-center">
           <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold truncate">{{ $t('dashboard.total_income_header') }}</p>
@@ -51,12 +51,12 @@
         </div>
       </div>
 
-      <!-- Touch & Scroll-Optimized Responsive Chart Viewport -->
+      <!-- Touch & Responsive Chart Viewport with Zero Overlap Y-Axis -->
       <div class="relative w-full overflow-x-auto scrollbar-thin pt-2">
-        <div class="min-w-[540px] sm:min-w-full h-72 sm:h-84">
+        <div class="min-w-[580px] sm:min-w-full h-72 sm:h-84">
           <svg
             class="w-full h-full overflow-visible"
-            viewBox="0 0 760 260"
+            viewBox="0 0 800 260"
             preserveAspectRatio="none"
             @mouseleave="hoveredIdx = null"
           >
@@ -71,53 +71,52 @@
               </linearGradient>
             </defs>
 
-            <!-- Vertical Y-Axis Title -->
+            <!-- Clean Top-Left Y-Axis Header Label -->
             <text
-              x="-110"
-              y="18"
-              transform="rotate(-90)"
-              text-anchor="middle"
-              class="fill-slate-400 dark:fill-slate-500 font-sans text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest"
+              x="88"
+              y="14"
+              text-anchor="end"
+              class="fill-slate-400 dark:fill-slate-500 font-sans text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider"
             >
               {{ $t('dashboard.revenue_in_thb') }}
             </text>
 
-            <!-- Y-Axis Gridlines & Clean Ticks -->
+            <!-- Y-Axis Gridlines & Spaced Numbers -->
             <g v-for="(tick, tIdx) in yTicks" :key="tIdx">
               <line
-                x1="80"
+                x1="100"
                 :y1="tick.y"
-                x2="750"
+                x2="780"
                 :y2="tick.y"
                 class="stroke-slate-200/80 dark:stroke-slate-800/80"
                 stroke-dasharray="4 4"
                 stroke-width="1"
               />
               <text
-                x="74"
+                x="88"
                 :y="tick.y + 4"
                 text-anchor="end"
-                class="fill-slate-500 dark:fill-slate-400 font-mono text-[10px] sm:text-[11px] font-semibold"
+                class="fill-slate-500 dark:fill-slate-400 font-mono text-[10px] sm:text-[11px] font-bold"
               >
                 {{ tick.label }}
               </text>
             </g>
 
             <!-- Baseline Axis Line -->
-            <line x1="80" y1="205" x2="750" y2="205" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
+            <line x1="100" y1="210" x2="780" y2="210" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1.5" />
 
             <!-- Forecast Target Line -->
             <line
-              x1="80"
+              x1="100"
               :y1="forecastLineY"
-              x2="750"
+              x2="780"
               :y2="forecastLineY"
               class="stroke-amber-400 dark:stroke-amber-500"
               stroke-width="2.5"
               stroke-dasharray="6 4"
             />
 
-            <!-- Grouped Bars, Numerical Labels, and Hover Overlay -->
+            <!-- Grouped Bars, Floating Value Labels, and Hover Overlay -->
             <g
               v-for="(group, idx) in barGroups"
               :key="idx"
@@ -129,7 +128,7 @@
               <rect
                 v-if="hoveredIdx === idx"
                 :x="group.groupCenterX - group.groupWidth / 2"
-                y="20"
+                y="25"
                 :width="group.groupWidth"
                 height="185"
                 class="fill-indigo-500/10 dark:fill-indigo-400/15 rx-md cursor-pointer"
@@ -182,7 +181,7 @@
               <!-- Aligned Beautified X-Axis Date Text -->
               <text
                 :x="group.groupCenterX"
-                y="232"
+                y="238"
                 text-anchor="middle"
                 class="fill-slate-700 dark:fill-slate-200 font-sans text-[11px] sm:text-[12px] font-extrabold tracking-wide"
               >
@@ -265,7 +264,7 @@ const yTicks = computed(() => {
   const ticks = []
   for (let i = 0; i <= count; i++) {
     const val = (max / count) * i
-    const y = 205 - (val / max) * 180
+    const y = 210 - (val / max) * 180
     ticks.push({
       val,
       y,
@@ -282,13 +281,13 @@ const forecastTargetValue = computed(() => {
 })
 
 const forecastLineY = computed(() => {
-  return 205 - (forecastTargetValue.value / roundedMaxVal.value) * 180
+  return 210 - (forecastTargetValue.value / roundedMaxVal.value) * 180
 })
 
 const barGroups = computed(() => {
   if (!props.byDate || props.byDate.length === 0) return []
-  const startX = 80
-  const chartWidth = 670
+  const startX = 100
+  const chartWidth = 680
   const count = props.byDate.length
   const groupWidth = chartWidth / count
   const barWidth = Math.min(groupWidth * 0.34, 32)
@@ -299,10 +298,10 @@ const barGroups = computed(() => {
     const xProfit = groupCenterX + 2.5
 
     const hIncome = Math.max((item.net_revenue / roundedMaxVal.value) * 180, 4)
-    const yIncome = 205 - hIncome
+    const yIncome = 210 - hIncome
 
     const hProfit = Math.max((item.total_profit / roundedMaxVal.value) * 180, 4)
-    const yProfit = 205 - hProfit
+    const yProfit = 210 - hProfit
 
     return {
       date: item.date,
@@ -327,7 +326,7 @@ const hoveredGroup = computed(() => {
 
 const tooltipStyle = computed(() => {
   if (!hoveredGroup.value) return {}
-  const leftPct = (hoveredGroup.value.groupCenterX / 760) * 100
+  const leftPct = (hoveredGroup.value.groupCenterX / 800) * 100
   return {
     left: `${Math.min(Math.max(leftPct, 15), 75)}%`,
     top: '25px',
