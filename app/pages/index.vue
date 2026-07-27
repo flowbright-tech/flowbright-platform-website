@@ -1,7 +1,7 @@
 <template>
-  <div class="space-y-6 max-w-7xl mx-auto">
+  <div class="space-y-6 max-w-7xl mx-auto pb-8">
     <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/60 dark:border-slate-800/80 animate-fade-in">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/60 dark:border-slate-800/80">
       <div class="flex items-center gap-3">
         <img
           v-if="company?.image_url"
@@ -23,19 +23,46 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <UBadge color="indigo" variant="subtle" size="md" class="font-semibold px-3 py-1 rounded-lg">
-          <UIcon name="i-heroicons-shield-check" class="w-4 h-4 mr-1.5" />
-          {{ locale === 'th' ? 'ระดับสิทธิ์: ' : 'Role: ' }}{{ user?.role || 'Admin' }}
-        </UBadge>
-        <UBadge color="emerald" variant="solid" size="md" class="font-bold px-3 py-1 rounded-lg text-white">
-          <UIcon name="i-heroicons-sparkles" class="w-4 h-4 mr-1.5" />
-          {{ company?.plan.toUpperCase() || 'FREE' }} {{ locale === 'th' ? 'แพ็กเกจ' : 'PLAN' }}
-        </UBadge>
+      <!-- Controls: Period Selector & Refresh -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl flex items-center gap-1 border border-slate-200/60 dark:border-slate-700/60">
+          <button
+            v-for="p in periodOptions"
+            :key="p.value"
+            @click="selectedPeriod = p.value"
+            class="px-3 py-1 text-xs font-bold rounded-lg transition-all"
+            :class="selectedPeriod === p.value ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+          >
+            {{ $t(p.labelKey) }}
+          </button>
+        </div>
+
+        <UButton
+          color="neutral"
+          variant="outline"
+          size="sm"
+          :loading="isLoading"
+          class="rounded-xl font-semibold"
+          @click="fetchDashboard"
+        >
+          <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 mr-1" />
+          {{ $t('dashboard.refresh') }}
+        </UButton>
       </div>
     </div>
 
-    <!-- 4 Metric Cards Grid -->
+    <!-- Error Alert banner if any -->
+    <UAlert
+      v-if="errorMsg"
+      color="rose"
+      variant="subtle"
+      icon="i-heroicons-exclamation-triangle"
+      title="Dashboard Data Sync Error"
+      :description="errorMsg"
+      class="rounded-xl"
+    />
+
+    <!-- 4 Primary Executive Stat Cards Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <MetricCard
         v-for="m in metrics"
@@ -44,14 +71,19 @@
       />
     </div>
 
-    <!-- Visual Chart & Audit Trail Grid -->
+    <!-- Main Section Grid: Forecast & Revenue Trend vs Top Sales Packages -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2">
-        <SalesTrendChart :data="chartData" />
+        <ForecastTrendChart :items="dashboardData?.forecast_trend || []" />
       </div>
       <div>
-        <RecentActivity :activities="activities" />
+        <TopSalesPackages :packages="dashboardData?.top_sales_packages || []" />
       </div>
+    </div>
+
+    <!-- Bottom Section Grid: Low Stock Inventory Alerts -->
+    <div class="grid grid-cols-1 gap-6">
+      <LowStockAlert :items="dashboardData?.low_stock_items || []" />
     </div>
   </div>
 </template>
@@ -62,12 +94,19 @@ import { useI18n } from 'vue-i18n'
 import { useAuthEngine } from '../features/auth/composables/useAuthEngine'
 import { useDashboardEngine } from '../features/dashboard/composables/useDashboardEngine'
 import MetricCard from '../features/dashboard/components/MetricCard.vue'
-import SalesTrendChart from '../features/dashboard/components/SalesTrendChart.vue'
-import RecentActivity from '../features/dashboard/components/RecentActivity.vue'
+import ForecastTrendChart from '../features/dashboard/components/ForecastTrendChart.vue'
+import TopSalesPackages from '../features/dashboard/components/TopSalesPackages.vue'
+import LowStockAlert from '../features/dashboard/components/LowStockAlert.vue'
 
 const { locale } = useI18n()
 const { user, company, activeTenant } = useAuthEngine()
-const { metrics, chartData, activities } = useDashboardEngine()
+const { dashboardData, isLoading, errorMsg, selectedPeriod, metrics, fetchDashboard } = useDashboardEngine()
+
+const periodOptions = [
+  { value: 'daily', labelKey: 'dashboard.period_daily' },
+  { value: 'monthly', labelKey: 'dashboard.period_monthly' },
+  { value: 'yearly', labelKey: 'dashboard.period_yearly' }
+] as const
 
 const handleImageError = (e: Event) => {
   const target = e.target as HTMLImageElement

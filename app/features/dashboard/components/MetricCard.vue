@@ -6,40 +6,58 @@
       <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
         {{ $t(`dashboard.${metric.key}`) }}
       </span>
-      <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 flex items-center justify-center">
+      <div 
+        class="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
+        :class="iconBgClass"
+      >
         <UIcon :name="metric.icon" class="w-5 h-5" />
       </div>
     </div>
 
-    <div class="mt-4 flex items-baseline justify-between">
+    <div class="mt-3">
       <div class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
         {{ metric.value }}
-        <span v-if="metric.unitKey" class="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">
-          {{ $t(`dashboard.${metric.unitKey}`) }}
-        </span>
       </div>
 
-      <UBadge
-        :color="metric.isPositive ? 'emerald' : 'rose'"
-        variant="subtle"
-        size="xs"
-        class="font-semibold rounded-full"
-      >
-        <UIcon :name="metric.isPositive ? 'i-heroicons-arrow-trending-up' : 'i-heroicons-arrow-trending-down'" class="w-3 h-3 mr-0.5" />
-        {{ metric.change }}
-      </UBadge>
-    </div>
+      <div v-if="metric.subText" class="mt-1.5 flex items-center text-xs font-medium text-slate-500 dark:text-slate-400">
+        <span>{{ metric.subText }}</span>
+      </div>
 
-    <div class="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
-      {{ $t('dashboard.vs_last_month') }}
+      <div v-else-if="metric.change" class="mt-1.5 flex items-center">
+        <UBadge
+          :color="metric.isPositive ? 'emerald' : 'rose'"
+          variant="subtle"
+          size="xs"
+          class="font-semibold rounded-full"
+        >
+          <UIcon :name="metric.isPositive ? 'i-heroicons-arrow-trending-up' : 'i-heroicons-arrow-trending-down'" class="w-3 h-3 mr-0.5" />
+          {{ metric.change }}
+        </UBadge>
+        <span class="text-[11px] text-slate-400 dark:text-slate-500 ml-2">vs last period</span>
+      </div>
     </div>
   </UCard>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { DashboardMetric } from '../types'
 
-defineProps<{
+const props = defineProps<{
   metric: DashboardMetric
 }>()
+
+const iconBgClass = computed(() => {
+  switch (props.metric.color) {
+    case 'emerald':
+      return 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'
+    case 'amber':
+      return 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'
+    case 'sky':
+      return 'bg-sky-500/10 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400'
+    case 'indigo':
+    default:
+      return 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400'
+  }
+})
 </script>

@@ -1,96 +1,132 @@
-import { ref, computed } from 'vue'
-import type { DashboardMetric, ChartDataPoint, ActivityItem } from '../types'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useState } from '#imports'
+import type { DashboardData, DashboardMetric, FinancialPeriodMetrics } from '../types'
+import { useAuthEngine } from '../../auth/composables/useAuthEngine'
+import { useApiFetch } from '../../../composables/useApiFetch'
 
 export const useDashboardEngine = () => {
-  const chartData = ref<ChartDataPoint[]>([
-    { month: 'Jan', revenue: 450000, target: 400000 },
-    { month: 'Feb', revenue: 520000, target: 450000 },
-    { month: 'Mar', revenue: 490000, target: 480000 },
-    { month: 'Apr', revenue: 610000, target: 500000 },
-    { month: 'May', revenue: 580000, target: 520000 },
-    { month: 'Jun', revenue: 740000, target: 600000 },
-    { month: 'Jul', revenue: 820000, target: 650000 }
-  ])
+  const { session } = useAuthEngine()
+  const { apiFetch } = useApiFetch()
 
-  const activities = ref<ActivityItem[]>([
-    {
-      id: 'act-101',
-      type: 'invoice',
-      title: 'INV-2026-089 Issued to Siam Retail Group',
-      timestamp: '10 mins ago',
-      amount: '฿125,000',
-      status: 'completed'
-    },
-    {
-      id: 'act-102',
-      type: 'vendor',
-      title: 'PO-2026-044 Confirmed with Apex Logistics',
-      timestamp: '45 mins ago',
-      amount: '฿340,000',
-      status: 'pending'
-    },
-    {
-      id: 'act-103',
-      type: 'customer',
-      title: 'New Enterprise Client: TechNordic TH Registered',
-      timestamp: '2 hours ago',
-      status: 'completed'
-    },
-    {
-      id: 'act-104',
-      type: 'invoice',
-      title: 'Payment Overdue Notice: INV-2026-032',
-      timestamp: '4 hours ago',
-      amount: '฿89,500',
-      status: 'warning'
+  const dashboardData = useState<DashboardData | null>('srp_dashboard_data', () => null)
+  const isLoading = useState<boolean>('srp_dashboard_loading', () => false)
+  const errorMsg = useState<string | null>('srp_dashboard_error', () => null)
+  const selectedPeriod = ref<'daily' | 'monthly' | 'yearly'>('monthly')
+
+  const fetchDashboard = async () => {
+    const token = session.value?.token
+    if (!token) {
+      dashboardData.value = null
+      return
     }
-  ])
 
-  const metrics = computed<DashboardMetric[]>(() => [
-    {
-      id: 'm1',
-      key: 'total_revenue',
-      value: '฿4,210,000',
-      change: '+18.4%',
-      isPositive: true,
-      icon: 'i-heroicons-banknotes'
-    },
-    {
-      id: 'm2',
-      key: 'customer_growth',
-      value: '142',
-      change: '+12.5%',
-      isPositive: true,
-      icon: 'i-heroicons-user-group'
-    },
-    {
-      id: 'm3',
-      key: 'open_invoices',
-      value: '28',
-      change: '-4.2%',
-      isPositive: true,
-      icon: 'i-heroicons-document-text',
-      unitKey: 'invoices_unit'
-    },
-    {
-      id: 'm4',
-      key: 'vendor_orders',
-      value: '19',
-      change: '+8.1%',
-      isPositive: true,
-      icon: 'i-heroicons-shopping-cart',
-      unitKey: 'orders_unit'
+    isLoading.value = true
+    errorMsg.value = null
+
+    try {
+      const res = await apiFetch('/api/v1/dashboard')
+      if (!res.ok) {
+        throw new Error(`Failed to fetch dashboard metrics: ${res.status} ${res.statusText}`)
+      }
+
+      const json = await res.json()
+      if (json.success && json.data) {
+        dashboardData.value = json.data
+      } else {
+        throw new Error(json.message || 'API returned unexpected payload structure')
+      }
+    } catch (err: any) {
+      console.error('Error fetching dashboard:', err)
+      errorMsg.value = err.message || 'An error occurred while loading executive dashboard'
+    } finally {
+      isLoading.value = false
     }
-  ])
+  }
 
-  const calculateTotalRevenue = () => {
-    return chartData.value.reduce((acc, item) => acc + item.revenue, 0)
+  // Selected period financial metrics getter
+  const currentFinancial = computed<FinancialPeriodMetrics>(() => {
+    if (!dashboardData.value?.financial) {
+      return { net_revenue: 0, total_cost: 0, total_profit: 0, total_orders: 0 }
+    }
+    return dashboardData.value.financial[selectedPeriod.value] || dashboardData.value.financial.monthly
+  })
+
+  // Format THB currency
+  const formatCurrency = (val: number): string => {
+    return new Intl.NumberFormat('th-TH', {
+      style: 'currency',
+      currency: 'THB',
+      maximumFractionDigits: 0
+    }).format(val || 0)
+  }
+
+  // Key metrics for top metric cards
+  const metrics = computed<DashboardMetric[]>(() => {
+    const fin = currentFinancial.value
+    const cust = dashboardData.value?.customers
+    const ord = dashboardData.value?.orders
+
+    return [
+      {
+        id: 'net_revenue',
+        key: 'net_revenue',
+        value: formatCurrency(fin.net_revenue),
+        subText: `Cost: ${formatCurrency(fin.total_cost)}`,
+        icon: 'i-heroicons-banknotes',
+        color: 'emerald'
+      },
+      {
+        id: 'total_profit',
+        key: 'total_profit',
+        value: formatCurrency(fin.total_profit),
+        subText: `${fin.total_orders} Completed Orders`,
+        icon: 'i-heroicons-chart-bar',
+        color: 'indigo'
+      },
+      {
+        id: 'orders_summary',
+        key: 'orders_summary',
+        value: String(ord?.total_orders ?? 0),
+        subText: `${ord?.pending_orders ?? 0} Pending`,
+        icon: 'i-heroicons-shopping-bag',
+        color: 'amber'
+      },
+      {
+        id: 'customer_total',
+        key: 'customer_total',
+        value: String(cust?.total ?? 0),
+        subText: `+${cust?.monthly ?? 0} this month`,
+        icon: 'i-heroicons-user-group',
+        color: 'sky'
+      }
+    ]
+  })
+
+  // Client lifecycle fetching & watchers
+  if (import.meta.client) {
+    onMounted(() => {
+      if (!dashboardData.value) {
+        fetchDashboard()
+      }
+    })
+
+    watch(() => session.value?.token, (newToken) => {
+      if (newToken) {
+        fetchDashboard()
+      } else {
+        dashboardData.value = null
+      }
+    })
   }
 
   return {
+    dashboardData,
+    isLoading,
+    errorMsg,
+    selectedPeriod,
+    currentFinancial,
     metrics,
-    chartData,
-    activities,
-    calculateTotalRevenue
+    fetchDashboard,
+    formatCurrency
   }
 }
