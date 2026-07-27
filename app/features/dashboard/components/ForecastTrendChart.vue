@@ -28,7 +28,7 @@
       {{ $t('dashboard.no_data') }}
     </div>
 
-    <!-- Touch & Responsive Chart Viewport with Zero Overlap Y-Axis -->
+    <!-- Touch & Responsive Chart Viewport with Top-Left Axis Label -->
     <div v-else class="relative w-full overflow-x-auto scrollbar-thin pt-3">
       <div class="min-w-[580px] sm:min-w-full h-72 sm:h-84">
         <svg
@@ -44,17 +44,17 @@
             </linearGradient>
           </defs>
 
-          <!-- Clean Top-Left Y-Axis Header Label -->
+          <!-- Clean Top-Left Y-Axis Label "Revenue in THB" -->
           <text
-            x="88"
-            y="14"
-            text-anchor="end"
+            x="20"
+            y="16"
+            text-anchor="start"
             class="fill-slate-400 dark:fill-slate-500 font-sans text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider"
           >
             {{ $t('dashboard.revenue_in_thb') }}
           </text>
 
-          <!-- Y-Axis Gridlines & Spaced Numbers -->
+          <!-- Y-Axis Gridlines & Right-Aligned Numbers -->
           <g v-for="(tick, tIdx) in yTicks" :key="tIdx">
             <line
               x1="100"
@@ -264,8 +264,8 @@ const chartNodes = computed(() => {
 
   return props.items.map((item, i) => {
     const x = startX + i * step
-    const yActual = 210 - (item.actual_revenue / roundedMaxVal.value) * 180
-    const yForecast = 210 - (item.forecast_revenue / roundedMaxVal.value) * 180
+    const yActual = 210 - (item.actual_revenue / roundedMaxVal.value) * 185
+    const yForecast = 210 - (item.forecast_revenue / roundedMaxVal.value) * 185
     return {
       x,
       yActual,
