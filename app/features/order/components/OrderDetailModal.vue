@@ -20,9 +20,13 @@
               <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
               {{ formatStatus(order.status) }}
             </span>
-            <UBadge :color="getPaymentBadgeColor(order.payment_channel)" variant="soft" size="md" class="capitalize font-bold px-3 py-1 text-xs sm:text-sm">
+            <span
+              :class="getPaymentBadgeClass(order.payment_channel)"
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs sm:text-sm font-bold capitalize shadow-sm transition-colors"
+            >
+              <UIcon :name="getPaymentIcon(order.payment_channel)" class="w-4 h-4 shrink-0" />
               {{ formatPaymentChannel(order.payment_channel) }}
-            </UBadge>
+            </span>
           </div>
         </div>
 
@@ -160,15 +164,37 @@ const getStatusBadgeColor = (status?: string) => {
 const getStatusBadgeClass = (status?: string) => {
   switch (status?.toLowerCase()) {
     case 'pending':
-      return 'bg-amber-100 text-amber-900 border border-amber-300/80 dark:bg-amber-950/90 dark:text-amber-300 dark:border-amber-700/80 shadow-sm'
+      return 'bg-amber-100/90 text-amber-950 border border-amber-300/80 dark:bg-amber-950/90 dark:text-amber-200 dark:border-amber-700/80 font-bold shadow-sm'
     case 'processing':
-      return 'bg-sky-100 text-sky-900 border border-sky-300/80 dark:bg-sky-950/90 dark:text-sky-300 dark:border-sky-700/80 shadow-sm'
+      return 'bg-sky-100/90 text-sky-950 border border-sky-300/80 dark:bg-sky-950/90 dark:text-sky-200 dark:border-sky-700/80 font-bold shadow-sm'
     case 'completed':
-      return 'bg-emerald-100 text-emerald-900 border border-emerald-300/80 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-700/80 shadow-sm'
+      return 'bg-emerald-100/90 text-emerald-950 border border-emerald-300/80 dark:bg-emerald-950/90 dark:text-emerald-200 dark:border-emerald-700/80 font-bold shadow-sm'
     case 'cancelled':
-      return 'bg-rose-100 text-rose-900 border border-rose-300/80 dark:bg-rose-950/90 dark:text-rose-300 dark:border-rose-700/80 shadow-sm'
+      return 'bg-rose-100/90 text-rose-950 border border-rose-300/80 dark:bg-rose-950/90 dark:text-rose-200 dark:border-rose-700/80 font-bold shadow-sm'
     default:
-      return 'bg-slate-100 text-slate-900 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 shadow-sm'
+      return 'bg-slate-100 text-slate-900 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 font-bold shadow-sm'
+  }
+}
+
+const getPaymentBadgeClass = (channel?: string) => {
+  switch (channel?.toLowerCase()) {
+    case 'cash':
+      return 'bg-amber-100/75 text-amber-950 border border-amber-300/80 dark:bg-amber-950/70 dark:text-amber-200 dark:border-amber-700/70 font-bold shadow-sm'
+    case 'credit_card':
+      return 'bg-indigo-100/75 text-indigo-950 border border-indigo-300/80 dark:bg-indigo-950/70 dark:text-indigo-200 dark:border-indigo-700/70 font-bold shadow-sm'
+    case 'internet_banking':
+      return 'bg-cyan-100/75 text-cyan-950 border border-cyan-300/80 dark:bg-cyan-950/70 dark:text-cyan-200 dark:border-cyan-700/70 font-bold shadow-sm'
+    default:
+      return 'bg-slate-100/80 text-slate-900 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 font-bold shadow-sm'
+  }
+}
+
+const getPaymentIcon = (channel?: string) => {
+  switch (channel?.toLowerCase()) {
+    case 'cash': return 'i-heroicons-banknotes'
+    case 'credit_card': return 'i-heroicons-credit-card'
+    case 'internet_banking': return 'i-heroicons-globe-alt'
+    default: return 'i-heroicons-currency-dollar'
   }
 }
 

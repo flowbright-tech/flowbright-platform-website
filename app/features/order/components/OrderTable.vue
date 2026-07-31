@@ -23,13 +23,15 @@
         </div>
       </template>
 
-      <!-- Payment Channel cell (Increased badge size) -->
+      <!-- Payment Channel cell (Increased visibility in light & dark themes) -->
       <template #payment_channel-cell="{ row }">
-        <UBadge :color="getPaymentBadgeColor(row.original.payment_channel)" variant="soft" size="md"
-          class="capitalize font-bold px-2.5 py-1">
-          <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-4 h-4 mr-1" />
+        <span
+          :class="getPaymentBadgeClass(row.original.payment_channel)"
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold capitalize transition-colors"
+        >
+          <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-4 h-4 shrink-0" />
           {{ formatPaymentChannel(row.original.payment_channel) }}
-        </UBadge>
+        </span>
       </template>
 
       <!-- Status cell (Increased badge size & human-friendly dark mode contrast) -->
@@ -151,34 +153,28 @@ const getStatusBadgeColor = (status: string) => {
 const getStatusBadgeClass = (status: string) => {
   switch (status?.toLowerCase()) {
     case 'pending':
-      return 'bg-amber-100 text-amber-900 border border-amber-300/80 dark:bg-amber-950/90 dark:text-amber-300 dark:border-amber-700/80 shadow-sm'
+      return 'bg-amber-100/90 text-amber-950 border border-amber-300/80 dark:bg-amber-950/90 dark:text-amber-200 dark:border-amber-700/80 font-bold shadow-sm'
     case 'processing':
-      return 'bg-sky-100 text-sky-900 border border-sky-300/80 dark:bg-sky-950/90 dark:text-sky-300 dark:border-sky-700/80 shadow-sm'
+      return 'bg-sky-100/90 text-sky-950 border border-sky-300/80 dark:bg-sky-950/90 dark:text-sky-200 dark:border-sky-700/80 font-bold shadow-sm'
     case 'completed':
-      return 'bg-emerald-100 text-emerald-900 border border-emerald-300/80 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-700/80 shadow-sm'
+      return 'bg-emerald-100/90 text-emerald-950 border border-emerald-300/80 dark:bg-emerald-950/90 dark:text-emerald-200 dark:border-emerald-700/80 font-bold shadow-sm'
     case 'cancelled':
-      return 'bg-rose-100 text-rose-900 border border-rose-300/80 dark:bg-rose-950/90 dark:text-rose-300 dark:border-rose-700/80 shadow-sm'
+      return 'bg-rose-100/90 text-rose-950 border border-rose-300/80 dark:bg-rose-950/90 dark:text-rose-200 dark:border-rose-700/80 font-bold shadow-sm'
     default:
-      return 'bg-slate-100 text-slate-900 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 shadow-sm'
+      return 'bg-slate-100 text-slate-900 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 font-bold shadow-sm'
   }
 }
 
-const formatStatus = (status: string) => {
-  switch (status?.toLowerCase()) {
-    case 'pending': return t('orders.status_pending') || 'Pending'
-    case 'processing': return t('orders.status_processing') || 'Processing'
-    case 'completed': return t('orders.status_completed') || 'Completed'
-    case 'cancelled': return t('orders.status_cancelled') || 'Cancelled'
-    default: return status || '-'
-  }
-}
-
-const getPaymentBadgeColor = (channel: string) => {
+const getPaymentBadgeClass = (channel: string) => {
   switch (channel?.toLowerCase()) {
-    case 'cash': return 'warning'
-    case 'credit_card': return 'primary'
-    case 'internet_banking': return 'info'
-    default: return 'neutral'
+    case 'cash':
+      return 'bg-amber-100/75 text-amber-950 border border-amber-300/80 dark:bg-amber-950/70 dark:text-amber-200 dark:border-amber-700/70 font-bold shadow-sm'
+    case 'credit_card':
+      return 'bg-indigo-100/75 text-indigo-950 border border-indigo-300/80 dark:bg-indigo-950/70 dark:text-indigo-200 dark:border-indigo-700/70 font-bold shadow-sm'
+    case 'internet_banking':
+      return 'bg-cyan-100/75 text-cyan-950 border border-cyan-300/80 dark:bg-cyan-950/70 dark:text-cyan-200 dark:border-cyan-700/70 font-bold shadow-sm'
+    default:
+      return 'bg-slate-100/80 text-slate-900 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 font-bold shadow-sm'
   }
 }
 
