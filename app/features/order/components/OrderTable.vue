@@ -165,6 +165,16 @@ const getStatusBadgeClass = (status: string) => {
   }
 }
 
+const formatStatus = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case 'pending': return t('orders.status_pending') || 'Pending'
+    case 'processing': return t('orders.status_processing') || 'Processing'
+    case 'completed': return t('orders.status_completed') || 'Completed'
+    case 'cancelled': return t('orders.status_cancelled') || 'Cancelled'
+    default: return status || '-'
+  }
+}
+
 const getPaymentBadgeClass = (channel: string) => {
   switch (channel?.toLowerCase()) {
     case 'cash':
