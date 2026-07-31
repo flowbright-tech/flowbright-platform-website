@@ -23,24 +23,24 @@
         </div>
       </template>
 
-      <!-- Payment Channel cell (Increased size & high visibility in both light & dark themes) -->
+      <!-- Payment Channel cell (Balanced size & high visibility in both light & dark themes) -->
       <template #payment_channel-cell="{ row }">
         <span
           :class="getPaymentBadgeClass(row.original.payment_channel)"
-          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold capitalize transition-all"
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold capitalize transition-all"
         >
-          <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-4.5 h-4.5 shrink-0" />
+          <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-4 h-4 shrink-0" />
           {{ formatPaymentChannel(row.original.payment_channel) }}
         </span>
       </template>
 
-      <!-- Status cell (Increased size & high visibility in both light & dark themes) -->
+      <!-- Status cell (Balanced size & high visibility in both light & dark themes) -->
       <template #status-cell="{ row }">
         <span
           :class="getStatusBadgeClass(row.original.status)"
-          class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold capitalize transition-all"
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize transition-all"
         >
-          <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
           {{ formatStatus(row.original.status) }}
         </span>
       </template>

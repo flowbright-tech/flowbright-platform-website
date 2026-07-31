@@ -50,15 +50,15 @@
           </span>
         </template>
 
-        <!-- Type Column (Increased size & high visibility in both light & dark themes) -->
+        <!-- Type Column (Balanced size & high visibility in both light & dark themes) -->
         <template #type-cell="{ row }">
           <span
             :class="row.original.type === 'company'
               ? 'bg-indigo-500/15 text-indigo-950 border border-indigo-400/60 dark:bg-indigo-500/25 dark:text-indigo-300 dark:border-indigo-400/50'
               : 'bg-sky-500/15 text-sky-950 border border-sky-400/60 dark:bg-sky-500/25 dark:text-sky-300 dark:border-sky-400/50'"
-            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold uppercase shadow-sm transition-all"
+            class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold uppercase shadow-sm transition-all"
           >
-            <UIcon :name="row.original.type === 'company' ? 'i-heroicons-building-office' : 'i-heroicons-user'" class="w-4 h-4 shrink-0" />
+            <UIcon :name="row.original.type === 'company' ? 'i-heroicons-building-office' : 'i-heroicons-user'" class="w-3.5 h-3.5 shrink-0" />
             {{ row.original.type || 'company' }}
           </span>
         </template>
