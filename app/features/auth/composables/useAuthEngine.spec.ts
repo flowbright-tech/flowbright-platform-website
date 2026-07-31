@@ -32,4 +32,23 @@ describe('Auth Engine & Tenant Memory Cleansing', () => {
     expect(session.value?.tenantId).toBe('tenant-sg-02')
     expect(activeTenant.value.code).toBe('FB-SINGAPORE-02')
   })
+
+  it('should evaluate isLab correctly when company_type is lab', () => {
+    const { setCompanyType, isLab } = useAuthEngine()
+    setCompanyType('lab')
+    expect(isLab.value).toBe(true)
+
+    setCompanyType('standard')
+    expect(isLab.value).toBe(false)
+  })
+
+  it('should evaluate isAdmin correctly based on user role', () => {
+    const { login, setUserRole, isAdmin } = useAuthEngine()
+    login('user@flowbright.co', 'mock-token', MOCK_TENANTS[0].id)
+    setUserRole('user')
+    expect(isAdmin.value).toBe(false)
+
+    setUserRole('admin')
+    expect(isAdmin.value).toBe(true)
+  })
 })

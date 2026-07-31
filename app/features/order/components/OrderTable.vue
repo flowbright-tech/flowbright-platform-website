@@ -32,13 +32,15 @@
         </UBadge>
       </template>
 
-      <!-- Status cell (Increased badge size) -->
+      <!-- Status cell (Increased badge size & human-friendly dark mode contrast) -->
       <template #status-cell="{ row }">
-        <UBadge :color="getStatusBadgeColor(row.original.status)" variant="solid" size="md"
-          class="capitalize font-bold px-2.5 py-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-white mr-1.5 inline-block animate-pulse"></span>
+        <span
+          :class="getStatusBadgeClass(row.original.status)"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold capitalize transition-colors"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
           {{ formatStatus(row.original.status) }}
-        </UBadge>
+        </span>
       </template>
 
       <!-- Items Count cell -->
@@ -143,6 +145,21 @@ const getStatusBadgeColor = (status: string) => {
     case 'completed': return 'success'
     case 'cancelled': return 'error'
     default: return 'neutral'
+  }
+}
+
+const getStatusBadgeClass = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case 'pending':
+      return 'bg-amber-100 text-amber-900 border border-amber-300/80 dark:bg-amber-950/90 dark:text-amber-300 dark:border-amber-700/80 shadow-sm'
+    case 'processing':
+      return 'bg-sky-100 text-sky-900 border border-sky-300/80 dark:bg-sky-950/90 dark:text-sky-300 dark:border-sky-700/80 shadow-sm'
+    case 'completed':
+      return 'bg-emerald-100 text-emerald-900 border border-emerald-300/80 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-700/80 shadow-sm'
+    case 'cancelled':
+      return 'bg-rose-100 text-rose-900 border border-rose-300/80 dark:bg-rose-950/90 dark:text-rose-300 dark:border-rose-700/80 shadow-sm'
+    default:
+      return 'bg-slate-100 text-slate-900 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 shadow-sm'
   }
 }
 

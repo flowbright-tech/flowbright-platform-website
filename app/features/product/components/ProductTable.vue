@@ -116,8 +116,10 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Product } from '../types'
+import { useDomainLabels } from '../../../composables/useDomainLabels'
 
 const { t } = useI18n()
+const { dl, isLab } = useDomainLabels()
 
 defineProps<{
   products: Product[]
@@ -156,13 +158,13 @@ const formatDateTime = (dateStr?: string) => {
 
 const columns = computed(() => [
   { accessorKey: 'image_url', header: '' },
-  { accessorKey: 'name', header: t('products.col_name') || 'Product Name' },
-  { accessorKey: 'identifiers', header: t('products.col_identifiers') || 'SKU / Barcode' },
-  { accessorKey: 'product_type', header: t('products.col_type') || 'Type' },
-  { accessorKey: 'price', header: t('products.col_price') || 'Selling Price' },
-  { accessorKey: 'stock', header: t('products.col_stock') || 'Inventory' },
-  { accessorKey: 'is_active', header: t('products.col_status') || 'Status' },
-  { accessorKey: 'created_at', header: t('products.col_created_at') || 'Created Date' },
-  { accessorKey: 'actions', header: t('products.col_actions') || 'Actions', class: 'text-right' }
+  { accessorKey: 'name', header: dl('col_name', isLab.value ? 'Test Name' : 'Product Name') },
+  { accessorKey: 'identifiers', header: dl('col_identifiers', isLab.value ? 'Test Code / Barcode' : 'SKU / Barcode') },
+  { accessorKey: 'product_type', header: dl('col_type', 'Type') },
+  { accessorKey: 'price', header: dl('col_price', isLab.value ? 'Test Fee' : 'Selling Price') },
+  { accessorKey: 'stock', header: dl('col_stock', isLab.value ? 'Capacity' : 'Inventory') },
+  { accessorKey: 'is_active', header: dl('col_status', 'Status') },
+  { accessorKey: 'created_at', header: dl('col_created_at', 'Created Date') },
+  { accessorKey: 'actions', header: dl('col_actions', 'Actions'), class: 'text-right' }
 ])
 </script>

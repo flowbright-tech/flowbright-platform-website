@@ -1,109 +1,127 @@
 <template>
   <div class="space-y-6 max-w-7xl mx-auto">
-    <!-- Page Title Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60 dark:border-slate-800/80">
-      <div>
-        <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-          <UIcon name="i-heroicons-building-storefront" class="w-7 h-7 text-amber-500" />
-          {{ $t('vendors.title') }}
-        </h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          {{ $t('vendors.subtitle') }} • <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ activeTenant.name }}</span>
-        </p>
-      </div>
+    <!-- Lab Company restriction notice -->
+    <div v-if="isLab" class="p-8 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-sm">
+      <UIcon name="i-heroicons-information-circle" class="w-12 h-12 text-indigo-500 mx-auto" />
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+        {{ locale === 'th' ? 'ไม่เปิดใช้งานการจัดการ Vendor สำหรับประเภทองค์กรนี้' : 'Vendor Management Not Required' }}
+      </h2>
+      <p class="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+        {{ locale === 'th' ? 'องค์กรประเภทห้องปฏิบัติการ (Lab) ไม่จำเป็นต้องใช้งานส่วนจัดการ Vendor Master' : 'Vendor Management is not applicable for Laboratory (Lab) organization type.' }}
+      </p>
+      <UButton color="neutral" variant="outline" :to="localePath('/')" class="font-bold">
+        {{ locale === 'th' ? 'กลับไปยังหน้าแรก' : 'Return to Dashboard' }}
+      </UButton>
     </div>
 
-    <!-- Error Alert banner if fetch fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="red"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle"
-      title="Failed to Load Vendors"
-      :description="errorMsg"
-      class="mb-6"
-    />
+    <!-- Standard Vendor View -->
+    <template v-else>
+      <!-- Page Title Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60 dark:border-slate-800/80">
+        <div>
+          <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <UIcon name="i-heroicons-building-storefront" class="w-7 h-7 text-amber-500" />
+            {{ $t('vendors.title') }}
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            {{ $t('vendors.subtitle') }} • <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ activeTenant.name }}</span>
+          </p>
+        </div>
+      </div>
 
-    <!-- Search & Filter Controls -->
-    <VendorFilter
-      v-model:search-query="searchQuery"
-      @open-create="handleOpenCreate"
-    />
+      <!-- Error Alert banner if fetch fails -->
+      <UAlert
+        v-if="errorMsg"
+        color="red"
+        variant="soft"
+        icon="i-heroicons-exclamation-triangle"
+        title="Failed to Load Vendors"
+        :description="errorMsg"
+        class="mb-6"
+      />
 
-    <!-- Premium Skeleton Loader for async data fetching -->
-    <div v-if="isLoading" class="space-y-4">
-      <UCard class="glass-panel overflow-hidden animate-pulse" :ui="{ body: { padding: 'p-0 sm:p-0' } }">
-        <div class="p-6 space-y-6">
-          <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
-            <div class="w-1/3 flex items-center gap-3">
-              <USkeleton class="h-4 w-20" />
-            </div>
-            <div class="w-1/4">
-              <USkeleton class="h-4 w-24" />
-            </div>
-            <div class="w-1/6">
-              <USkeleton class="h-4 w-16" />
-            </div>
-            <div class="w-1/6">
-              <USkeleton class="h-4 w-16" />
-            </div>
-            <div class="w-1/12 text-right">
-              <USkeleton class="h-4 w-10 ml-auto" />
-            </div>
-          </div>
-          <div v-for="n in 5" :key="n" class="flex items-center justify-between py-4 border-b border-slate-100 dark:border-slate-800 last:border-0">
-            <div class="w-1/3 flex items-center gap-3">
-              <USkeleton class="h-9 w-9 rounded-lg shrink-0" />
-              <div class="space-y-2 w-full">
-                <USkeleton class="h-4 w-4/5" />
-                <USkeleton class="h-3.5 w-3/5" />
+      <!-- Search & Filter Controls -->
+      <VendorFilter
+        v-model:search-query="searchQuery"
+        @open-create="handleOpenCreate"
+      />
+
+      <!-- Premium Skeleton Loader for async data fetching -->
+      <div v-if="isLoading" class="space-y-4">
+        <UCard class="glass-panel overflow-hidden animate-pulse" :ui="{ body: { padding: 'p-0 sm:p-0' } }">
+          <div class="p-6 space-y-6">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div class="w-1/3 flex items-center gap-3">
+                <USkeleton class="h-4 w-20" />
+              </div>
+              <div class="w-1/4">
+                <USkeleton class="h-4 w-24" />
+              </div>
+              <div class="w-1/6">
+                <USkeleton class="h-4 w-16" />
+              </div>
+              <div class="w-1/6">
+                <USkeleton class="h-4 w-16" />
+              </div>
+              <div class="w-1/12 text-right">
+                <USkeleton class="h-4 w-10 ml-auto" />
               </div>
             </div>
-            <div class="w-1/4">
-              <USkeleton class="h-4 w-4/5" />
-            </div>
-            <div class="w-1/6">
-              <USkeleton class="h-5 w-16 rounded-md" />
-            </div>
-            <div class="w-1/6">
-              <USkeleton class="h-5 w-20 rounded-full" />
-            </div>
-            <div class="w-1/12 flex items-center justify-end gap-2">
-              <USkeleton class="h-8 w-8 rounded-md" />
-              <USkeleton class="h-8 w-8 rounded-md" />
+            <div v-for="n in 5" :key="n" class="flex items-center justify-between py-4 border-b border-slate-100 dark:border-slate-800 last:border-0">
+              <div class="w-1/3 flex items-center gap-3">
+                <USkeleton class="h-9 w-9 rounded-lg shrink-0" />
+                <div class="space-y-2 w-full">
+                  <USkeleton class="h-4 w-4/5" />
+                  <USkeleton class="h-3.5 w-3/5" />
+                </div>
+              </div>
+              <div class="w-1/4">
+                <USkeleton class="h-4 w-3/4" />
+              </div>
+              <div class="w-1/6">
+                <USkeleton class="h-5 w-16 rounded-md" />
+              </div>
+              <div class="w-1/6">
+                <USkeleton class="h-4 w-20" />
+              </div>
+              <div class="w-1/12 flex items-center justify-end gap-2">
+                <USkeleton class="h-8 w-8 rounded-md" />
+                <USkeleton class="h-8 w-8 rounded-md" />
+              </div>
             </div>
           </div>
-        </div>
-      </UCard>
-    </div>
+        </UCard>
+      </div>
 
-    <!-- Vendor Table & Pagination -->
-    <VendorTable
-      v-else
-      v-model:page="currentPage"
-      :vendors="paginatedVendors"
-      :total="totalFilteredCount"
-      :page-size="pageSize"
-      @edit="handleOpenEdit"
-      @delete="handleOpenDelete"
-    />
+      <!-- Vendor Table & Pagination -->
+      <VendorTable
+        v-else
+        v-model:page="currentPage"
+        :vendors="paginatedVendors"
+        :total="totalFilteredCount"
+        :page-size="pageSize"
+        @edit="handleOpenEdit"
+        @delete="handleOpenDelete"
+      />
 
-    <!-- Reusable Delete Confirmation Modal -->
-    <ConfirmModal
-      v-model:open="isDeleteModalOpen"
-      :title="$t('vendors.confirm_delete_title')"
-      :description="$t('vendors.confirm_delete_desc')"
-      confirm-color="primary"
-      confirm-icon="i-heroicons-trash"
-      :confirm-text="$t('common.delete')"
-      @confirm="confirmDelete"
-    />
+      <!-- Reusable Delete Confirmation Modal -->
+      <ConfirmModal
+        v-model:open="isDeleteModalOpen"
+        :title="$t('vendors.confirm_delete_title')"
+        :description="$t('vendors.confirm_delete_desc')"
+        confirm-color="primary"
+        confirm-icon="i-heroicons-trash"
+        :confirm-text="$t('common.delete')"
+        @confirm="confirmDelete"
+      />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useLocalePath } from '#imports'
 import { useAuthEngine } from '../../features/auth/composables/useAuthEngine'
 import { useVendorEngine } from '../../features/vendor/composables/useVendorEngine'
@@ -115,7 +133,8 @@ import type { Vendor } from '../../features/vendor/types'
 
 const router = useRouter()
 const localePath = useLocalePath()
-const { activeTenant } = useAuthEngine()
+const { locale } = useI18n()
+const { activeTenant, isLab } = useAuthEngine()
 const {
   searchQuery,
   currentPage,
@@ -133,7 +152,9 @@ const isDeleteModalOpen = ref(false)
 const vendorToDelete = ref<Vendor | null>(null)
 
 onMounted(async () => {
-  await fetchVendors()
+  if (!isLab.value) {
+    await fetchVendors()
+  }
 })
 
 const handleOpenCreate = () => {

@@ -23,17 +23,18 @@
         </div>
       </div>
 
-      <!-- Controls: Refresh Button & Badges -->
+      <!-- Controls: Role Badge & Refresh Button -->
       <div class="flex flex-wrap items-center gap-2.5">
-        <UBadge color="indigo" variant="subtle" size="md" class="font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm">
+        <UBadge color="indigo" variant="subtle" size="md" class="font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm capitalize">
           <UIcon name="i-heroicons-shield-check" class="w-4.5 h-4.5 mr-1.5 text-indigo-500" />
-          {{ $t('dashboard.role') }} {{ user?.role || 'Admin' }}
+          {{ $t('dashboard.role') }} {{ user?.role || session?.role || 'Admin' }}
         </UBadge>
         <UBadge color="emerald" variant="solid" size="md" class="font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm text-white">
           <UIcon name="i-heroicons-sparkles" class="w-4.5 h-4.5 mr-1.5" />
           {{ company?.plan?.toUpperCase() || 'FREE' }} {{ $t('dashboard.plan') }}
         </UBadge>
         <UButton
+          v-if="isAdmin"
           color="neutral"
           variant="outline"
           size="md"
@@ -47,48 +48,67 @@
       </div>
     </div>
 
-    <!-- Error Alert banner if any -->
-    <UAlert
-      v-if="errorMsg"
-      color="rose"
-      variant="subtle"
-      icon="i-heroicons-exclamation-triangle"
-      :title="$t('dashboard.sync_error')"
-      :description="errorMsg"
-      class="rounded-2xl text-sm"
-    />
-
-    <!-- 4 Primary Executive Stat Cards Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <MetricCard
-        v-for="m in metrics"
-        :key="m.id"
-        :metric="m"
-      />
-    </div>
-
-    <!-- Daily Financial Income & Profit Bar Chart (Full Width) -->
-    <div class="grid grid-cols-1 gap-6">
-      <DailyFinancialBarChart
-        :by-date="dailyFinancialRecords"
-        :forecast-trend="dashboardData?.forecast_trend || []"
-      />
-    </div>
-
-    <!-- Revenue Forecast & Trend (Full Width Card) -->
-    <div class="grid grid-cols-1 gap-6">
-      <ForecastTrendChart :items="dashboardData?.forecast_trend || []" />
-    </div>
-
-    <!-- Combined 1/2 Section Grid: Top Sales Packages & Low Stock Alerts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div>
-        <TopSalesPackages :packages="dashboardData?.top_sales_packages || []" />
+    <!-- Requirement 4: Restricted Dashboard View for Standard User Type -->
+    <div v-if="!isAdmin" class="p-8 sm:p-12 rounded-3xl bg-slate-100/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-center space-y-4 shadow-sm my-6">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-500 shadow-inner">
+        <UIcon name="i-heroicons-shield-exclamation" class="w-10 h-10" />
       </div>
-      <div>
-        <LowStockAlert :items="dashboardData?.low_stock_items || []" />
-      </div>
+      <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
+        {{ locale === 'th' ? 'ข้อมูลแดชบอร์ดสงวนสิทธิ์เฉพาะผู้ใช้งานระดับ Admin' : 'Dashboard Information Restricted' }}
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">
+        {{ locale === 'th' 
+          ? 'คุณกำลังเข้าใช้งานในฐานะผู้ใช้ทั่วไป (User) ระบบไม่อนุญาตให้แสดงข้อมูลสถิติ ดัชนีชี้วัดทางการเงิน หรือรายงานสรุปสำหรับบัญชีประเภทนี้' 
+          : 'You are logged in as a standard User. Dashboard financial metrics, operational KPIs, and analytical reporting are restricted to Admin users.' 
+        }}
+      </p>
     </div>
+
+    <!-- Full Dashboard for Admin Users -->
+    <template v-else>
+      <!-- Error Alert banner if any -->
+      <UAlert
+        v-if="errorMsg"
+        color="rose"
+        variant="subtle"
+        icon="i-heroicons-exclamation-triangle"
+        :title="$t('dashboard.sync_error')"
+        :description="errorMsg"
+        class="rounded-2xl text-sm"
+      />
+
+      <!-- 4 Primary Executive Stat Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard
+          v-for="m in metrics"
+          :key="m.id"
+          :metric="m"
+        />
+      </div>
+
+      <!-- Daily Financial Income & Profit Bar Chart (Full Width) -->
+      <div class="grid grid-cols-1 gap-6">
+        <DailyFinancialBarChart
+          :by-date="dailyFinancialRecords"
+          :forecast-trend="dashboardData?.forecast_trend || []"
+        />
+      </div>
+
+      <!-- Revenue Forecast & Trend (Full Width Card) -->
+      <div class="grid grid-cols-1 gap-6">
+        <ForecastTrendChart :items="dashboardData?.forecast_trend || []" />
+      </div>
+
+      <!-- Combined 1/2 Section Grid: Top Sales Packages & Low Stock Alerts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <TopSalesPackages :packages="dashboardData?.top_sales_packages || []" />
+        </div>
+        <div>
+          <LowStockAlert :items="dashboardData?.low_stock_items || []" />
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -104,13 +124,15 @@ import TopSalesPackages from '../features/dashboard/components/TopSalesPackages.
 import LowStockAlert from '../features/dashboard/components/LowStockAlert.vue'
 
 const { locale } = useI18n()
-const { user, company, activeTenant } = useAuthEngine()
+const { user, session, company, activeTenant, isAdmin } = useAuthEngine()
 const { dashboardData, isLoading, errorMsg, metrics, dailyFinancialRecords, fetchDashboard } = useDashboardEngine()
 
-// Explicitly call /api/v1/dashboard exactly 1 time on page mount
+// Explicitly call /api/v1/dashboard only when user is Admin
 if (import.meta.client) {
   onMounted(() => {
-    fetchDashboard()
+    if (isAdmin.value) {
+      fetchDashboard()
+    }
   })
 }
 
@@ -137,6 +159,6 @@ const userName = computed(() => {
       ? `${user.value.first_name_th} ${user.value.last_name_th}` 
       : `${user.value.first_name_en} ${user.value.last_name_en}`
   }
-  return 'User'
+  return session.value?.name || 'User'
 })
 </script>

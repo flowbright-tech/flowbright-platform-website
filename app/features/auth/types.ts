@@ -28,6 +28,7 @@ export interface CompanyProfile {
   plan: string
   status: string
   image_url: string
+  company_type?: 'lab' | 'standard' | string
   created_at: string
   updated_at: string
 }

@@ -43,6 +43,66 @@ export const useAuthEngine = () => {
     return companyProfileState.value
   })
 
+  const isLab = computed(() => {
+    initializeFromStorage()
+    return companyProfileState.value?.company_type?.toLowerCase() === 'lab'
+  })
+
+  const isAdmin = computed(() => {
+    initializeFromStorage()
+    const r = (userProfileState.value?.role || session.value?.role || '').toLowerCase()
+    // Treat roles with 'admin' or 'manager' as Admin; 'user' as non-admin
+    if (r === 'user') return false
+    return r.includes('admin') || r.includes('manager') || r === 'system administrator' || r === ''
+  })
+
+  const setCompanyType = (type: 'lab' | 'standard') => {
+    if (!companyProfileState.value) {
+      companyProfileState.value = {
+        id: 'comp-01',
+        name_th: 'บริษัท ตัวอย่าง จำกัด',
+        name_en: 'Flow Bright Co., Ltd.',
+        tax_id: '0105566778899',
+        phone: '02-123-4567',
+        email: 'contact@flowbright.co',
+        address_th: 'กรุงเทพมหานคร',
+        address_en: 'Bangkok, Thailand',
+        plan: 'enterprise',
+        status: 'active',
+        image_url: '',
+        company_type: type,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    } else {
+      companyProfileState.value = {
+        ...companyProfileState.value,
+        company_type: type
+      }
+    }
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('srp_company_profile', JSON.stringify(companyProfileState.value))
+    }
+  }
+
+  const setUserRole = (role: string) => {
+    if (userProfileState.value) {
+      userProfileState.value = {
+        ...userProfileState.value,
+        role
+      }
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem('srp_user_profile', JSON.stringify(userProfileState.value))
+      }
+    }
+    if (session.value) {
+      session.value = {
+        ...session.value,
+        role
+      }
+    }
+  }
+
   const tenants = ref<Tenant[]>(MOCK_TENANTS)
 
   const activeTenant = computed(() => {
@@ -202,7 +262,11 @@ export const useAuthEngine = () => {
     login,
     loginWithProfile,
     user,
-    company
+    company,
+    isLab,
+    isAdmin,
+    setCompanyType,
+    setUserRole
   }
 }
 

@@ -317,7 +317,10 @@ import type { Category } from '../../category/types'
 import { useImageUpload } from '../../../composables/useImageUpload'
 import { useAppToast } from '../../../composables/useAppToast'
 
+import { useDomainLabels } from '../../../composables/useDomainLabels'
+
 const { t, locale } = useI18n()
+const { dl, isLab } = useDomainLabels()
 const { uploadImage } = useImageUpload()
 const { showError } = useAppToast()
 const isUploadingImage = ref(false)
@@ -383,15 +386,15 @@ const availableStock = computed(() => {
 })
 
 const productTypeOptions = computed(() => [
-  { label: t('products.type_standard') || 'Standard Inventory Item', value: 'standard' },
-  { label: t('products.type_service') || 'Service Charge / Non-Stock', value: 'service' },
-  { label: t('products.type_kit') || 'Kit / Assembly Bundle', value: 'kit' }
+  { label: dl('type_standard', 'Standard Item'), value: 'standard' },
+  { label: dl('type_service', 'Service Charge / Non-Stock'), value: 'service' },
+  { label: dl('type_kit', 'Kit / Assembly Bundle'), value: 'kit' }
 ])
 
 const categoryOptions = computed(() => {
   const list = props.categories || []
   return [
-    { label: t('products.no_category') || 'None (Uncategorized)', value: 'root' },
+    { label: dl('no_category', 'None (Uncategorized)'), value: 'root' },
     ...list.map(c => ({
       label: locale.value === 'th' ? c.name_th : c.name_en,
       value: c.id

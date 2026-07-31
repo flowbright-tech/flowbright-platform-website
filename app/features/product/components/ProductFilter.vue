@@ -4,7 +4,7 @@
     <!-- Search Bar -->
     <div class="flex-1 max-w-md">
       <UInput v-model="searchQuery" trailing-icon="i-heroicons-magnifying-glass"
-        :placeholder="$t('products.search_placeholder') || 'Search products by name or SKU...'" size="md" class="w-full">
+        :placeholder="searchPlaceholder" size="md" class="w-full">
         <template #trailing>
           <UButton v-if="searchQuery" color="neutral" variant="ghost" icon="i-heroicons-x-mark" size="xs" class="mr-1"
             @click="searchQuery = ''" />
@@ -12,16 +12,19 @@
       </UInput>
     </div>
 
-    <!-- Create Product Button -->
+    <!-- Create Product / Test Button -->
     <UButton color="primary" icon="i-heroicons-plus" size="md" class="font-semibold shadow-sm shrink-0"
       @click="$emit('open-create')">
-      {{ $t('products.add_product') || 'Add Product' }}
+      {{ addLabel }}
     </UButton>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useDomainLabels } from '../../../composables/useDomainLabels'
+
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
+const { searchPlaceholder, addLabel } = useDomainLabels()
 
 defineEmits<{
   (e: 'open-create'): void
