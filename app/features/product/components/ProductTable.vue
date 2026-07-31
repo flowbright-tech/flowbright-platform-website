@@ -66,16 +66,17 @@
           </div>
         </template>
 
-        <!-- Status Column -->
+        <!-- Status Column (Increased size & high visibility in both light & dark themes) -->
         <template #is_active-cell="{ row }">
-          <UBadge
-            :color="row.original.is_active ? 'success' : 'neutral'"
-            variant="soft"
-            size="sm"
-            class="font-semibold"
+          <span
+            :class="row.original.is_active
+              ? 'bg-emerald-500/15 text-emerald-950 border border-emerald-400/60 dark:bg-emerald-500/25 dark:text-emerald-300 dark:border-emerald-400/50'
+              : 'bg-slate-200/80 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold shadow-sm transition-all"
           >
+            <span class="w-2 h-2 rounded-full" :class="row.original.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
             {{ row.original.is_active ? $t('common.active') || 'Active' : $t('common.inactive') || 'Inactive' }}
-          </UBadge>
+          </span>
         </template>
 
         <!-- Created Date Column -->

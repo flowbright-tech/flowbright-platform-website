@@ -23,24 +23,24 @@
         </div>
       </template>
 
-      <!-- Payment Channel cell (Increased visibility in light & dark themes) -->
+      <!-- Payment Channel cell (Increased size & high visibility in both light & dark themes) -->
       <template #payment_channel-cell="{ row }">
         <span
           :class="getPaymentBadgeClass(row.original.payment_channel)"
-          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold capitalize transition-colors"
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold capitalize transition-all"
         >
-          <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-4 h-4 shrink-0" />
+          <UIcon :name="getPaymentIcon(row.original.payment_channel)" class="w-4.5 h-4.5 shrink-0" />
           {{ formatPaymentChannel(row.original.payment_channel) }}
         </span>
       </template>
 
-      <!-- Status cell (Increased badge size & human-friendly dark mode contrast) -->
+      <!-- Status cell (Increased size & high visibility in both light & dark themes) -->
       <template #status-cell="{ row }">
         <span
           :class="getStatusBadgeClass(row.original.status)"
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold capitalize transition-colors"
+          class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-extrabold capitalize transition-all"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
+          <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
           {{ formatStatus(row.original.status) }}
         </span>
       </template>
@@ -153,15 +153,15 @@ const getStatusBadgeColor = (status: string) => {
 const getStatusBadgeClass = (status: string) => {
   switch (status?.toLowerCase()) {
     case 'pending':
-      return 'bg-amber-100/90 text-amber-950 border border-amber-300/80 dark:bg-amber-950/90 dark:text-amber-200 dark:border-amber-700/80 font-bold shadow-sm'
+      return 'bg-amber-500/15 text-amber-950 border border-amber-400/60 dark:bg-amber-500/25 dark:text-amber-300 dark:border-amber-400/50 shadow-sm'
     case 'processing':
-      return 'bg-sky-100/90 text-sky-950 border border-sky-300/80 dark:bg-sky-950/90 dark:text-sky-200 dark:border-sky-700/80 font-bold shadow-sm'
+      return 'bg-sky-500/15 text-sky-950 border border-sky-400/60 dark:bg-sky-500/25 dark:text-sky-300 dark:border-sky-400/50 shadow-sm'
     case 'completed':
-      return 'bg-emerald-100/90 text-emerald-950 border border-emerald-300/80 dark:bg-emerald-950/90 dark:text-emerald-200 dark:border-emerald-700/80 font-bold shadow-sm'
+      return 'bg-emerald-500/15 text-emerald-950 border border-emerald-400/60 dark:bg-emerald-500/25 dark:text-emerald-300 dark:border-emerald-400/50 shadow-sm'
     case 'cancelled':
-      return 'bg-rose-100/90 text-rose-950 border border-rose-300/80 dark:bg-rose-950/90 dark:text-rose-200 dark:border-rose-700/80 font-bold shadow-sm'
+      return 'bg-rose-500/15 text-rose-950 border border-rose-400/60 dark:bg-rose-500/25 dark:text-rose-300 dark:border-rose-400/50 shadow-sm'
     default:
-      return 'bg-slate-100 text-slate-900 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 font-bold shadow-sm'
+      return 'bg-slate-200/80 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 shadow-sm'
   }
 }
 
@@ -178,13 +178,13 @@ const formatStatus = (status: string) => {
 const getPaymentBadgeClass = (channel: string) => {
   switch (channel?.toLowerCase()) {
     case 'cash':
-      return 'bg-amber-100/75 text-amber-950 border border-amber-300/80 dark:bg-amber-950/70 dark:text-amber-200 dark:border-amber-700/70 font-bold shadow-sm'
+      return 'bg-amber-500/15 text-amber-950 border border-amber-400/60 dark:bg-amber-500/25 dark:text-amber-300 dark:border-amber-400/50 shadow-sm'
     case 'credit_card':
-      return 'bg-indigo-100/75 text-indigo-950 border border-indigo-300/80 dark:bg-indigo-950/70 dark:text-indigo-200 dark:border-indigo-700/70 font-bold shadow-sm'
+      return 'bg-indigo-500/15 text-indigo-950 border border-indigo-400/60 dark:bg-indigo-500/25 dark:text-indigo-300 dark:border-indigo-400/50 shadow-sm'
     case 'internet_banking':
-      return 'bg-cyan-100/75 text-cyan-950 border border-cyan-300/80 dark:bg-cyan-950/70 dark:text-cyan-200 dark:border-cyan-700/70 font-bold shadow-sm'
+      return 'bg-cyan-500/15 text-cyan-950 border border-cyan-400/60 dark:bg-cyan-500/25 dark:text-cyan-300 dark:border-cyan-400/50 shadow-sm'
     default:
-      return 'bg-slate-100/80 text-slate-900 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 font-bold shadow-sm'
+      return 'bg-slate-200/80 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 shadow-sm'
   }
 }
 

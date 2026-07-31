@@ -50,16 +50,17 @@
           </span>
         </template>
 
-        <!-- Type Column -->
+        <!-- Type Column (Increased size & high visibility in both light & dark themes) -->
         <template #type-cell="{ row }">
-          <UBadge
-            :color="row.original.type === 'company' ? 'indigo' : 'sky'"
-            variant="subtle"
-            size="xs"
-            class="uppercase text-[10px] font-extrabold px-2 py-0.5"
+          <span
+            :class="row.original.type === 'company'
+              ? 'bg-indigo-500/15 text-indigo-950 border border-indigo-400/60 dark:bg-indigo-500/25 dark:text-indigo-300 dark:border-indigo-400/50'
+              : 'bg-sky-500/15 text-sky-950 border border-sky-400/60 dark:bg-sky-500/25 dark:text-sky-300 dark:border-sky-400/50'"
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold uppercase shadow-sm transition-all"
           >
+            <UIcon :name="row.original.type === 'company' ? 'i-heroicons-building-office' : 'i-heroicons-user'" class="w-4 h-4 shrink-0" />
             {{ row.original.type || 'company' }}
-          </UBadge>
+          </span>
         </template>
 
         <!-- Created Date Column formatted as dd-mmm-yy hh:mm -->
