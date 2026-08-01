@@ -67,7 +67,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useLocalePath } from '#imports'
 import { useProductEngine } from '../../features/product/composables/useProductEngine'
 import { useCategoryEngine } from '../../features/category/composables/useCategoryEngine'
-import { useAppToast } from '../../composables/useAppToast'
+import { useDomainLabels } from '../../composables/useDomainLabels'
 import ProductForm from '../../features/product/components/ProductForm.vue'
 import type { Product, ProductFormData } from '../../features/product/types'
 
@@ -77,6 +77,7 @@ const localePath = useLocalePath()
 const { fetchProductById, updateProduct, isLoading, errorMsg } = useProductEngine()
 const { allCategories, fetchAllCategories } = useCategoryEngine()
 const { showSuccess } = useAppToast()
+const { isLab } = useDomainLabels()
 
 const product = ref<Product | null>(null)
 
@@ -95,10 +96,10 @@ const handleSave = async (data: ProductFormData) => {
   if (product.value) {
     try {
       await updateProduct(product.value.id, data)
-      showSuccess('update', 'Product')
+      showSuccess('update', isLab.value ? 'Test' : 'Product')
       router.push(localePath('/products'))
     } catch (e) {
-      // Handled in composable
+      console.error('Save failed:', e)
     }
   }
 }

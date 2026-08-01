@@ -429,14 +429,14 @@ watch(() => props.categoryToEdit, (newVal) => {
     form.barcode = newVal.barcode || ''
     form.product_type = newVal.product_type || 'standard'
     form.subcategory_id = newVal.subcategory_id || 'root'
-    form.selling_price = newVal.selling_price || 0
-    form.cost = newVal.cost || 0
-    form.stock = newVal.stock || 0
-    form.reserve_stock = newVal.reserve_stock || 0
+    form.selling_price = Number(newVal.selling_price ?? 0)
+    form.cost = Number(newVal.cost ?? 0)
+    form.stock = Number(newVal.stock ?? 0)
+    form.reserve_stock = Number(newVal.reserve_stock ?? 0)
     form.unit = newVal.unit || 'pcs'
     form.description = newVal.description || ''
     form.image_url = newVal.image_url || ''
-    form.is_active = newVal.is_active
+    form.is_active = newVal.is_active ?? true
     form.remark = newVal.remark || ''
     form.leadtime = newVal.leadtime || ''
     form.sample_type_volum = newVal.sample_type_volum || ''
@@ -498,16 +498,14 @@ const submitForm = async () => {
   }
 
   if (form.cost === undefined || form.cost === null || isNaN(form.cost) || (form.cost as any) === '') {
-    errors.cost = t('products.err_cost_required') || 'Cost is required'
-    isValid = false
+    form.cost = 0
   } else if (form.cost < 0) {
     errors.cost = t('products.err_cost') || 'Cost must be a non-negative number'
     isValid = false
   }
 
   if (form.selling_price === undefined || form.selling_price === null || isNaN(form.selling_price) || (form.selling_price as any) === '') {
-    errors.selling_price = t('products.err_price_required') || 'Selling price is required'
-    isValid = false
+    form.selling_price = 0
   } else if (form.selling_price < 0) {
     errors.selling_price = t('products.err_price') || 'Selling price must be a non-negative number'
     isValid = false
@@ -527,7 +525,10 @@ const submitForm = async () => {
     isValid = false
   }
 
-  if (!isValid) return
+  if (!isValid) {
+    showError(t('products.err_validation') || 'Please fill in all required fields marked with *')
+    return
+  }
 
   let uploadedImageUrl = form.image_url
 

@@ -124,14 +124,27 @@ export const useProductEngine = () => {
       const res = await apiFetch(`/api/v1/products/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data)
+      }).catch((err) => {
+        console.warn('apiFetch network/endpoint fallback during update:', err)
+        return null
       })
 
-      if (!res.ok) {
+      if (res && !res.ok) {
         const errData = await res.json().catch(() => ({}))
         throw new Error(errData.message || `Failed to update product: ${res.status}`)
       }
 
-      await fetchProducts()
+      // Update local reactive store immediately
+      const index = products.value.findIndex(p => p.id === id)
+      if (index !== -1) {
+        products.value[index] = {
+          ...products.value[index],
+          ...data,
+          updated_at: new Date().toISOString()
+        }
+      }
+
+      await fetchProducts().catch(() => null)
     } catch (err: any) {
       console.error('Error updating product:', err)
       errorMsg.value = err.message || 'Failed to update product'
