@@ -110,7 +110,7 @@
 
             <!-- Row 2 -->
             <div class="flex justify-between items-center w-full">
-              <div class="w-[60%] text-left whitespace-nowrap">
+              <div class="w-[45%] text-left whitespace-nowrap overflow-hidden text-ellipsis">
                 <span class="font-bold text-slate-800">ชื่อ</span>
                 <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Name )</span>
                 <span class="text-slate-800 font-bold ml-0.5">:</span>
@@ -118,7 +118,13 @@
                   {{ getCustomerFullName() }}
                 </span>
               </div>
-              <div class="w-[40%] text-right whitespace-nowrap">
+              <div class="w-[30%] text-center whitespace-nowrap">
+                <span class="font-bold text-slate-800">วันเดือนปีเกิด</span>
+                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Date of Birth )</span>
+                <span class="text-slate-800 font-bold ml-0.5">:</span>
+                <span class="font-mono font-bold text-slate-900 ml-1.5">{{ formatBirthDate(customer?.birth_date) }}</span>
+              </div>
+              <div class="w-[25%] text-right whitespace-nowrap">
                 <span class="font-bold text-slate-800">อายุ</span>
                 <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Age )</span>
                 <span class="text-slate-800 font-bold ml-0.5">:</span>
@@ -260,6 +266,11 @@ const fetchInvoiceData = async () => {
 
 // Helpers
 const formatInvoiceDate = (dateStr?: string) => {
+  if (!dateStr) return '-'
+  return formatDeliveryDate(dateStr).replace(/-/g, '/')
+}
+
+const formatBirthDate = (dateStr?: string) => {
   if (!dateStr) return '-'
   return formatDeliveryDate(dateStr).replace(/-/g, '/')
 }

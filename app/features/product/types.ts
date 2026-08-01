@@ -28,6 +28,7 @@ export interface Product {
   method?: string | null
   clinical_use?: string | null
   reference_range_unit?: string | null
+  lab_flag?: string | null
 }
 
 export interface ProductFormData {
@@ -54,4 +55,5 @@ export interface ProductFormData {
   method?: string | null
   clinical_use?: string | null
   reference_range_unit?: string | null
+  lab_flag?: string | null
 }

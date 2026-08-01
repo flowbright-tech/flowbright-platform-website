@@ -122,7 +122,8 @@ describe('Product Engine API & Logic', () => {
       stock: 10,
       reserve_stock: 0,
       unit: 'pcs',
-      is_active: true
+      is_active: true,
+      lab_flag: 'labout'
     }
 
     const { addProduct } = useProductEngine()
@@ -133,6 +134,43 @@ describe('Product Engine API & Logic', () => {
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify(newProductData)
+      })
+    )
+  })
+
+  it('should support lab_flag in product payload for labin / labout', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        data: []
+      })
+    })
+
+    const labInProduct = {
+      name_en: 'CBC In-House Test',
+      name_th: 'ตรวจความสมบูรณ์ของเม็ดเลือด',
+      sku: 'LAB-CBC-01',
+      barcode: '',
+      product_type: 'service',
+      selling_price: 350,
+      cost: 100,
+      stock: 0,
+      reserve_stock: 0,
+      unit: 'test',
+      is_active: true,
+      lab_flag: 'labin'
+    }
+
+    const { addProduct } = useProductEngine()
+    await addProduct(labInProduct)
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://flowbright-platform-api.onrender.com/api/v1/products',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('"lab_flag":"labin"')
       })
     )
   })

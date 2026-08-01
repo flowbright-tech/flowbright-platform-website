@@ -63,6 +63,8 @@
       <!-- Actions cell -->
       <template #actions-cell="{ row }">
         <div class="flex items-center justify-end gap-1">
+          <UButton color="neutral" variant="ghost" icon="i-heroicons-beaker" size="md"
+            :title="$t('orders.lab_form') || 'Lab In/Out Form'" @click="$emit('openLabForm', row.original)" />
           <UButton color="neutral" variant="ghost" icon="i-heroicons-identification" size="md"
             :title="$t('orders.print_document') || 'Print Document'" @click="$emit('printDocument', row.original)" />
           <UButton color="neutral" variant="ghost" icon="i-heroicons-printer" size="md"
@@ -122,6 +124,7 @@ defineEmits<{
   (e: 'delete', id: string): void
   (e: 'print', order: Order): void
   (e: 'printDocument', order: Order): void
+  (e: 'openLabForm', order: Order): void
 }>()
 
 const { t } = useI18n()

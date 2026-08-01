@@ -61,6 +61,7 @@
       @delete="handleConfirmDelete"
       @print="handlePrintInvoice"
       @print-document="handlePrintDocument"
+      @open-lab-form="handleOpenLabForm"
     />
 
     <!-- Reusable Confirm Modal for Deletion -->
@@ -145,6 +146,13 @@ const handlePrintInvoice = (order: Order) => {
 const handlePrintDocument = (order: Order) => {
   if (import.meta.client) {
     const routeUrl = localePath(`/orders/${order.id}/document`)
+    window.open(routeUrl, '_blank')
+  }
+}
+
+const handleOpenLabForm = (order: Order) => {
+  if (import.meta.client) {
+    const routeUrl = localePath(`/orders/${order.id}/lab-form`)
     window.open(routeUrl, '_blank')
   }
 }

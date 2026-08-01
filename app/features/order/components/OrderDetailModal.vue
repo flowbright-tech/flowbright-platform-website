@@ -129,6 +129,20 @@
             ฿{{ formatCurrency(order.total_amount) }}
           </span>
         </div>
+
+        <!-- Action Bar in Modal -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <UButton
+            color="emerald"
+            variant="soft"
+            icon="i-heroicons-beaker"
+            size="sm"
+            class="font-bold"
+            @click="openLabForm(order.id)"
+          >
+            {{ $t('orders.lab_form') || 'Open Lab In/Out Form' }}
+          </UButton>
+        </div>
       </div>
     </template>
   </UModal>
@@ -223,6 +237,12 @@ const formatPaymentChannel = (channel?: string) => {
     case 'credit_card': return t('orders.payment_credit_card') || 'Credit Card'
     case 'internet_banking': return t('orders.payment_internet_banking') || 'Internet Banking'
     default: return channel || '-'
+  }
+}
+
+const openLabForm = (id: string) => {
+  if (typeof window !== 'undefined') {
+    window.open(`/orders/${id}/lab-form`, '_blank')
   }
 }
 </script>

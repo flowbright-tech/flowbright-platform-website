@@ -107,8 +107,8 @@
           </div>
         </div>
 
-        <!-- Section 2: Product Image -->
-        <div class="space-y-4 pt-4 border-t border-muted">
+        <!-- Section 2: Product Image (Hidden for Lab company type) -->
+        <div v-if="!isLab" class="space-y-4 pt-4 border-t border-muted">
           <h3 class="text-sm font-bold text-highlighted">
             {{ $t('products.sec_image') || 'Product Image' }}
           </h3>
@@ -155,14 +155,14 @@
           </UFormField>
         </div>
 
-        <!-- Section 4: Pricing & Inventory -->
+        <!-- Section 4: Pricing & Financials / Inventory -->
         <div class="space-y-4 pt-4 border-t border-muted">
           <h3 class="text-sm font-bold text-highlighted pb-2 border-b border-muted">
-            {{ $t('products.sec_financial_pricing') || 'Pricing & Inventory' }}
+            {{ isLab ? ($t('products.sec_financial_pricing_lab') || 'Pricing & Financials') : ($t('products.sec_financial_pricing') || 'Pricing & Inventory') }}
           </h3>
 
           <!-- KPI Summary Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 gap-4" :class="{ 'sm:grid-cols-2': !isLab }">
             <div class="p-4 rounded-xl border border-muted bg-muted flex items-center justify-between">
               <div class="space-y-0.5">
                 <span class="text-[10px] text-dimmed font-bold uppercase tracking-wider">{{ $t('products.profit_margin') || 'Gross Profit Margin' }}</span>
@@ -175,7 +175,7 @@
               </div>
             </div>
 
-            <div class="p-4 rounded-xl border border-muted bg-muted flex items-center justify-between">
+            <div v-if="!isLab" class="p-4 rounded-xl border border-muted bg-muted flex items-center justify-between">
               <div class="space-y-0.5">
                 <span class="text-[10px] text-dimmed font-bold uppercase tracking-wider">{{ $t('products.available_stock') || 'Available Inventory' }}</span>
                 <h5 class="text-xl font-black text-info">
@@ -221,30 +221,32 @@
               />
             </UFormField>
 
-            <UFormField :error="errors.stock || undefined" :label="$t('products.stock') || 'Total Stock'">
-              <UInput
-                v-model.number="form.stock"
-                type="number"
-                min="0"
-                placeholder="0"
-                size="md"
-                class="w-full"
-              />
-            </UFormField>
+            <template v-if="!isLab">
+              <UFormField :error="errors.stock || undefined" :label="$t('products.stock') || 'Total Stock'">
+                <UInput
+                  v-model.number="form.stock"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  size="md"
+                  class="w-full"
+                />
+              </UFormField>
 
-            <UFormField :error="errors.reserve_stock || undefined" :label="$t('products.reserve_stock') || 'Reserve Stock'">
-              <UInput
-                v-model.number="form.reserve_stock"
-                type="number"
-                min="0"
-                placeholder="0"
-                size="md"
-                class="w-full"
-              />
-            </UFormField>
+              <UFormField :error="errors.reserve_stock || undefined" :label="$t('products.reserve_stock') || 'Reserve Stock'">
+                <UInput
+                  v-model.number="form.reserve_stock"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  size="md"
+                  class="w-full"
+                />
+              </UFormField>
+            </template>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-if="!isLab" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <UFormField :label="$t('products.storage_condition') || 'Storage Condition'">
               <UInput v-model="form.storage_condition" placeholder="e.g. 2-8°C, -20°C, Room Temp" size="md" class="w-full" />
             </UFormField>
@@ -261,7 +263,18 @@
             {{ $t('products.sec_specs') || 'Specifications / Lab Details' }}
           </h3>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <UFormField :label="$t('products.lab_flag') || 'Lab Flag'">
+              <USelectMenu
+                v-model="form.lab_flag"
+                :items="labFlagOptions"
+                value-key="value"
+                label-key="label"
+                size="md"
+                class="w-full"
+              />
+            </UFormField>
+
             <UFormField :label="$t('products.sample_type_volum') || 'Sample Type / Volume'">
               <UInput v-model="form.sample_type_volum" placeholder="e.g. Serum 500uL" size="md" class="w-full" />
             </UFormField>
@@ -359,7 +372,8 @@ const form = reactive({
   principle: '',
   method: '',
   clinical_use: '',
-  reference_range_unit: ''
+  reference_range_unit: '',
+  lab_flag: 'labout'
 })
 
 const errors = reactive({
@@ -384,6 +398,11 @@ const grossMargin = computed(() => {
 const availableStock = computed(() => {
   return Math.max(0, form.stock - form.reserve_stock)
 })
+
+const labFlagOptions = [
+  { label: 'Lab Out', value: 'labout' },
+  { label: 'Lab In', value: 'labin' }
+]
 
 const productTypeOptions = computed(() => [
   { label: dl('type_standard', 'Standard Item'), value: 'standard' },
@@ -427,6 +446,7 @@ watch(() => props.categoryToEdit, (newVal) => {
     form.method = newVal.method || ''
     form.clinical_use = newVal.clinical_use || ''
     form.reference_range_unit = newVal.reference_range_unit || ''
+    form.lab_flag = newVal.lab_flag || 'labout'
   }
 }, { immediate: true })
 
@@ -548,7 +568,8 @@ const submitForm = async () => {
     principle: form.principle || '',
     method: form.method || '',
     clinical_use: form.clinical_use || '',
-    reference_range_unit: form.reference_range_unit || ''
+    reference_range_unit: form.reference_range_unit || '',
+    lab_flag: form.lab_flag || 'labout'
   }
 
   emit('save', payload)
