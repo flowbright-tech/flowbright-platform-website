@@ -85,21 +85,21 @@
             </div>
           </div>
 
-          <!-- Document Profile Metadata (Beautified Single-Language Responsive Grid) -->
+          <!-- Document Profile Metadata (Perfectly Aligned 3-Column Grid) -->
           <div class="bg-slate-50/80 border border-slate-200/80 rounded-xl p-3.5 sm:p-4 space-y-3 text-slate-800 text-[11.5px] font-medium my-4 shadow-2xs">
-            <!-- Row 1: Billing Date, HN, Payment Channel -->
+            <!-- Row 1: Billing Date (Left), HN (Center), Payment Channel (Right) -->
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 pb-3 border-b border-slate-200/80 items-center">
-              <div class="sm:col-span-4 flex items-center gap-1">
+              <div class="sm:col-span-4 flex items-center justify-start gap-1">
                 <span class="font-bold text-slate-800 shrink-0">
                   {{ locale === 'th' ? 'วันที่' : 'Date' }} :
                 </span>
                 <span class="font-mono font-bold text-slate-900 ml-0.5">{{ formatInvoiceDate(invoice?.delivery_date) }}</span>
               </div>
-              <div class="sm:col-span-3 flex items-center justify-center gap-1 shrink-0 text-center">
+              <div class="sm:col-span-4 flex items-center justify-center gap-1 shrink-0 text-center">
                 <span class="font-bold text-slate-800 shrink-0">HN :</span>
                 <span class="font-mono font-bold text-slate-900 ml-0.5">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
               </div>
-              <div class="sm:col-span-5 flex items-center justify-end gap-1 shrink-0">
+              <div class="sm:col-span-4 flex items-center justify-end gap-1 shrink-0">
                 <span class="font-bold text-slate-800 shrink-0">
                   {{ locale === 'th' ? 'ช่องทางการชำระเงิน' : 'Payment Channel' }} :
                 </span>
@@ -107,10 +107,10 @@
               </div>
             </div>
 
-            <!-- Row 2: Customer Name, Date of Birth (Centralized), Age (Y/M/D) -->
+            <!-- Row 2: Customer Name (Left), Date of Birth (Center), Age (Right) -->
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center">
               <!-- Name -->
-              <div class="sm:col-span-4 flex items-center gap-1 min-w-0">
+              <div class="sm:col-span-4 flex items-center justify-start gap-1 min-w-0">
                 <span class="font-bold text-slate-800 shrink-0">
                   {{ locale === 'th' ? 'ชื่อ' : 'Name' }} :
                 </span>
@@ -119,7 +119,7 @@
                 </span>
               </div>
 
-              <!-- Date of Birth (Centralized) -->
+              <!-- Date of Birth (Centralized - Vertically Aligned with HN) -->
               <div class="sm:col-span-4 flex items-center justify-center gap-1 shrink-0 text-center">
                 <span class="font-bold text-slate-800 shrink-0">
                   {{ locale === 'th' ? 'วันเดือนปีเกิด' : 'Date of Birth' }} :
@@ -173,24 +173,6 @@
                 {{ formatCurrency(invoice?.total_amount) }}
               </span>
             </div>
-          </div>
-        </div>
-
-        <!-- Footer Collector Signatures & print timestamp -->
-        <div class="mt-24">
-          <div class="flex justify-between items-center text-[12px]">
-            <div class="text-slate-400">
-              <!-- Left side spacing -->
-            </div>
-            <div class="text-center font-bold text-slate-800">
-              <span class="mr-1">{{ locale === 'th' ? 'ผู้รับเงิน' : 'Collector' }}</span>
-              <span class="ml-1">..............................................................</span>
-            </div>
-          </div>
-
-          <!-- Printing timestamp details at bottom right -->
-          <div class="flex justify-end text-[9px] font-bold text-slate-400 mt-12">
-            Printing Date {{ printDate }}
           </div>
         </div>
       </div>

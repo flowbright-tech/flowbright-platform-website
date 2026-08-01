@@ -385,7 +385,8 @@
     "err_price_required": "Selling price is required",
     "err_price": "Selling price must be a non-negative number",
     "err_stock": "Stock count must be a non-negative number",
-    "err_reserve": "Reserve stock must be a non-negative number"
+    "err_reserve": "Reserve stock must be a non-negative number",
+    "err_validation": "Please fill in all required fields marked with *"
   },
   "tests": {
     "title": "Test Master",
@@ -408,6 +409,10 @@
     "is_active": "Active Status",
     "sec_financial": "Pricing & Test Parameters",
     "sec_financial_pricing": "Pricing & Laboratory Specs",
+    "sec_financial_pricing_lab": "Pricing & Financials",
+    "profit_margin": "Gross Profit Margin",
+    "available_stock": "Available Test Capacity",
+    "lab_flag": "Lab Flag (In/Out)",
     "cost": "Test Cost (THB)",
     "selling_price": "Test Fee (THB)",
     "stock": "Test Capacity",
@@ -446,7 +451,16 @@
     "col_actions": "Actions",
     "err_name_en": "English test name is required",
     "err_name_th": "Thai test name is required",
-    "err_sku": "Test code identifier is required"
+    "err_sku": "Test code identifier is required",
+    "err_unit": "Test unit is required",
+    "err_product_type": "Test type is required",
+    "err_cost_required": "Test cost is required",
+    "err_cost": "Test cost must be a non-negative number",
+    "err_price_required": "Test fee is required",
+    "err_price": "Test fee must be a non-negative number",
+    "err_stock": "Test capacity must be a non-negative number",
+    "err_reserve": "Reserve capacity must be a non-negative number",
+    "err_validation": "Please fill in all required fields marked with *"
   },
   "boms": {
     "title": "Bill of Materials (BOM) Master",

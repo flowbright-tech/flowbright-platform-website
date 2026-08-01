@@ -473,60 +473,65 @@ const submitForm = async () => {
   })
 
   if (!form.name_en.trim()) {
-    errors.name_en = t('products.err_name_en') || 'English name is required'
+    errors.name_en = dl('err_name_en', 'English name is required')
     isValid = false
   }
 
   if (!form.name_th.trim()) {
-    errors.name_th = t('products.err_name_th') || 'Thai name is required'
+    errors.name_th = dl('err_name_th', 'Thai name is required')
     isValid = false
   }
 
   if (!form.sku.trim()) {
-    errors.sku = t('products.err_sku') || 'SKU identifier is required'
+    errors.sku = dl('err_sku', 'SKU identifier is required')
     isValid = false
   }
 
   if (!form.product_type) {
-    errors.product_type = t('products.err_product_type') || 'Product type is required'
+    errors.product_type = dl('err_product_type', 'Product type is required')
     isValid = false
   }
 
   if (!form.unit.trim()) {
-    errors.unit = t('products.err_unit') || 'Unit is required'
+    errors.unit = dl('err_unit', 'Unit is required')
     isValid = false
   }
 
   if (form.cost === undefined || form.cost === null || isNaN(form.cost) || (form.cost as any) === '') {
     form.cost = 0
   } else if (form.cost < 0) {
-    errors.cost = t('products.err_cost') || 'Cost must be a non-negative number'
+    errors.cost = dl('err_cost', 'Cost must be a non-negative number')
     isValid = false
   }
 
   if (form.selling_price === undefined || form.selling_price === null || isNaN(form.selling_price) || (form.selling_price as any) === '') {
     form.selling_price = 0
   } else if (form.selling_price < 0) {
-    errors.selling_price = t('products.err_price') || 'Selling price must be a non-negative number'
+    errors.selling_price = dl('err_price', 'Selling price must be a non-negative number')
     isValid = false
   }
 
-  if (form.stock === undefined || form.stock === null || isNaN(form.stock) || (form.stock as any) === '') {
+  if (isLab.value) {
     form.stock = 0
-  } else if (form.stock < 0) {
-    errors.stock = t('products.err_stock') || 'Stock count must be a non-negative number'
-    isValid = false
-  }
-
-  if (form.reserve_stock === undefined || form.reserve_stock === null || isNaN(form.reserve_stock) || (form.reserve_stock as any) === '') {
     form.reserve_stock = 0
-  } else if (form.reserve_stock < 0) {
-    errors.reserve_stock = t('products.err_reserve') || 'Reserve stock must be a non-negative number'
-    isValid = false
+  } else {
+    if (form.stock === undefined || form.stock === null || isNaN(form.stock) || (form.stock as any) === '') {
+      form.stock = 0
+    } else if (form.stock < 0) {
+      errors.stock = dl('err_stock', 'Stock count must be a non-negative number')
+      isValid = false
+    }
+
+    if (form.reserve_stock === undefined || form.reserve_stock === null || isNaN(form.reserve_stock) || (form.reserve_stock as any) === '') {
+      form.reserve_stock = 0
+    } else if (form.reserve_stock < 0) {
+      errors.reserve_stock = dl('err_reserve', 'Reserve stock must be a non-negative number')
+      isValid = false
+    }
   }
 
   if (!isValid) {
-    showError(t('products.err_validation') || 'Please fill in all required fields marked with *')
+    showError(dl('err_validation', 'Please fill in all required fields marked with *'))
     return
   }
 
