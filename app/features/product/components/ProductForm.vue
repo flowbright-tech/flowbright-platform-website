@@ -520,7 +520,9 @@ const submitForm = async () => {
     isValid = false
   }
 
-  if (form.reserve_stock === undefined || form.reserve_stock === null || isNaN(form.reserve_stock) || form.reserve_stock < 0) {
+  if (form.reserve_stock === undefined || form.reserve_stock === null || isNaN(form.reserve_stock) || (form.reserve_stock as any) === '') {
+    form.reserve_stock = 0
+  } else if (form.reserve_stock < 0) {
     errors.reserve_stock = t('products.err_reserve') || 'Reserve stock must be a non-negative number'
     isValid = false
   }
@@ -545,17 +547,27 @@ const submitForm = async () => {
     }
   }
 
+  const extractVal = (val: any): string => {
+    if (!val) return ''
+    if (typeof val === 'object' && 'value' in val) return String(val.value)
+    return String(val)
+  }
+
+  const selectedType = extractVal(form.product_type) || 'standard'
+  const selectedCat = extractVal(form.subcategory_id)
+  const selectedLabFlag = extractVal(form.lab_flag) || 'labout'
+
   const payload: ProductFormData = {
     name_en: form.name_en,
     name_th: form.name_th,
     sku: form.sku,
     barcode: form.barcode || '',
-    product_type: form.product_type,
-    subcategory_id: form.subcategory_id === 'root' ? null : (form.subcategory_id || null),
-    selling_price: form.selling_price,
-    cost: form.cost,
-    stock: form.stock,
-    reserve_stock: form.reserve_stock,
+    product_type: selectedType,
+    subcategory_id: (selectedCat === 'root' || !selectedCat) ? null : selectedCat,
+    selling_price: Number(form.selling_price || 0),
+    cost: Number(form.cost || 0),
+    stock: isLab.value ? 0 : Number(form.stock || 0),
+    reserve_stock: isLab.value ? 0 : Number(form.reserve_stock || 0),
     unit: form.unit,
     description: form.description || '',
     image_url: uploadedImageUrl || null,
@@ -569,7 +581,7 @@ const submitForm = async () => {
     method: form.method || '',
     clinical_use: form.clinical_use || '',
     reference_range_unit: form.reference_range_unit || '',
-    lab_flag: form.lab_flag || 'labout'
+    lab_flag: selectedLabFlag
   }
 
   emit('save', payload)

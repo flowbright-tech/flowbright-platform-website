@@ -335,6 +335,10 @@
     "is_active": "Active Status",
     "sec_financial": "Financials & Stock Levels",
     "sec_financial_pricing": "Pricing & Inventory",
+    "sec_financial_pricing_lab": "Pricing & Financials",
+    "profit_margin": "Gross Profit Margin",
+    "available_stock": "Available Inventory",
+    "lab_flag": "Lab Flag (In/Out)",
     "cost": "Unit Cost (THB)",
     "selling_price": "Selling Price (THB)",
     "stock": "Initial Stock",
@@ -569,7 +573,9 @@
     "view_detail": "View Details",
     "order_detail_title": "Order Specification Detail",
     "print_invoice": "Print Invoice",
-    "print_document": "Print Document"
+    "print_document": "Print Document",
+    "lab_form": "Lab Technician Worksheet (Lab In/Out)",
+    "col_tests": "Tests"
   },
   "errors": {
     "bad_request_title": "Invalid Request (400)",

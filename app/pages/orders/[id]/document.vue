@@ -85,50 +85,55 @@
             </div>
           </div>
 
-          <!-- Document Profile Metadata (2 Clean Rows) -->
-          <div class="space-y-3 border-y border-slate-200 py-3.5 text-slate-800 text-[11.5px] font-medium">
-            <!-- Row 1 -->
-            <div class="flex justify-between items-center w-full">
-              <div class="w-[32%] text-left whitespace-nowrap">
-                <span class="font-bold text-slate-800">วันที่</span>
-                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Billing Date. )</span>
-                <span class="text-slate-800 font-bold ml-0.5">:</span>
-                <span class="font-mono font-bold text-slate-900 ml-1.5">{{ formatInvoiceDate(invoice?.delivery_date) }}</span>
+          <!-- Document Profile Metadata (Beautified Responsive Grid) -->
+          <div class="bg-slate-50/80 border border-slate-200/80 rounded-xl p-3.5 sm:p-4 space-y-3 text-slate-800 text-[11.5px] font-medium my-4 shadow-2xs">
+            <!-- Row 1: Billing Date, HN, Payment Channel -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 pb-3 border-b border-slate-200/80 items-center">
+              <div class="sm:col-span-4 flex items-center gap-1">
+                <span class="font-bold text-slate-800 shrink-0">วันที่</span>
+                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Billing Date )</span>
+                <span class="text-slate-800 font-bold shrink-0">:</span>
+                <span class="font-mono font-bold text-slate-900 ml-1">{{ formatInvoiceDate(invoice?.delivery_date) }}</span>
               </div>
-              <div class="w-[20%] text-center whitespace-nowrap">
-                <span class="font-bold text-slate-800">HN</span>
-                <span class="text-slate-800 font-bold ml-0.5">:</span>
-                <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
+              <div class="sm:col-span-3 flex items-center gap-1 sm:justify-center">
+                <span class="font-bold text-slate-800 shrink-0">HN</span>
+                <span class="text-slate-800 font-bold shrink-0">:</span>
+                <span class="font-mono font-bold text-slate-900 ml-1">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
               </div>
-              <div class="w-[48%] text-right whitespace-nowrap">
-                <span class="font-bold text-slate-800">ช่องทางการชำระเงิน</span>
-                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Payment Channel )</span>
-                <span class="text-slate-800 font-bold ml-0.5">:</span>
-                <span class="font-bold text-slate-900 ml-1.5 capitalize">{{ formatPaymentChannel(invoice?.payment_channel) }}</span>
+              <div class="sm:col-span-5 flex items-center gap-1 sm:justify-end">
+                <span class="font-bold text-slate-800 shrink-0">ช่องทางการชำระเงิน</span>
+                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Payment Channel )</span>
+                <span class="text-slate-800 font-bold shrink-0">:</span>
+                <span class="font-bold text-slate-900 ml-1 capitalize">{{ formatPaymentChannel(invoice?.payment_channel) }}</span>
               </div>
             </div>
 
-            <!-- Row 2 -->
-            <div class="flex justify-between items-center w-full">
-              <div class="w-[45%] text-left whitespace-nowrap overflow-hidden text-ellipsis">
-                <span class="font-bold text-slate-800">ชื่อ</span>
-                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Name )</span>
-                <span class="text-slate-800 font-bold ml-0.5">:</span>
-                <span class="font-extrabold text-slate-955 ml-1.5 text-[12px]">
+            <!-- Row 2: Customer Name, Date of Birth, Age -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center">
+              <!-- Name -->
+              <div class="sm:col-span-5 flex items-center gap-1 min-w-0">
+                <span class="font-bold text-slate-800 shrink-0">ชื่อ</span>
+                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Name )</span>
+                <span class="text-slate-800 font-bold shrink-0">:</span>
+                <span class="font-extrabold text-slate-950 text-[12px] truncate ml-1">
                   {{ getCustomerFullName() }}
                 </span>
               </div>
-              <div class="w-[30%] text-center whitespace-nowrap">
-                <span class="font-bold text-slate-800">วันเดือนปีเกิด</span>
-                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Date of Birth )</span>
-                <span class="text-slate-800 font-bold ml-0.5">:</span>
-                <span class="font-mono font-bold text-slate-900 ml-1.5">{{ formatBirthDate(customer?.birth_date) }}</span>
+
+              <!-- Date of Birth -->
+              <div class="sm:col-span-4 flex items-center gap-1 sm:justify-center shrink-0">
+                <span class="font-bold text-slate-800 shrink-0">วันเดือนปีเกิด</span>
+                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Date of Birth )</span>
+                <span class="text-slate-800 font-bold shrink-0">:</span>
+                <span class="font-mono font-bold text-slate-900 ml-1">{{ formatBirthDate(customer?.birth_date) }}</span>
               </div>
-              <div class="w-[25%] text-right whitespace-nowrap">
-                <span class="font-bold text-slate-800">อายุ</span>
-                <span class="text-[9.5px] text-slate-500 font-medium ml-0.5">( Age )</span>
-                <span class="text-slate-800 font-bold ml-0.5">:</span>
-                <span class="font-bold text-slate-900 ml-1.5">{{ calculatePreciseAge(customer?.birth_date, invoice?.created_at) }}</span>
+
+              <!-- Age -->
+              <div class="sm:col-span-3 flex items-center gap-1 sm:justify-end shrink-0">
+                <span class="font-bold text-slate-800 shrink-0">อายุ</span>
+                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Age )</span>
+                <span class="text-slate-800 font-bold shrink-0">:</span>
+                <span class="font-bold text-slate-900 ml-1">{{ calculatePreciseAge(customer?.birth_date, invoice?.created_at) }}</span>
               </div>
             </div>
           </div>
@@ -297,16 +302,16 @@ const calculatePreciseAge = (birthDateStr?: string, referenceDateStr?: string) =
   if (!birthDateStr) return '-'
   try {
     const birth = new Date(birthDateStr.split('T')[0])
-    const ref = referenceDateStr ? new Date(referenceDateStr.split('T')[0]) : new Date()
-    if (isNaN(birth.getTime()) || isNaN(ref.getTime())) return '-'
+    const refDate = referenceDateStr ? new Date(referenceDateStr.split('T')[0]) : new Date()
+    if (isNaN(birth.getTime()) || isNaN(refDate.getTime())) return '-'
     
-    let years = ref.getFullYear() - birth.getFullYear()
-    let months = ref.getMonth() - birth.getMonth()
-    let days = ref.getDate() - birth.getDate()
+    let years = refDate.getFullYear() - birth.getFullYear()
+    let months = refDate.getMonth() - birth.getMonth()
+    let days = refDate.getDate() - birth.getDate()
     
     if (days < 0) {
       months--
-      const prevMonth = new Date(ref.getFullYear(), ref.getMonth(), 0)
+      const prevMonth = new Date(refDate.getFullYear(), refDate.getMonth(), 0)
       days += prevMonth.getDate()
     }
     
@@ -316,11 +321,11 @@ const calculatePreciseAge = (birthDateStr?: string, referenceDateStr?: string) =
     }
     
     const parts = []
-    if (years > 0) parts.push(`${years} ${years === 1 ? 'year' : 'years'}`)
-    if (months > 0) parts.push(`${months} ${months === 1 ? 'month' : 'months'}`)
-    if (days > 0) parts.push(`${days} ${days === 1 ? 'day' : 'days'}`)
+    if (years > 0) parts.push(locale.value === 'th' ? `${years} ปี` : `${years} yrs`)
+    if (months > 0) parts.push(locale.value === 'th' ? `${months} เดือน` : `${months} mos`)
+    if (days > 0 && years === 0) parts.push(locale.value === 'th' ? `${days} วัน` : `${days} days`)
     
-    return parts.length > 0 ? parts.join(', ') : '0 days'
+    return parts.length > 0 ? parts.join(' ') : (locale.value === 'th' ? '0 วัน' : '0 days')
   } catch {
     return '-'
   }

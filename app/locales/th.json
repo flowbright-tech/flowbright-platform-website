@@ -335,6 +335,10 @@
     "is_active": "สถานะเปิดใช้",
     "sec_financial": "ข้อมูลการเงินและการควบคุมสต็อก",
     "sec_financial_pricing": "ข้อมูลการเงินและการควบคุมสต็อก",
+    "sec_financial_pricing_lab": "อัตราค่าบริการและข้อมูลการเงิน",
+    "profit_margin": "อัตรากำไรขั้นต้น (Gross Profit Margin)",
+    "available_stock": "สินค้าคงคลังพร้อมจำหน่าย",
+    "lab_flag": "ประเภทห้องแล็บ (Lab Flag)",
     "cost": "ราคาทุนต่อหน่วย (บาท)",
     "selling_price": "ราคาเสนอขายต่อหน่วย (บาท)",
     "stock": "ปริมาณสต็อกเริ่มต้น",
@@ -569,7 +573,9 @@
     "view_detail": "ดูรายละเอียด",
     "order_detail_title": "รายละเอียดคำสั่งซื้อ",
     "print_invoice": "พิมพ์ใบเสร็จ/ใบแจ้งหนี้",
-    "print_document": "พิมพ์เอกสารประจำตัว"
+    "print_document": "พิมพ์เอกสารประจำตัว",
+    "lab_form": "พิมพ์ใบส่งตรวจแล็บ (Lab In/Out)",
+    "col_tests": "รายการตรวจ"
   },
   "errors": {
     "bad_request_title": "คำขอไม่ถูกต้อง (400)",
