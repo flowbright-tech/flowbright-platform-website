@@ -85,55 +85,54 @@
             </div>
           </div>
 
-          <!-- Document Profile Metadata (Beautified Responsive Grid) -->
+          <!-- Document Profile Metadata (Beautified Single-Language Responsive Grid) -->
           <div class="bg-slate-50/80 border border-slate-200/80 rounded-xl p-3.5 sm:p-4 space-y-3 text-slate-800 text-[11.5px] font-medium my-4 shadow-2xs">
             <!-- Row 1: Billing Date, HN, Payment Channel -->
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 pb-3 border-b border-slate-200/80 items-center">
               <div class="sm:col-span-4 flex items-center gap-1">
-                <span class="font-bold text-slate-800 shrink-0">วันที่</span>
-                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Billing Date )</span>
-                <span class="text-slate-800 font-bold shrink-0">:</span>
-                <span class="font-mono font-bold text-slate-900 ml-1">{{ formatInvoiceDate(invoice?.delivery_date) }}</span>
+                <span class="font-bold text-slate-800 shrink-0">
+                  {{ locale === 'th' ? 'วันที่' : 'Date' }} :
+                </span>
+                <span class="font-mono font-bold text-slate-900 ml-0.5">{{ formatInvoiceDate(invoice?.delivery_date) }}</span>
               </div>
-              <div class="sm:col-span-3 flex items-center gap-1 sm:justify-center">
-                <span class="font-bold text-slate-800 shrink-0">HN</span>
-                <span class="text-slate-800 font-bold shrink-0">:</span>
-                <span class="font-mono font-bold text-slate-900 ml-1">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
+              <div class="sm:col-span-3 flex items-center justify-center gap-1 shrink-0 text-center">
+                <span class="font-bold text-slate-800 shrink-0">HN :</span>
+                <span class="font-mono font-bold text-slate-900 ml-0.5">{{ customer?.code || invoice?.customer_code || 'HN' + (invoice?.customer_id?.substring(0, 10) || '') }}</span>
               </div>
-              <div class="sm:col-span-5 flex items-center gap-1 sm:justify-end">
-                <span class="font-bold text-slate-800 shrink-0">ช่องทางการชำระเงิน</span>
-                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Payment Channel )</span>
-                <span class="text-slate-800 font-bold shrink-0">:</span>
-                <span class="font-bold text-slate-900 ml-1 capitalize">{{ formatPaymentChannel(invoice?.payment_channel) }}</span>
+              <div class="sm:col-span-5 flex items-center justify-end gap-1 shrink-0">
+                <span class="font-bold text-slate-800 shrink-0">
+                  {{ locale === 'th' ? 'ช่องทางการชำระเงิน' : 'Payment Channel' }} :
+                </span>
+                <span class="font-bold text-slate-900 ml-0.5 capitalize">{{ formatPaymentChannel(invoice?.payment_channel) }}</span>
               </div>
             </div>
 
-            <!-- Row 2: Customer Name, Date of Birth, Age -->
+            <!-- Row 2: Customer Name, Date of Birth (Centralized), Age (Y/M/D) -->
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center">
               <!-- Name -->
-              <div class="sm:col-span-5 flex items-center gap-1 min-w-0">
-                <span class="font-bold text-slate-800 shrink-0">ชื่อ</span>
-                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Name )</span>
-                <span class="text-slate-800 font-bold shrink-0">:</span>
-                <span class="font-extrabold text-slate-950 text-[12px] truncate ml-1">
+              <div class="sm:col-span-4 flex items-center gap-1 min-w-0">
+                <span class="font-bold text-slate-800 shrink-0">
+                  {{ locale === 'th' ? 'ชื่อ' : 'Name' }} :
+                </span>
+                <span class="font-extrabold text-slate-950 text-[12px] truncate ml-0.5">
                   {{ getCustomerFullName() }}
                 </span>
               </div>
 
-              <!-- Date of Birth -->
-              <div class="sm:col-span-4 flex items-center gap-1 sm:justify-center shrink-0">
-                <span class="font-bold text-slate-800 shrink-0">วันเดือนปีเกิด</span>
-                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Date of Birth )</span>
-                <span class="text-slate-800 font-bold shrink-0">:</span>
-                <span class="font-mono font-bold text-slate-900 ml-1">{{ formatBirthDate(customer?.birth_date) }}</span>
+              <!-- Date of Birth (Centralized) -->
+              <div class="sm:col-span-4 flex items-center justify-center gap-1 shrink-0 text-center">
+                <span class="font-bold text-slate-800 shrink-0">
+                  {{ locale === 'th' ? 'วันเดือนปีเกิด' : 'Date of Birth' }} :
+                </span>
+                <span class="font-mono font-bold text-slate-900 ml-0.5">{{ formatBirthDate(customer?.birth_date) }}</span>
               </div>
 
               <!-- Age -->
-              <div class="sm:col-span-3 flex items-center gap-1 sm:justify-end shrink-0">
-                <span class="font-bold text-slate-800 shrink-0">อายุ</span>
-                <span class="text-[9.5px] text-slate-500 font-medium shrink-0">( Age )</span>
-                <span class="text-slate-800 font-bold shrink-0">:</span>
-                <span class="font-bold text-slate-900 ml-1">{{ calculatePreciseAge(customer?.birth_date, invoice?.created_at) }}</span>
+              <div class="sm:col-span-4 flex items-center justify-end gap-1 shrink-0">
+                <span class="font-bold text-slate-800 shrink-0">
+                  {{ locale === 'th' ? 'อายุ' : 'Age' }} :
+                </span>
+                <span class="font-bold text-slate-900 ml-0.5">{{ calculatePreciseAge(customer?.birth_date, invoice?.created_at) }}</span>
               </div>
             </div>
           </div>
@@ -143,10 +142,10 @@
             <table class="w-full border-collapse border-b border-slate-300">
               <thead>
                 <tr class="bg-indigo-50/60 text-[11px] font-bold text-slate-700 border-b border-slate-300">
-                  <th class="px-4 py-2.5 text-center w-16">ลำดับ (No.)</th>
-                  <th class="px-4 py-2.5 text-left">รายการ (Charged Items)</th>
-                  <th class="px-4 py-2.5 text-center w-28">จำนวน (Quantity)</th>
-                  <th class="px-4 py-2.5 text-right w-36">จำนวนเงิน ( THB )</th>
+                  <th class="px-4 py-2.5 text-center w-16">{{ locale === 'th' ? 'ลำดับ' : 'No.' }}</th>
+                  <th class="px-4 py-2.5 text-left">{{ locale === 'th' ? 'รายการ' : 'Charged Items' }}</th>
+                  <th class="px-4 py-2.5 text-center w-28">{{ locale === 'th' ? 'จำนวน' : 'Quantity' }}</th>
+                  <th class="px-4 py-2.5 text-right w-36">{{ locale === 'th' ? 'จำนวนเงิน (บาท)' : 'Amount (THB)' }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-200 text-[11.5px]">
@@ -169,7 +168,7 @@
           <!-- Total Calculation Box -->
           <div class="mt-4 flex justify-end">
             <div class="w-80 flex items-center justify-between p-3 border-b border-slate-300 text-[12px]">
-              <span class="font-extrabold text-slate-900">รวม (Total Amount)</span>
+              <span class="font-extrabold text-slate-900">{{ locale === 'th' ? 'ราคารวมสุทธิ' : 'Total Amount' }}</span>
               <span class="font-mono font-extrabold text-[14px] text-slate-950">
                 {{ formatCurrency(invoice?.total_amount) }}
               </span>
@@ -184,8 +183,7 @@
               <!-- Left side spacing -->
             </div>
             <div class="text-center font-bold text-slate-800">
-              <span class="mr-1">ผู้รับเงิน</span>
-              <span class="text-slate-500 font-medium">( Collector )</span>
+              <span class="mr-1">{{ locale === 'th' ? 'ผู้รับเงิน' : 'Collector' }}</span>
               <span class="ml-1">..............................................................</span>
             </div>
           </div>
@@ -323,7 +321,7 @@ const calculatePreciseAge = (birthDateStr?: string, referenceDateStr?: string) =
     const parts = []
     if (years > 0) parts.push(locale.value === 'th' ? `${years} ปี` : `${years} yrs`)
     if (months > 0) parts.push(locale.value === 'th' ? `${months} เดือน` : `${months} mos`)
-    if (days > 0 && years === 0) parts.push(locale.value === 'th' ? `${days} วัน` : `${days} days`)
+    if (days > 0) parts.push(locale.value === 'th' ? `${days} วัน` : `${days} days`)
     
     return parts.length > 0 ? parts.join(' ') : (locale.value === 'th' ? '0 วัน' : '0 days')
   } catch {
