@@ -95,40 +95,64 @@ const handleToggleLanguage = () => {
   router.push(targetPath)
 }
 
-const loadHtml2Pdf = (): Promise<any> => {
+const loadPdfGeneratorLibraries = (): Promise<{ htmlToImage: any; jsPDF: any }> => {
   return new Promise((resolve, reject) => {
-    if ((window as any).html2pdf) {
-      return resolve((window as any).html2pdf)
+    const checkReady = () => {
+      const h2i = (window as any).htmlToImage
+      const jspdf = (window as any).jspdf?.jsPDF || (window as any).jsPDF
+      if (h2i && jspdf) {
+        resolve({ htmlToImage: h2i, jsPDF: jspdf })
+        return true
+      }
+      return false
     }
-    const existing = document.getElementById('html2pdf-script')
-    if (existing) {
-      existing.addEventListener('load', () => resolve((window as any).html2pdf))
-      existing.addEventListener('error', (e) => reject(e))
-      return
-    }
-    const script = document.createElement('script')
-    script.id = 'html2pdf-script'
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
-    script.onload = () => resolve((window as any).html2pdf)
-    script.onerror = (e) => reject(e)
-    document.head.appendChild(script)
-  })
-}
 
-const imageToDataUri = async (url: string): Promise<string> => {
-  if (!url || url.startsWith('data:')) return url
-  try {
-    const res = await fetch(url, { mode: 'cors' })
-    const blob = await res.blob()
-    return new Promise((resolve) => {
-      const reader = new FileReader()
-      reader.onloadend = () => resolve(reader.result as string)
-      reader.onerror = () => resolve(url)
-      reader.readAsDataURL(blob)
-    })
-  } catch {
-    return url
-  }
+    if (checkReady()) return
+
+    let loadedCount = 0
+    const onScriptLoad = () => {
+      loadedCount++
+      if (loadedCount >= 2 || checkReady()) {
+        const h2i = (window as any).htmlToImage
+        const jspdf = (window as any).jspdf?.jsPDF || (window as any).jsPDF
+        if (h2i && jspdf) {
+          resolve({ htmlToImage: h2i, jsPDF: jspdf })
+        } else {
+          setTimeout(() => {
+            const h2iRetry = (window as any).htmlToImage
+            const jspdfRetry = (window as any).jspdf?.jsPDF || (window as any).jsPDF
+            if (h2iRetry && jspdfRetry) {
+              resolve({ htmlToImage: h2iRetry, jsPDF: jspdfRetry })
+            } else {
+              reject(new Error('PDF generator libraries failed to initialize'))
+            }
+          }, 300)
+        }
+      }
+    }
+
+    // 1. Load html-to-image
+    if (!(window as any).htmlToImage) {
+      const s1 = document.createElement('script')
+      s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js'
+      s1.onload = onScriptLoad
+      s1.onerror = (e) => reject(e)
+      document.head.appendChild(s1)
+    } else {
+      loadedCount++
+    }
+
+    // 2. Load jsPDF
+    if (!((window as any).jspdf || (window as any).jsPDF)) {
+      const s2 = document.createElement('script')
+      s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+      s2.onload = onScriptLoad
+      s2.onerror = (e) => reject(e)
+      document.head.appendChild(s2)
+    } else {
+      loadedCount++
+    }
+  })
 }
 
 const handleExportPdf = async () => {
@@ -136,67 +160,40 @@ const handleExportPdf = async () => {
   if (!import.meta.client) return
 
   const targetEl = (document.querySelector('.a4-page') || document.querySelector('.print-content')) as HTMLElement
-  if (!targetEl) {
-    window.print()
-    return
-  }
+  if (!targetEl) return
 
   isExportingPdf.value = true
-  let container: HTMLElement | null = null
-
   try {
-    const html2pdf = await loadHtml2Pdf()
+    const { htmlToImage, jsPDF } = await loadPdfGeneratorLibraries()
 
-    // 1. Clone element to prevent live DOM mutations
-    const clone = targetEl.cloneNode(true) as HTMLElement
+    // 1. Convert DOM node to PNG image string (preserves Tailwind v4 styles & SVG/images)
+    const imgData = await htmlToImage.toPng(targetEl, {
+      quality: 0.95,
+      pixelRatio: 2,
+      backgroundColor: '#ffffff'
+    })
 
-    // 2. Convert images to Base64 Data URIs to eliminate CORS canvas issues
-    const imgs = clone.querySelectorAll('img')
-    for (const img of Array.from(imgs)) {
-      if (img.src) {
-        const dataUri = await imageToDataUri(img.src)
-        img.src = dataUri
-      }
-    }
+    // 2. Create jsPDF document instance
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    })
 
-    // 3. Create isolated offscreen container
-    container = document.createElement('div')
-    container.style.position = 'absolute'
-    container.style.left = '-9999px'
-    container.style.top = '0px'
-    container.style.width = '210mm'
-    container.style.background = '#ffffff'
-    container.appendChild(clone)
-    document.body.appendChild(container)
+    const pdfWidth = pdf.internal.pageSize.getWidth() // 210mm
+    const pdfHeight = pdf.internal.pageSize.getHeight() // 297mm
+
+    // 3. Render page onto PDF
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
 
     const rawName = props.pdfFilename || `${props.title || 'document'}.pdf`
     const cleanFilename = rawName.endsWith('.pdf') ? rawName : `${rawName}.pdf`
 
-    const opt = {
-      margin: 0,
-      filename: cleanFilename,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false
-      },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }
-
-    await html2pdf().set(opt).from(clone).save()
-  } catch (err) {
-    console.error('PDF direct file save failed, falling back to print dialog:', err)
-    const originalTitle = document.title
-    const rawName = props.pdfFilename || `${props.title || 'document'}.pdf`
-    document.title = rawName.replace(/[^a-zA-Z0-9_.-]/g, '_')
-    window.print()
-    setTimeout(() => { document.title = originalTitle }, 1500)
+    // 4. Trigger DIRECT PDF file download dialog
+    pdf.save(cleanFilename)
+  } catch (err: any) {
+    console.error('Failed to save PDF file:', err)
   } finally {
-    if (container && container.parentNode) {
-      container.parentNode.removeChild(container)
-    }
     isExportingPdf.value = false
   }
 }
