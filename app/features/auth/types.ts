@@ -29,6 +29,8 @@ export interface CompanyProfile {
   status: string
   image_url: string
   company_type?: 'lab' | 'standard' | string
+  credit_card_percent_charge?: number
+  credit_card_charge_percent?: number
   created_at: string
   updated_at: string
 }

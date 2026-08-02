@@ -71,6 +71,8 @@ export const useAuthEngine = () => {
         status: 'active',
         image_url: '',
         company_type: type,
+        credit_card_percent_charge: 3,
+        credit_card_charge_percent: 3,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }

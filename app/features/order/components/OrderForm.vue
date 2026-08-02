@@ -110,20 +110,42 @@
               />
             </UFormField>
 
-            <!-- Credit Card Charge Percent (Shown when Credit Card selected) -->
-            <UFormField v-if="form.payment_channel === 'credit_card'" :label="$t('orders.credit_card_charge_percent') || 'Credit Card Fee (%)'">
-              <UInput
-                v-model.number="form.credit_card_charge_percent"
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                placeholder="e.g. 3.0"
-                size="md"
-                class="w-full font-mono"
-                @input="form.credit_card_percent_charge = form.credit_card_charge_percent; recalculateOrderTotal()"
-              />
-            </UFormField>
+            <!-- Credit Card Surcharge Auto Info Banner & Rate Control -->
+            <div v-if="form.payment_channel === 'credit_card'" class="md:col-span-3 p-4 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <UIcon name="i-heroicons-credit-card" class="w-5 h-5" />
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-indigo-950 dark:text-indigo-200 flex flex-wrap items-center gap-2">
+                    <span>{{ $t('orders.credit_card_auto_charge_title') || 'Credit Card Surcharge Active' }}</span>
+                    <span class="px-2 py-0.5 rounded-md bg-indigo-200/70 dark:bg-indigo-800/70 text-indigo-900 dark:text-indigo-100 text-[10px] font-mono font-bold">
+                      {{ companyCreditCardRate }}% {{ $t('orders.from_company_profile') || 'from Company Profile' }}
+                    </span>
+                  </div>
+                  <div class="text-[11px] text-indigo-700 dark:text-indigo-300 mt-0.5">
+                    {{ $t('orders.credit_card_auto_charge_hint') || 'Automatic rate loaded from company profile settings (srp_company_profile).' }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">{{ $t('orders.charge_rate') || 'Rate' }}:</span>
+                <div class="w-24">
+                  <UInput
+                    v-model.number="form.credit_card_charge_percent"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    size="sm"
+                    class="font-mono font-bold text-right"
+                    @input="form.credit_card_percent_charge = form.credit_card_charge_percent; recalculateOrderTotal()"
+                  />
+                </div>
+                <span class="text-xs font-mono font-bold text-indigo-700 dark:text-indigo-300">%</span>
+              </div>
+            </div>
 
             <!-- Order Status (Default Pending, Searchable Dropdown) -->
             <UFormField :label="$t('orders.status') || 'Order Status'">
@@ -325,6 +347,7 @@ import { reactive, watch, ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Order, OrderFormData } from '../types'
 import { calculateItemSubtotal, calculateOrderSummary, calculateOrderTotal, getTodayDateString, safeLowerCase } from '../composables/useOrderEngine'
+import { useAuthEngine } from '../../auth/composables/useAuthEngine'
 import { useApiFetch } from '../../../composables/useApiFetch'
 import { useAppToast } from '../../../composables/useAppToast'
 import type { Customer } from '../../customer/types'
@@ -333,6 +356,36 @@ import type { Package } from '../../package/types'
 const { t, locale } = useI18n()
 const { apiFetch } = useApiFetch()
 const { showError } = useAppToast()
+const { company } = useAuthEngine()
+
+// Helper to look up credit_card_percent_charge from local storage company profile
+const getCompanyCreditCardPercentCharge = (): number => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const c = window.localStorage.getItem('srp_company_profile')
+      if (c) {
+        const parsed = JSON.parse(c)
+        const val = parsed.credit_card_percent_charge ?? parsed.credit_card_charge_percent
+        if (val !== undefined && val !== null && !isNaN(Number(val))) {
+          return Number(val)
+        }
+      }
+    } catch (e) {
+      console.warn('Could not read srp_company_profile from localStorage', e)
+    }
+  }
+
+  if (company.value) {
+    const val = (company.value as any).credit_card_percent_charge ?? (company.value as any).credit_card_charge_percent
+    if (val !== undefined && val !== null && !isNaN(Number(val))) {
+      return Number(val)
+    }
+  }
+
+  return 3 // Default 3% fallback
+}
+
+const companyCreditCardRate = computed(() => getCompanyCreditCardPercentCharge())
 
 const props = defineProps<{
   orderToEdit?: Order | null
@@ -547,7 +600,19 @@ watch(
 )
 
 watch(
-  [() => form.discount, () => form.payment_channel, () => form.credit_card_charge_percent, () => form.credit_card_percent_charge],
+  () => form.payment_channel,
+  (newChannel) => {
+    if (newChannel === 'credit_card') {
+      const autoRate = getCompanyCreditCardPercentCharge()
+      form.credit_card_charge_percent = autoRate
+      form.credit_card_percent_charge = autoRate
+    }
+    recalculateOrderTotal()
+  }
+)
+
+watch(
+  [() => form.discount, () => form.credit_card_charge_percent, () => form.credit_card_percent_charge],
   () => {
     recalculateOrderTotal()
   }
