@@ -166,11 +166,18 @@ const handleExportPdf = async () => {
   try {
     const { htmlToImage, jsPDF } = await loadPdfGeneratorLibraries()
 
-    // 1. Convert DOM node to PNG image string (preserves Tailwind v4 styles & SVG/images)
+    // 1. Convert DOM node to PNG image data (skip fonts to prevent CORS fetch errors)
     const imgData = await htmlToImage.toPng(targetEl, {
       quality: 0.95,
       pixelRatio: 2,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      skipFonts: true,
+      filter: (node: Node) => {
+        if (node instanceof HTMLElement && node.classList.contains('no-print')) {
+          return false
+        }
+        return true
+      }
     })
 
     // 2. Create jsPDF document instance
@@ -183,16 +190,16 @@ const handleExportPdf = async () => {
     const pdfWidth = pdf.internal.pageSize.getWidth() // 210mm
     const pdfHeight = pdf.internal.pageSize.getHeight() // 297mm
 
-    // 3. Render page onto PDF
+    // 3. Render image onto PDF
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
 
     const rawName = props.pdfFilename || `${props.title || 'document'}.pdf`
     const cleanFilename = rawName.endsWith('.pdf') ? rawName : `${rawName}.pdf`
 
-    // 4. Trigger DIRECT PDF file download dialog
+    // 4. Directly trigger PDF save file download dialog
     pdf.save(cleanFilename)
   } catch (err: any) {
-    console.error('Failed to save PDF file:', err)
+    console.error('Failed to export PDF:', err)
   } finally {
     isExportingPdf.value = false
   }
