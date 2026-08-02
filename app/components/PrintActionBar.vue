@@ -34,7 +34,6 @@
         icon="i-heroicons-arrow-down-tray"
         size="sm"
         class="font-semibold shadow-xs"
-        :loading="isExportingPdf"
         @click="handleExportPdf"
       >
         Export PDF
@@ -55,7 +54,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useLocalePath, useSwitchLocalePath } from '#imports'
@@ -77,7 +75,6 @@ const { locale } = useI18n()
 const router = useRouter()
 const localePath = useLocalePath()
 const switchLocalePath = useSwitchLocalePath()
-const isExportingPdf = ref(false)
 
 const handleBack = () => {
   emit('back')
@@ -95,56 +92,20 @@ const handleToggleLanguage = () => {
   router.push(targetPath)
 }
 
-const loadHtml2Pdf = (): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    if ((window as any).html2pdf) {
-      return resolve((window as any).html2pdf)
-    }
-    const existing = document.getElementById('html2pdf-script')
-    if (existing) {
-      existing.addEventListener('load', () => resolve((window as any).html2pdf))
-      existing.addEventListener('error', (e) => reject(e))
-      return
-    }
-    const script = document.createElement('script')
-    script.id = 'html2pdf-script'
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
-    script.onload = () => resolve((window as any).html2pdf)
-    script.onerror = (e) => reject(e)
-    document.head.appendChild(script)
-  })
-}
-
-const handleExportPdf = async () => {
+const handleExportPdf = () => {
   emit('exportPdf')
   if (!import.meta.client) return
 
-  isExportingPdf.value = true
+  const originalTitle = document.title
   try {
-    const html2pdf = await loadHtml2Pdf()
-    const element = document.querySelector('.a4-page') || document.querySelector('.print-content')
-    if (!element) {
-      window.print()
-      return
-    }
-
-    const sanitizedTitle = (props.title || 'document').replace(/[^a-zA-Z0-9_-]/g, '_')
-    const filename = props.pdfFilename || `${sanitizedTitle}.pdf`
-
-    const opt = {
-      margin: 0,
-      filename: filename,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }
-
-    await html2pdf().set(opt).from(element).save()
-  } catch (err) {
-    console.error('Direct PDF export failed, fallback to print:', err)
+    const rawName = props.pdfFilename || `${props.title || 'document'}.pdf`
+    const cleanFilename = rawName.replace(/[^a-zA-Z0-9_.-]/g, '_')
+    document.title = cleanFilename
     window.print()
   } finally {
-    isExportingPdf.value = false
+    setTimeout(() => {
+      document.title = originalTitle
+    }, 1500)
   }
 }
 
