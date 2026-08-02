@@ -130,7 +130,7 @@
             <div class="space-y-6">
               <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
                 <div class="flex items-center gap-2">
-                  <img src="/icon.svg" alt="Swift Crown Logo"
+                  <img src="/swiftcrownlogo.svg" alt="Swift Crown Logo"
                     class="w-10 h-10 rounded-xl object-contain bg-white p-1 border border-slate-200/40 dark:border-slate-800/40 shadow-sm" />
                   <span class="font-bold text-slate-900 dark:text-white">Swift Crown SRP</span>
                 </div>

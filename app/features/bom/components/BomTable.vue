@@ -17,9 +17,6 @@
             <span class="text-sm font-semibold text-slate-800 dark:text-slate-200">
               {{ locale === 'th' ? row.original.product.name_th : row.original.product.name_en }}
             </span>
-            <span class="text-xs font-mono text-slate-400">
-              SKU: {{ row.original.product.sku }}
-            </span>
           </div>
           <span v-else class="text-xs text-slate-400 font-mono">
             Unassigned (ID: {{ row.original.product_id || '-' }})
