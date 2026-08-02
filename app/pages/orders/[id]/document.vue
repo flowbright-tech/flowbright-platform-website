@@ -1,43 +1,10 @@
 <template>
   <div class="min-h-screen bg-slate-100 dark:bg-slate-900 py-6 flex flex-col items-center">
-    <!-- Top Action bar (hidden on print) -->
-    <div class="no-print w-full max-w-[210mm] mb-6 flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700">
-      <div class="flex items-center gap-3">
-        <UButton
-          color="neutral"
-          variant="outline"
-          icon="i-heroicons-arrow-left"
-          size="sm"
-          @click="goBack"
-        >
-          {{ $t('common.back') || 'Back' }}
-        </UButton>
-        <span class="text-sm font-bold text-slate-700 dark:text-slate-200">
-          Document Printing Preview
-        </span>
-      </div>
-      <div class="flex items-center gap-3">
-        <!-- Language Switcher Button -->
-        <UButton
-          color="neutral"
-          variant="outline"
-          size="sm"
-          icon="i-heroicons-language"
-          @click="toggleLanguage"
-        >
-          {{ locale === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย' }}
-        </UButton>
-        <UButton
-          color="primary"
-          icon="i-heroicons-printer"
-          size="md"
-          class="font-semibold shadow-sm"
-          @click="printInvoice"
-        >
-          Print Document (A4)
-        </UButton>
-      </div>
-    </div>
+    <!-- Reusable Top Action Bar -->
+    <PrintActionBar
+      title="Document Printing Preview"
+      print-label="Print Document (A4)"
+    />
 
     <!-- Loading Skeleton -->
     <div v-if="isLoading" class="w-full max-w-[210mm] bg-white p-8 rounded-xl shadow-md space-y-6">
@@ -188,6 +155,7 @@ import { useI18n } from 'vue-i18n'
 import { useApiFetch } from '../../../composables/useApiFetch'
 import { useAuthEngine } from '../../../features/auth/composables/useAuthEngine'
 import { formatDeliveryDate } from '../../../features/order/composables/useOrderEngine'
+import PrintActionBar from '../../../components/PrintActionBar.vue'
 
 // Disable layouts entirely for A4 print page
 definePageMeta({

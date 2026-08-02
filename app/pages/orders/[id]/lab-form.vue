@@ -1,43 +1,10 @@
 <template>
-  <div class="min-h-screen bg-slate-100 dark:bg-slate-900 py-4 sm:py-8 px-2 sm:px-6 flex flex-col items-center">
-    <!-- Top Action bar (hidden on print) -->
-    <div class="no-print w-full max-w-[210mm] mb-4 sm:mb-6 flex flex-wrap justify-between items-center gap-3 bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700">
-      <div class="flex items-center gap-2 sm:gap-3">
-        <UButton
-          color="neutral"
-          variant="outline"
-          icon="i-heroicons-arrow-left"
-          size="sm"
-          @click="goBack"
-        >
-          {{ $t('common.back') || 'Back' }}
-        </UButton>
-        <span class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200">
-          Lab Technician Worksheet (Lab In / Lab Out)
-        </span>
-      </div>
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Language Switcher Button -->
-        <UButton
-          color="neutral"
-          variant="outline"
-          size="sm"
-          icon="i-heroicons-language"
-          @click="toggleLanguage"
-        >
-          {{ locale === 'th' ? 'English' : 'ไทย' }}
-        </UButton>
-        <UButton
-          color="primary"
-          icon="i-heroicons-printer"
-          size="sm"
-          class="font-semibold shadow-sm"
-          @click="printLabForm"
-        >
-          Print (A4)
-        </UButton>
-      </div>
-    </div>
+  <div class="min-h-screen bg-slate-100 dark:bg-slate-900 py-3 sm:py-6 px-2 sm:px-6 flex flex-col items-center">
+    <!-- Reusable Top Action Bar -->
+    <PrintActionBar
+      title="Lab Technician Worksheet (Lab In / Lab Out)"
+      print-label="Print Worksheet (A4)"
+    />
 
     <!-- Loading Skeleton -->
     <div v-if="isLoading" class="w-full max-w-[210mm] bg-white p-6 sm:p-8 rounded-xl shadow-md space-y-6">
@@ -67,12 +34,12 @@
       </UButton>
     </div>
 
-    <!-- Document Sheet (Print target & responsive view) -->
+    <!-- Document Sheet (Print target & responsive A4 view) -->
     <div v-else class="a4-page-container w-full max-w-[210mm]">
       <div class="a4-page print-content flex flex-col justify-between">
         <div>
-          <!-- Lab Form Header (With Company Logo Image, No Icons) -->
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b-2 border-slate-800 mb-4">
+          <!-- Lab Form Header (Company Logo Image, No Icons) -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b-2 border-slate-800 mb-3">
             <div class="flex items-center gap-3">
               <img
                 v-if="company?.image_url"
@@ -84,33 +51,33 @@
                 <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
                   {{ company?.name_th || 'เอ็มทีอินเตอร์เมดิคอลแล็บ' }}
                 </h1>
-                <p class="text-xs font-semibold text-slate-600">
+                <p class="text-[11px] font-semibold text-slate-600">
                   {{ company?.name_en || 'M.T. Inter Medical Laboratory' }}
                 </p>
               </div>
             </div>
             <div class="text-left sm:text-right">
-              <div class="inline-block px-3 py-1 bg-emerald-100 text-emerald-950 border border-emerald-400 font-extrabold text-xs uppercase tracking-wider rounded">
+              <div class="inline-block px-2.5 py-0.5 bg-emerald-100 text-emerald-950 border border-emerald-400 font-extrabold text-[11px] uppercase tracking-wider rounded">
                 LAB TECHNICIAN WORKSHEET
               </div>
-              <div class="text-[11px] font-mono font-bold text-slate-700 mt-1">
+              <div class="text-[10.5px] font-mono font-bold text-slate-700 mt-0.5">
                 Order Ref: {{ order?.code || order?.order_number || orderId }}
               </div>
             </div>
           </div>
 
-          <!-- Customer Information Card (Responsive) -->
-          <div class="border border-slate-300 rounded-lg p-3 space-y-2 bg-slate-50/50 mb-4 text-[11.5px]">
+          <!-- Customer Information Card (Space Optimized & Responsive) -->
+          <div class="border border-slate-300 rounded-lg p-2.5 space-y-1.5 bg-slate-50/50 mb-3 text-[11px]">
             <div class="font-bold text-slate-900 border-b border-slate-200 pb-1 flex justify-between items-center flex-wrap gap-1">
               <span class="font-bold text-slate-800">
                 ข้อมูลผู้ป่วย / ข้อมูลลูกค้า (Customer & Patient Profile)
               </span>
-              <span class="font-mono text-[11px] text-slate-600">
+              <span class="font-mono text-[10.5px] text-slate-600">
                 HN: {{ customer?.code || order?.customer_code || 'HN' + (order?.customer_id?.substring(0, 8) || '') }}
               </span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
               <div>
                 <span class="font-bold text-slate-700">ชื่อ-นามสกุล : </span>
                 <span class="font-extrabold text-slate-900">{{ getCustomerFullName() }}</span>
@@ -125,7 +92,7 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-200/60 text-[11px]">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 pt-1 border-t border-slate-200/60 text-[10.5px]">
               <div>
                 <span class="font-bold text-slate-700">เพศ : </span>
                 <span class="font-bold text-slate-900 capitalize">{{ customer?.gender || '-' }}</span>
@@ -142,16 +109,16 @@
           </div>
 
           <!-- Order Summary Card -->
-          <div class="border border-slate-300 rounded-lg p-3 space-y-1.5 bg-slate-50/50 mb-5 text-[11.5px]">
+          <div class="border border-slate-300 rounded-lg p-2.5 space-y-1 bg-slate-50/50 mb-4 text-[11px]">
             <div class="font-bold text-slate-900 border-b border-slate-200 pb-1 flex justify-between items-center flex-wrap gap-1">
               <span class="font-bold text-slate-800">
                 รายละเอียดคำสั่งซื้อ (Order Details)
               </span>
-              <span class="font-mono text-[11px] text-slate-600">
+              <span class="font-mono text-[10.5px] text-slate-600">
                 วันที่ส่งตรวจ: {{ formatInvoiceDate(order?.delivery_date) }}
               </span>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[10.5px]">
               <div>
                 <span class="font-bold text-slate-700">ช่องทางการชำระเงิน: </span>
                 <span class="font-bold text-slate-900 capitalize">{{ formatPaymentChannel(order?.payment_channel) }}</span>
@@ -161,125 +128,125 @@
                 <span class="font-bold text-emerald-700 uppercase">{{ order?.status || 'Active' }}</span>
               </div>
             </div>
-            <div v-if="order?.notes" class="text-[10.5px] text-amber-900 bg-amber-50 p-1.5 rounded border border-amber-200 mt-1">
+            <div v-if="order?.notes" class="text-[10px] text-amber-900 bg-amber-50 p-1 rounded border border-amber-200 mt-1">
               <span class="font-bold">หมายเหตุพิเศษ: </span>{{ order.notes }}
             </div>
           </div>
 
           <!-- Table 1: Lab In Items -->
-          <div class="mb-6">
-            <div class="flex items-center justify-between mb-2">
-              <h2 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-1.5">
+              <h2 class="text-[11px] font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-600 inline-block"></span>
                 รายการทดสอบภายในห้องปฏิบัติการ (Lab In Tests)
               </h2>
-              <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                 Total: {{ labInItems.length }} Tests
               </span>
             </div>
 
             <div class="overflow-x-auto border border-slate-300 rounded-lg">
-              <table v-if="labInItems.length > 0" class="w-full border-collapse text-[11px] min-w-[550px] sm:min-w-full">
+              <table v-if="labInItems.length > 0" class="w-full border-collapse text-[10px] sm:text-[10.5px] min-w-[550px] sm:min-w-full">
                 <thead>
                   <tr class="bg-emerald-100/70 text-slate-900 font-bold border-b border-slate-300">
-                    <th class="px-2.5 py-2 text-center border-r border-slate-300 w-10">ลำดับ</th>
-                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-28">รหัส/SKU</th>
-                    <th class="px-2.5 py-2 text-left border-r border-slate-300">รายการทดสอบ (Test Name)</th>
-                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-36">ชนิดตัวอย่าง (Sample)</th>
-                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-32">วิธีวิเคราะห์ (Method)</th>
-                    <th class="px-2.5 py-2 text-center w-28">ผลลัพธ์ / หมายเหตุ</th>
+                    <th class="px-2 py-1.5 text-center border-r border-slate-300 w-8">ลำดับ</th>
+                    <th class="px-2 py-1.5 text-left border-r border-slate-300 w-24">รหัส/SKU</th>
+                    <th class="px-2 py-1.5 text-left border-r border-slate-300">รายการทดสอบ (Test Name)</th>
+                    <th class="px-2 py-1.5 text-left border-r border-slate-300 w-32">ชนิดตัวอย่าง (Sample)</th>
+                    <th class="px-2 py-1.5 text-left border-r border-slate-300 w-28">วิธีวิเคราะห์ (Method)</th>
+                    <th class="px-2 py-1.5 text-center w-24">ผลลัพธ์ / หมายเหตุ</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200">
                   <tr v-for="(item, idx) in labInItems" :key="idx" class="text-slate-800">
-                    <td class="px-2.5 py-2 text-center font-mono font-bold border-r border-slate-200">{{ idx + 1 }}</td>
-                    <td class="px-2.5 py-2 font-mono font-bold text-slate-900 border-r border-slate-200">
+                    <td class="px-2 py-1 text-center font-mono font-bold border-r border-slate-200">{{ idx + 1 }}</td>
+                    <td class="px-2 py-1 font-mono font-bold text-slate-900 border-r border-slate-200">
                       {{ getItemSku(item) }}
                     </td>
-                    <td class="px-2.5 py-2 border-r border-slate-200">
-                      <div class="font-extrabold text-slate-900">{{ getItemName(item) }}</div>
-                      <div v-if="getItemPackageName(item)" class="text-[9.5px] text-slate-500 font-semibold">
+                    <td class="px-2 py-1 border-r border-slate-200">
+                      <div class="font-extrabold text-slate-900 leading-tight">{{ getItemName(item) }}</div>
+                      <div v-if="getItemPackageName(item)" class="text-[9px] text-slate-500 font-semibold leading-tight">
                         Package: {{ getItemPackageName(item) }}
                       </div>
-                      <div v-if="item.principle || item.product?.principle" class="text-[9.5px] text-slate-500 italic">
+                      <div v-if="item.principle || item.product?.principle" class="text-[9px] text-slate-500 italic leading-tight">
                         {{ item.principle || item.product?.principle }}
                       </div>
                     </td>
-                    <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
+                    <td class="px-2 py-1 border-r border-slate-200 font-medium">
                       {{ item.sample_type_volum || item.product?.sample_type_volum || '-' }}
                     </td>
-                    <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
+                    <td class="px-2 py-1 border-r border-slate-200 font-medium">
                       {{ item.method || item.product?.method || '-' }}
-                      <span v-if="item.reference_range_unit || item.product?.reference_range_unit" class="text-[10px] text-slate-500">
+                      <span v-if="item.reference_range_unit || item.product?.reference_range_unit" class="text-[9.5px] text-slate-500">
                         ({{ item.reference_range_unit || item.product?.reference_range_unit }})
                       </span>
                     </td>
-                    <td class="px-2.5 py-2 text-center text-slate-400 font-mono text-[10px]">
-                      [ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]
+                    <td class="px-2 py-1 text-center text-slate-400 font-mono text-[9.5px]">
+                      [ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]
                     </td>
                   </tr>
                 </tbody>
               </table>
 
-              <div v-else class="p-3 text-center text-xs text-slate-500 font-medium bg-slate-50">
+              <div v-else class="p-2.5 text-center text-[11px] text-slate-500 font-medium bg-slate-50">
                 ไม่มีรายการทดสอบ Lab In สำหรับคำสั่งซื้อนี้ (No Lab In tests required)
               </div>
             </div>
           </div>
 
           <!-- Table 2: Lab Out Items -->
-          <div class="mb-6">
-            <div class="flex items-center justify-between mb-2">
-              <h2 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-1.5">
+              <h2 class="text-[11px] font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
                 รายการทดสอบส่งตรวจภายนอก (Lab Out Tests)
               </h2>
-              <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+              <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                 Total: {{ labOutItems.length }} Tests
               </span>
             </div>
 
             <div class="overflow-x-auto border border-slate-300 rounded-lg">
-              <table v-if="labOutItems.length > 0" class="w-full border-collapse text-[11px] min-w-[550px] sm:min-w-full">
+              <table v-if="labOutItems.length > 0" class="w-full border-collapse text-[10px] sm:text-[10.5px] min-w-[550px] sm:min-w-full">
                 <thead>
                   <tr class="bg-amber-100/70 text-slate-900 font-bold border-b border-slate-300">
-                    <th class="px-2.5 py-2 text-center border-r border-slate-300 w-10">ลำดับ</th>
-                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-28">รหัส/SKU</th>
-                    <th class="px-2.5 py-2 text-left border-r border-slate-300">รายการทดสอบ (Test Name)</th>
-                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-36">ชนิดตัวอย่าง (Sample)</th>
-                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-32">Lead Time / จัดเก็บ</th>
-                    <th class="px-2.5 py-2 text-center w-28">สถานะการส่งตรวจ</th>
+                    <th class="px-2 py-1.5 text-center border-r border-slate-300 w-8">ลำดับ</th>
+                    <th class="px-2 py-1.5 text-left border-r border-slate-300 w-24">รหัส/SKU</th>
+                    <th class="px-2 py-1.5 text-left border-r border-slate-300">รายการทดสอบ (Test Name)</th>
+                    <th class="px-2 py-1.5 text-left border-r border-slate-300 w-32">ชนิดตัวอย่าง (Sample)</th>
+                    <th class="px-2 py-1.5 text-left border-r border-slate-300 w-28">Lead Time / จัดเก็บ</th>
+                    <th class="px-2 py-1.5 text-center w-24">สถานะการส่งตรวจ</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200">
                   <tr v-for="(item, idx) in labOutItems" :key="idx" class="text-slate-800">
-                    <td class="px-2.5 py-2 text-center font-mono font-bold border-r border-slate-200">{{ idx + 1 }}</td>
-                    <td class="px-2.5 py-2 font-mono font-bold text-slate-900 border-r border-slate-200">
+                    <td class="px-2 py-1 text-center font-mono font-bold border-r border-slate-200">{{ idx + 1 }}</td>
+                    <td class="px-2 py-1 font-mono font-bold text-slate-900 border-r border-slate-200">
                       {{ getItemSku(item) }}
                     </td>
-                    <td class="px-2.5 py-2 border-r border-slate-200">
-                      <div class="font-extrabold text-slate-900">{{ getItemName(item) }}</div>
-                      <div v-if="getItemPackageName(item)" class="text-[9.5px] text-slate-500 font-semibold">
+                    <td class="px-2 py-1 border-r border-slate-200">
+                      <div class="font-extrabold text-slate-900 leading-tight">{{ getItemName(item) }}</div>
+                      <div v-if="getItemPackageName(item)" class="text-[9px] text-slate-500 font-semibold leading-tight">
                         Package: {{ getItemPackageName(item) }}
                       </div>
-                      <div v-if="item.collection_remark || item.product?.collection_remark" class="text-[9.5px] text-amber-700 italic">
+                      <div v-if="item.collection_remark || item.product?.collection_remark" class="text-[9px] text-amber-700 italic leading-tight">
                         Instruction: {{ item.collection_remark || item.product?.collection_remark }}
                       </div>
                     </td>
-                    <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
+                    <td class="px-2 py-1 border-r border-slate-200 font-medium">
                       {{ item.sample_type_volum || item.product?.sample_type_volum || '-' }}
                     </td>
-                    <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
+                    <td class="px-2 py-1 border-r border-slate-200 font-medium">
                       {{ item.leadtime || item.product?.leadtime || '-' }} / {{ item.storage_condition || item.product?.storage_condition || '-' }}
                     </td>
-                    <td class="px-2.5 py-2 text-center font-bold text-amber-700 text-[10.5px]">
+                    <td class="px-2 py-1 text-center font-bold text-amber-700 text-[10px]">
                       Pending Outsource
                     </td>
                   </tr>
                 </tbody>
               </table>
 
-              <div v-else class="p-3 text-center text-xs text-slate-500 font-medium bg-slate-50">
+              <div v-else class="p-2.5 text-center text-[11px] text-slate-500 font-medium bg-slate-50">
                 ไม่มีรายการทดสอบ Lab Out สำหรับคำสั่งซื้อนี้ (No Lab Out tests required)
               </div>
             </div>
@@ -293,11 +260,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useLocalePath, useSwitchLocalePath } from '#imports'
 import { useI18n } from 'vue-i18n'
 import { useApiFetch } from '../../../composables/useApiFetch'
 import { useAuthEngine } from '../../../features/auth/composables/useAuthEngine'
 import { formatDeliveryDate } from '../../../features/order/composables/useOrderEngine'
+import PrintActionBar from '../../../components/PrintActionBar.vue'
 
 // Disable page layouts for A4 printing
 definePageMeta({
@@ -306,8 +273,6 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
-const localePath = useLocalePath()
-const switchLocalePath = useSwitchLocalePath()
 const { locale } = useI18n()
 const { apiFetch } = useApiFetch()
 const { company: authCompany } = useAuthEngine()
@@ -359,7 +324,6 @@ const fetchLabFormData = async () => {
   isLoading.value = true
   errorMsg.value = null
   try {
-    // 1. Primary GET request: /api/v1/orders/{id}/lab-form
     const res = await apiFetch(`/api/v1/orders/${orderId}/lab-form`).catch(() => null)
     if (res && res.ok) {
       const json = await res.json()
@@ -373,11 +337,10 @@ const fetchLabFormData = async () => {
       }
     }
 
-    // 2. Robust Fallback: GET /api/v1/orders/{id}
     const orderRes = await apiFetch(`/api/v1/orders/${orderId}`)
     if (orderRes.ok) {
-      const orderJson = await orderRes.json()
-      if (orderJson.success && orderJson.data) {
+      const orderJson = await orderRes.ok ? await orderRes.json() : null
+      if (orderJson && orderJson.success && orderJson.data) {
         order.value = orderJson.data
         customer.value = orderJson.data?.customer
         company.value = orderJson.data?.company || authCompany.value
@@ -509,22 +472,6 @@ const formatPrintDate = (dObj: Date = new Date()) => {
   return `${day}-${months[dObj.getMonth()]}-${year} ${hours}:${minutes}`
 }
 
-const toggleLanguage = () => {
-  const targetLocale = locale.value === 'th' ? 'en' : 'th'
-  const targetPath = switchLocalePath(targetLocale)
-  router.push(targetPath)
-}
-
-const printLabForm = () => {
-  if (import.meta.client) {
-    window.print()
-  }
-}
-
-const goBack = () => {
-  router.push(localePath('/orders'))
-}
-
 onMounted(() => {
   printDate.value = formatPrintDate()
   fetchLabFormData()
@@ -540,7 +487,7 @@ onMounted(() => {
   box-sizing: border-box;
   width: 210mm;
   min-height: 297mm;
-  padding: 15mm;
+  padding: 12mm 15mm;
   margin: 0 auto;
   background: white;
   color: #0f172a;
@@ -570,16 +517,16 @@ onMounted(() => {
 
   .a4-page {
     width: 100% !important;
-    height: 297mm !important;
     min-height: 297mm !important;
-    padding: 10mm !important;
+    padding: 10mm 12mm !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
     box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
   }
 
   @page {
