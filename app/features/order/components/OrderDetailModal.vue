@@ -121,13 +121,25 @@
         </div>
 
         <!-- Total Summary Bar -->
-        <div class="flex items-center justify-between p-4 rounded-xl bg-indigo-600/10 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-900/50">
-          <span class="text-sm font-bold text-slate-900 dark:text-white">
-            {{ $t('orders.total_amount') || 'Total Amount' }}
-          </span>
-          <span class="text-xl font-mono font-extrabold text-indigo-600 dark:text-indigo-400">
-            ฿{{ formatCurrency(order.total_amount) }}
-          </span>
+        <div class="p-4 rounded-xl bg-indigo-600/10 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-900/50 space-y-2">
+          <div v-if="order.discount || (order.payment_channel === 'credit_card' && (order.credit_card_charge_percent || order.credit_card_percent_charge))" class="space-y-1 text-xs border-b border-indigo-200/50 dark:border-indigo-800/50 pb-2">
+            <div v-if="order.discount" class="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
+              <span>{{ $t('orders.discount') || 'Discount' }}:</span>
+              <span class="font-mono">-฿{{ formatCurrency(order.discount) }}</span>
+            </div>
+            <div v-if="order.payment_channel === 'credit_card' && (order.credit_card_charge_percent || order.credit_card_percent_charge)" class="flex justify-between text-indigo-700 dark:text-indigo-300 font-semibold">
+              <span>{{ $t('orders.credit_card_fee') || 'Credit Card Fee' }} ({{ order.credit_card_charge_percent || order.credit_card_percent_charge }}%):</span>
+              <span class="font-mono">+{{ order.credit_card_charge_percent || order.credit_card_percent_charge }}%</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-900 dark:text-white">
+              {{ $t('orders.total_amount') || 'Total Amount' }}
+            </span>
+            <span class="text-xl font-mono font-extrabold text-indigo-600 dark:text-indigo-400">
+              ฿{{ formatCurrency(order.total_amount) }}
+            </span>
+          </div>
         </div>
 
         <!-- Action Bar in Modal -->

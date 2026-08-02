@@ -110,6 +110,21 @@
               />
             </UFormField>
 
+            <!-- Credit Card Charge Percent (Shown when Credit Card selected) -->
+            <UFormField v-if="form.payment_channel === 'credit_card'" :label="$t('orders.credit_card_charge_percent') || 'Credit Card Fee (%)'">
+              <UInput
+                v-model.number="form.credit_card_charge_percent"
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                placeholder="e.g. 3.0"
+                size="md"
+                class="w-full font-mono"
+                @input="form.credit_card_percent_charge = form.credit_card_charge_percent; recalculateOrderTotal()"
+              />
+            </UFormField>
+
             <!-- Order Status (Default Pending, Searchable Dropdown) -->
             <UFormField :label="$t('orders.status') || 'Order Status'">
               <USelectMenu
@@ -222,14 +237,49 @@
               </table>
             </div>
 
-            <!-- Total Amount Bar -->
-            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-              <span class="text-sm font-bold text-slate-700 dark:text-slate-300">
-                {{ $t('orders.total_amount') || 'Total Amount' }}
-              </span>
-              <span class="text-xl font-mono font-extrabold text-indigo-600 dark:text-indigo-400">
-                ฿{{ formatCurrency(form.total_amount) }}
-              </span>
+            <!-- Financial Breakdown & Discount Input -->
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-3 border-b border-slate-200/60 dark:border-slate-700/60">
+                <!-- Discount Input -->
+                <UFormField :label="$t('orders.discount') || 'Discount (THB)'">
+                  <UInput
+                    v-model.number="form.discount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    size="sm"
+                    class="w-full font-mono"
+                    @input="recalculateOrderTotal"
+                  />
+                </UFormField>
+
+                <!-- Detailed Financial Summary -->
+                <div class="space-y-1.5 text-xs self-end text-right sm:border-l sm:border-slate-200/60 dark:sm:border-slate-700/60 sm:pl-4">
+                  <div class="flex justify-between items-center text-slate-500 dark:text-slate-400">
+                    <span>{{ $t('orders.subtotal_items') || 'Items Subtotal' }}:</span>
+                    <span class="font-mono font-semibold">฿{{ formatCurrency(summaryBreakdown.itemsSubtotal) }}</span>
+                  </div>
+                  <div v-if="summaryBreakdown.discountAmount > 0" class="flex justify-between items-center text-emerald-600 dark:text-emerald-400">
+                    <span>{{ $t('orders.discount') || 'Discount' }}:</span>
+                    <span class="font-mono font-semibold">-฿{{ formatCurrency(summaryBreakdown.discountAmount) }}</span>
+                  </div>
+                  <div v-if="form.payment_channel === 'credit_card' && summaryBreakdown.creditCardFee > 0" class="flex justify-between items-center text-indigo-600 dark:text-indigo-400">
+                    <span>{{ $t('orders.credit_card_fee') || 'Credit Card Fee' }} ({{ form.credit_card_charge_percent || 0 }}%):</span>
+                    <span class="font-mono font-semibold">+฿{{ formatCurrency(summaryBreakdown.creditCardFee) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Final Total Amount -->
+              <div class="flex items-center justify-between pt-1">
+                <span class="text-sm font-bold text-slate-800 dark:text-slate-200">
+                  {{ $t('orders.total_amount') || 'Total Amount' }}
+                </span>
+                <span class="text-2xl font-mono font-extrabold text-indigo-600 dark:text-indigo-400">
+                  ฿{{ formatCurrency(form.total_amount) }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -274,7 +324,7 @@
 import { reactive, watch, ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Order, OrderFormData } from '../types'
-import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, safeLowerCase } from '../composables/useOrderEngine'
+import { calculateItemSubtotal, calculateOrderSummary, calculateOrderTotal, getTodayDateString, safeLowerCase } from '../composables/useOrderEngine'
 import { useApiFetch } from '../../../composables/useApiFetch'
 import { useAppToast } from '../../../composables/useAppToast'
 import type { Customer } from '../../customer/types'
@@ -303,6 +353,9 @@ const form = reactive<OrderFormData>({
   delivery_date: getTodayDateString(), // Default today date
   payment_channel: '', // No default value
   status: 'pending', // Default pending
+  discount: 0,
+  credit_card_charge_percent: 3,
+  credit_card_percent_charge: 3,
   notes: '',
   total_amount: 0,
   items: []
@@ -469,6 +522,16 @@ watch(selectedPackage, (val) => {
   }
 })
 
+// Summary breakdown computation
+const summaryBreakdown = computed(() => {
+  return calculateOrderSummary(
+    form.items,
+    form.discount || 0,
+    form.payment_channel,
+    form.credit_card_charge_percent ?? form.credit_card_percent_charge ?? 0
+  )
+})
+
 // Deep watcher on form.items to automatically recalculate item subtotals and total amount whenever quantity changes
 watch(
   () => form.items,
@@ -477,15 +540,22 @@ watch(
       newItems.forEach(item => {
         item.subtotal = calculateItemSubtotal(item.quantity, item.unit_price)
       })
-      form.total_amount = calculateOrderTotal(newItems)
+      recalculateOrderTotal()
     }
   },
   { deep: true }
 )
 
+watch(
+  [() => form.discount, () => form.payment_channel, () => form.credit_card_charge_percent, () => form.credit_card_percent_charge],
+  () => {
+    recalculateOrderTotal()
+  }
+)
+
 // Helper methods
 const recalculateOrderTotal = () => {
-  form.total_amount = calculateOrderTotal(form.items)
+  form.total_amount = summaryBreakdown.value.totalAmount
 }
 
 const removeItem = (index: number) => {
@@ -513,6 +583,9 @@ watch(() => props.orderToEdit, (newVal) => {
     form.delivery_date = newVal.delivery_date ? newVal.delivery_date.split('T')[0] : getTodayDateString()
     form.payment_channel = newVal.payment_channel ? newVal.payment_channel.toLowerCase() : ''
     form.status = (newVal.status || 'pending').toLowerCase()
+    form.discount = Number(newVal.discount || 0)
+    form.credit_card_charge_percent = Number(newVal.credit_card_charge_percent ?? newVal.credit_card_percent_charge ?? 3)
+    form.credit_card_percent_charge = Number(newVal.credit_card_percent_charge ?? newVal.credit_card_charge_percent ?? 3)
     form.notes = newVal.notes || ''
     form.total_amount = newVal.total_amount || 0
     form.items = Array.isArray(newVal.items)
@@ -578,8 +651,15 @@ const submitForm = () => {
   }
 
   recalculateOrderTotal()
+  const ccChargePercent = safeLowerCase(form.payment_channel) === 'credit_card'
+    ? Number(form.credit_card_charge_percent ?? form.credit_card_percent_charge ?? 0)
+    : 0
+
   emit('save', {
     ...form,
+    discount: Number(form.discount || 0),
+    credit_card_charge_percent: ccChargePercent,
+    credit_card_percent_charge: ccChargePercent,
     status: safeLowerCase(form.status || 'pending'),
     payment_channel: safeLowerCase(form.payment_channel)
   })

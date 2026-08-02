@@ -38,6 +38,21 @@ describe('Order Calculation & Utility Engine', () => {
       expect(calculateOrderTotal(items)).toBe(300)
     })
 
+    it('should deduct discount when discount parameter is specified', () => {
+      const items = [
+        { quantity: 2, unit_price: 500 } // Total 1000
+      ]
+      expect(calculateOrderTotal(items, 100)).toBe(900)
+    })
+
+    it('should apply credit card fee percentage after discount when payment channel is credit_card', () => {
+      const items = [
+        { quantity: 2, unit_price: 500 } // Subtotal: 1000
+      ]
+      // 1000 - 100 discount = 900. 3% of 900 = 27. Total = 927
+      expect(calculateOrderTotal(items, 100, 'credit_card', 3)).toBe(927)
+    })
+
     it('should return 0 when items array is empty or invalid', () => {
       expect(calculateOrderTotal([])).toBe(0)
       expect(calculateOrderTotal(null as any)).toBe(0)

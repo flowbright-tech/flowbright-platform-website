@@ -29,17 +29,49 @@ export const calculateItemSubtotal = (quantity: number, unitPrice: number): numb
   return Number((q * p).toFixed(2))
 }
 
-export const calculateOrderTotal = (
-  items: Array<{ subtotal?: number; quantity?: number; unit_price?: number }>
-): number => {
-  if (!Array.isArray(items) || items.length === 0) return 0
-  const total = items.reduce((sum, item) => {
+export const calculateOrderSummary = (
+  items: Array<{ subtotal?: number; quantity?: number; unit_price?: number }>,
+  discount: number = 0,
+  paymentChannel: string = '',
+  creditCardChargePercent: number = 0
+) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    return { itemsSubtotal: 0, discountAmount: 0, subtotalAfterDiscount: 0, creditCardFee: 0, totalAmount: 0 }
+  }
+  const itemsSubtotal = items.reduce((sum, item) => {
     const sub = item.subtotal !== undefined
       ? Number(item.subtotal) || 0
       : calculateItemSubtotal(item.quantity || 0, item.unit_price || 0)
     return sum + sub
   }, 0)
-  return Number(total.toFixed(2))
+
+  const disc = Math.max(0, Number(discount) || 0)
+  const subtotalAfterDiscount = Math.max(0, itemsSubtotal - disc)
+
+  let creditCardFee = 0
+  if (safeLowerCase(paymentChannel) === 'credit_card') {
+    const feePercent = Math.max(0, Number(creditCardChargePercent) || 0)
+    creditCardFee = (subtotalAfterDiscount * feePercent) / 100
+  }
+
+  const totalAmount = Number((subtotalAfterDiscount + creditCardFee).toFixed(2))
+
+  return {
+    itemsSubtotal: Number(itemsSubtotal.toFixed(2)),
+    discountAmount: Number(disc.toFixed(2)),
+    subtotalAfterDiscount: Number(subtotalAfterDiscount.toFixed(2)),
+    creditCardFee: Number(creditCardFee.toFixed(2)),
+    totalAmount
+  }
+}
+
+export const calculateOrderTotal = (
+  items: Array<{ subtotal?: number; quantity?: number; unit_price?: number }>,
+  discount: number = 0,
+  paymentChannel: string = '',
+  creditCardChargePercent: number = 0
+): number => {
+  return calculateOrderSummary(items, discount, paymentChannel, creditCardChargePercent).totalAmount
 }
 
 export const getTodayDateString = (dateObj: Date = new Date()): string => {
@@ -172,10 +204,18 @@ export const useOrderEngine = () => {
     isLoading.value = true
     errorMsg.value = null
 
+    const paymentChannelClean = safeLowerCase(data.payment_channel || 'cash')
+    const ccChargePercent = paymentChannelClean === 'credit_card'
+      ? Number(data.credit_card_charge_percent ?? data.credit_card_percent_charge ?? 0)
+      : 0
+
     const payload = {
       ...data,
       status: safeLowerCase(data.status || 'pending'),
-      payment_channel: safeLowerCase(data.payment_channel || 'cash')
+      payment_channel: paymentChannelClean,
+      discount: Number(data.discount || 0),
+      credit_card_charge_percent: ccChargePercent,
+      credit_card_percent_charge: ccChargePercent
     }
 
     try {
@@ -215,10 +255,18 @@ export const useOrderEngine = () => {
     isLoading.value = true
     errorMsg.value = null
 
+    const paymentChannelClean = safeLowerCase(data.payment_channel || 'cash')
+    const ccChargePercent = paymentChannelClean === 'credit_card'
+      ? Number(data.credit_card_charge_percent ?? data.credit_card_percent_charge ?? 0)
+      : 0
+
     const payload = {
       ...data,
       status: safeLowerCase(data.status || 'pending'),
-      payment_channel: safeLowerCase(data.payment_channel || 'cash')
+      payment_channel: paymentChannelClean,
+      discount: Number(data.discount || 0),
+      credit_card_charge_percent: ccChargePercent,
+      credit_card_percent_charge: ccChargePercent
     }
 
     try {
@@ -307,6 +355,7 @@ export const useOrderEngine = () => {
     updateOrder,
     deleteOrder,
     calculateItemSubtotal,
+    calculateOrderSummary,
     calculateOrderTotal,
     getTodayDateString,
     formatDeliveryDate,

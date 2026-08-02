@@ -27,6 +27,9 @@ export interface Order {
   delivery_date: string // YYYY-MM-DD
   payment_channel: PaymentChannel | string
   status: OrderStatus | string
+  discount?: number
+  credit_card_charge_percent?: number
+  credit_card_percent_charge?: number
   total_amount: number
   notes: string
   items: OrderItem[]
@@ -42,6 +45,9 @@ export interface OrderFormData {
   delivery_date: string // YYYY-MM-DD
   payment_channel: string
   status: string
+  discount?: number
+  credit_card_charge_percent?: number
+  credit_card_percent_charge?: number
   notes: string
   total_amount: number
   items: Array<{
