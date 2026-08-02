@@ -3,6 +3,7 @@
     <!-- Reusable Top Action Bar -->
     <PrintActionBar
       title="Document Printing Preview"
+      :pdf-filename="`Document_${invoice?.code || invoice?.order_number || orderId}.pdf`"
     />
 
     <!-- Loading Skeleton -->

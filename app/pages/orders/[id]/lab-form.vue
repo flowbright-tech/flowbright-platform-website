@@ -3,6 +3,7 @@
     <!-- Reusable Top Action Bar -->
     <PrintActionBar
       title="Lab Technician Worksheet (Lab In / Lab Out)"
+      :pdf-filename="`Lab_Worksheet_${order?.code || order?.order_number || orderId}.pdf`"
     />
 
     <!-- Loading Skeleton -->
