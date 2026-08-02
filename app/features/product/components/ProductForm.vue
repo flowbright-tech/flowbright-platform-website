@@ -107,10 +107,10 @@
           </div>
         </div>
 
-        <!-- Section 2: Product Image (Hidden for Lab company type) -->
-        <div v-if="!isLab" class="space-y-4 pt-4 border-t border-muted">
+        <!-- Section 2: Product / Test Image -->
+        <div class="space-y-4 pt-4 border-t border-muted">
           <h3 class="text-sm font-bold text-highlighted">
-            {{ $t('products.sec_image') || 'Product Image' }}
+            {{ dl('sec_image', $t('products.sec_image') || 'Product Image') }}
           </h3>
 
           <div class="flex items-center justify-center border-2 border-dashed border-muted rounded-xl p-6 hover:bg-muted transition-colors cursor-pointer relative">
@@ -123,7 +123,7 @@
             <div class="text-center space-y-2 pointer-events-none">
               <UIcon name="i-lucide-upload" class="w-8 h-8 text-dimmed mx-auto" />
               <div class="text-xs font-semibold text-muted">
-                {{ $t('products.upload_image_hint') || 'Drag and drop or click to upload product image...' }}
+                {{ dl('upload_image_hint', $t('products.upload_image_hint') || 'Drag and drop or click to upload image...') }}
               </div>
             </div>
           </div>
@@ -133,10 +133,10 @@
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-toned flex items-center gap-1.5">
                 <UIcon name="i-lucide-image" class="w-4 h-4 text-primary" />
-                {{ $t('products.uploaded_preview') || 'Image Preview' }}
+                {{ dl('uploaded_preview', $t('products.uploaded_preview') || 'Image Preview') }}
               </span>
               <UButton color="error" variant="ghost" icon="i-lucide-trash-2" size="xs" @click="form.image_url = ''">
-                {{ $t('products.remove_image') || 'Remove' }}
+                {{ dl('remove_image', $t('products.remove_image') || 'Remove') }}
               </UButton>
             </div>
             <div class="w-40 h-40 rounded-xl overflow-hidden border border-muted shadow-sm bg-muted">
@@ -354,7 +354,7 @@ const form = reactive({
   name_th: '',
   sku: '',
   barcode: '',
-  product_type: 'standard',
+  product_type: 'test',
   subcategory_id: 'root',
   selling_price: 0,
   cost: 0,
@@ -405,6 +405,7 @@ const labFlagOptions = [
 ]
 
 const productTypeOptions = computed(() => [
+  { label: dl('type_test', isLab.value ? 'Clinical Test' : 'Test Product'), value: 'test' },
   { label: dl('type_standard', 'Standard Item'), value: 'standard' },
   { label: dl('type_service', 'Service Charge / Non-Stock'), value: 'service' },
   { label: dl('type_kit', 'Kit / Assembly Bundle'), value: 'kit' }
@@ -427,7 +428,7 @@ watch(() => props.categoryToEdit, (newVal) => {
     form.name_th = newVal.name_th || ''
     form.sku = newVal.sku || ''
     form.barcode = newVal.barcode || ''
-    form.product_type = newVal.product_type || 'standard'
+    form.product_type = newVal.product_type || 'test'
     form.subcategory_id = newVal.subcategory_id || 'root'
     form.selling_price = Number(newVal.selling_price ?? 0)
     form.cost = Number(newVal.cost ?? 0)
@@ -559,7 +560,7 @@ const submitForm = async () => {
     return String(val)
   }
 
-  const selectedType = extractVal(form.product_type) || 'standard'
+  const selectedType = extractVal(form.product_type) || 'test'
   const selectedCat = extractVal(form.subcategory_id)
   const selectedLabFlag = extractVal(form.lab_flag) || 'labout'
 

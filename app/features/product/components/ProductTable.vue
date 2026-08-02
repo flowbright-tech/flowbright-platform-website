@@ -66,6 +66,17 @@
           </div>
         </template>
 
+        <!-- Product Type Column -->
+        <template #product_type-cell="{ row }">
+          <UBadge
+            variant="subtle"
+            :color="row.original.product_type === 'test' ? 'info' : row.original.product_type === 'service' ? 'warning' : row.original.product_type === 'kit' ? 'secondary' : 'neutral'"
+            class="font-semibold text-xs"
+          >
+            {{ getProductTypeLabel(row.original.product_type) }}
+          </UBadge>
+        </template>
+
         <!-- Status Column (Balanced size & high visibility in both light & dark themes) -->
         <template #is_active-cell="{ row }">
           <span
@@ -155,6 +166,15 @@ const formatDateTime = (dateStr?: string) => {
   } catch (e) {
     return '-'
   }
+}
+
+const getProductTypeLabel = (type?: string) => {
+  if (!type) return '-'
+  if (type === 'test') return dl('type_test', isLab.value ? 'Clinical Test' : 'Test Item')
+  if (type === 'standard') return dl('type_standard', isLab.value ? 'Standard Clinical Test' : 'Standard Inventory Item')
+  if (type === 'service') return dl('type_service', isLab.value ? 'Specialized Panel / Service' : 'Service Charge / Non-Stock')
+  if (type === 'kit') return dl('type_kit', isLab.value ? 'Test Kit / Panel Bundle' : 'Kit / Assembly Bundle')
+  return type
 }
 
 const columns = computed(() => [
