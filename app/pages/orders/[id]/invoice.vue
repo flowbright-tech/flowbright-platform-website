@@ -3,7 +3,6 @@
     <!-- Reusable Top Action Bar -->
     <PrintActionBar
       title="Invoice Printing Preview"
-      print-label="Print Invoice (A4)"
     />
 
     <!-- Loading Skeleton -->

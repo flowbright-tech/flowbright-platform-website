@@ -3,7 +3,6 @@
     <!-- Reusable Top Action Bar -->
     <PrintActionBar
       title="Document Printing Preview"
-      print-label="Print Document (A4)"
     />
 
     <!-- Loading Skeleton -->

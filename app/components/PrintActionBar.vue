@@ -15,7 +15,7 @@
         {{ title }}
       </span>
     </div>
-    <div class="flex items-center gap-2 sm:gap-3">
+    <div class="flex flex-wrap items-center gap-2 sm:gap-3">
       <!-- Language Switcher Button -->
       <UButton
         color="neutral"
@@ -26,6 +26,20 @@
       >
         {{ locale === 'th' ? 'English' : 'ไทย' }}
       </UButton>
+
+      <!-- Export PDF Button -->
+      <UButton
+        color="neutral"
+        variant="outline"
+        icon="i-heroicons-arrow-down-tray"
+        size="sm"
+        class="font-semibold shadow-xs"
+        @click="handleExportPdf"
+      >
+        Export PDF
+      </UButton>
+
+      <!-- Print Button (Print (A4)) -->
       <UButton
         color="primary"
         icon="i-heroicons-printer"
@@ -33,7 +47,7 @@
         class="font-semibold shadow-sm"
         @click="handlePrint"
       >
-        {{ printLabel || 'Print (A4)' }}
+        Print (A4)
       </UButton>
     </div>
   </div>
@@ -46,13 +60,13 @@ import { useLocalePath, useSwitchLocalePath } from '#imports'
 
 const props = defineProps<{
   title: string
-  printLabel?: string
   backPath?: string
 }>()
 
 const emit = defineEmits<{
   (e: 'back'): void
   (e: 'print'): void
+  (e: 'exportPdf'): void
   (e: 'toggleLanguage'): void
 }>()
 
@@ -75,6 +89,13 @@ const handleToggleLanguage = () => {
   const targetLocale = locale.value === 'th' ? 'en' : 'th'
   const targetPath = switchLocalePath(targetLocale)
   router.push(targetPath)
+}
+
+const handleExportPdf = () => {
+  emit('exportPdf')
+  if (import.meta.client) {
+    window.print()
+  }
 }
 
 const handlePrint = () => {

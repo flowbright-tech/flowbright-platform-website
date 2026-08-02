@@ -3,7 +3,6 @@
     <!-- Reusable Top Action Bar -->
     <PrintActionBar
       title="Lab Technician Worksheet (Lab In / Lab Out)"
-      print-label="Print Worksheet (A4)"
     />
 
     <!-- Loading Skeleton -->
