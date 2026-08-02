@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-slate-100 dark:bg-slate-900 py-6 flex flex-col items-center">
+  <div class="min-h-screen bg-slate-100 dark:bg-slate-900 py-4 sm:py-8 px-2 sm:px-6 flex flex-col items-center">
     <!-- Top Action bar (hidden on print) -->
-    <div class="no-print w-full max-w-[210mm] mb-6 flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700">
-      <div class="flex items-center gap-3">
+    <div class="no-print w-full max-w-[210mm] mb-4 sm:mb-6 flex flex-wrap justify-between items-center gap-3 bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700">
+      <div class="flex items-center gap-2 sm:gap-3">
         <UButton
           color="neutral"
           variant="outline"
@@ -12,12 +12,11 @@
         >
           {{ $t('common.back') || 'Back' }}
         </UButton>
-        <span class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-          <UIcon name="i-heroicons-beaker" class="w-4 h-4 text-emerald-500" />
+        <span class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200">
           Lab Technician Worksheet (Lab In / Lab Out)
         </span>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
         <!-- Language Switcher Button -->
         <UButton
           color="neutral"
@@ -26,27 +25,27 @@
           icon="i-heroicons-language"
           @click="toggleLanguage"
         >
-          {{ locale === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย' }}
+          {{ locale === 'th' ? 'English' : 'ไทย' }}
         </UButton>
         <UButton
           color="primary"
           icon="i-heroicons-printer"
-          size="md"
+          size="sm"
           class="font-semibold shadow-sm"
           @click="printLabForm"
         >
-          Print Lab Worksheet (A4)
+          Print (A4)
         </UButton>
       </div>
     </div>
 
     <!-- Loading Skeleton -->
-    <div v-if="isLoading" class="w-full max-w-[210mm] bg-white p-8 rounded-xl shadow-md space-y-6">
+    <div v-if="isLoading" class="w-full max-w-[210mm] bg-white p-6 sm:p-8 rounded-xl shadow-md space-y-6">
       <div class="flex justify-center py-6">
         <USkeleton class="h-10 w-80 rounded-lg" />
       </div>
       <div class="border-y border-slate-100 py-6 space-y-4">
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <USkeleton class="h-4 w-full" />
           <USkeleton class="h-4 w-full" />
           <USkeleton class="h-4 w-full" />
@@ -59,7 +58,7 @@
     </div>
 
     <!-- Error State -->
-    <div v-else-if="errorMsg" class="w-full max-w-[210mm] bg-white p-8 rounded-xl shadow-md text-center space-y-4">
+    <div v-else-if="errorMsg" class="w-full max-w-[210mm] bg-white p-6 sm:p-8 rounded-xl shadow-md text-center space-y-4">
       <UIcon name="i-heroicons-exclamation-triangle" class="w-12 h-12 text-rose-500 mx-auto" />
       <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Failed to load Lab Worksheet details</h2>
       <p class="text-sm text-slate-500">{{ errorMsg }}</p>
@@ -68,22 +67,29 @@
       </UButton>
     </div>
 
-    <!-- Document Sheet (Print target) -->
+    <!-- Document Sheet (Print target & responsive view) -->
     <div v-else class="a4-page-container w-full max-w-[210mm]">
       <div class="a4-page print-content flex flex-col justify-between">
         <div>
-          <!-- Lab Form Header -->
-          <div class="flex justify-between items-start pb-4 border-b-2 border-slate-800 mb-4">
-            <div>
-              <h1 class="text-lg font-extrabold text-slate-900 uppercase tracking-tight flex items-center gap-2">
-                <UIcon name="i-heroicons-beaker" class="w-5 h-5 text-emerald-600 no-print" />
-                {{ company?.name_th || 'คลินิก เอ็ม.ที อินเตอร์แล็บ' }}
-              </h1>
-              <p class="text-xs font-semibold text-slate-600">
-                {{ company?.name_en || 'METRO MED COMPANY LIMITED (LABORATORY DIVISION)' }}
-              </p>
+          <!-- Lab Form Header (With Company Logo Image, No Icons) -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b-2 border-slate-800 mb-4">
+            <div class="flex items-center gap-3">
+              <img
+                v-if="company?.image_url"
+                :src="company.image_url"
+                alt="Company Logo"
+                class="h-10 sm:h-12 max-w-[160px] object-contain shrink-0"
+              />
+              <div>
+                <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+                  {{ company?.name_th || 'เอ็มทีอินเตอร์เมดิคอลแล็บ' }}
+                </h1>
+                <p class="text-xs font-semibold text-slate-600">
+                  {{ company?.name_en || 'M.T. Inter Medical Laboratory' }}
+                </p>
+              </div>
             </div>
-            <div class="text-right">
+            <div class="text-left sm:text-right">
               <div class="inline-block px-3 py-1 bg-emerald-100 text-emerald-950 border border-emerald-400 font-extrabold text-xs uppercase tracking-wider rounded">
                 LAB TECHNICIAN WORKSHEET
               </div>
@@ -93,11 +99,10 @@
             </div>
           </div>
 
-          <!-- Customer Information Card -->
+          <!-- Customer Information Card (Responsive) -->
           <div class="border border-slate-300 rounded-lg p-3 space-y-2 bg-slate-50/50 mb-4 text-[11.5px]">
-            <div class="font-bold text-slate-900 border-b border-slate-200 pb-1 flex justify-between items-center">
-              <span class="flex items-center gap-1.5 text-slate-800">
-                <UIcon name="i-heroicons-user" class="w-4 h-4 text-emerald-600" />
+            <div class="font-bold text-slate-900 border-b border-slate-200 pb-1 flex justify-between items-center flex-wrap gap-1">
+              <span class="font-bold text-slate-800">
                 ข้อมูลผู้ป่วย / ข้อมูลลูกค้า (Customer & Patient Profile)
               </span>
               <span class="font-mono text-[11px] text-slate-600">
@@ -105,7 +110,7 @@
               </span>
             </div>
 
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div>
                 <span class="font-bold text-slate-700">ชื่อ-นามสกุล : </span>
                 <span class="font-extrabold text-slate-900">{{ getCustomerFullName() }}</span>
@@ -114,13 +119,13 @@
                 <span class="font-bold text-slate-700">วันเกิด : </span>
                 <span class="font-mono font-bold text-slate-900">{{ formatBirthDate(customer?.birth_date) }}</span>
               </div>
-              <div class="text-right">
+              <div class="sm:text-right">
                 <span class="font-bold text-slate-700">อายุ : </span>
                 <span class="font-bold text-slate-900">{{ calculatePreciseAge(customer?.birth_date, order?.created_at) }}</span>
               </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-200/60 text-[11px]">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-200/60 text-[11px]">
               <div>
                 <span class="font-bold text-slate-700">เพศ : </span>
                 <span class="font-bold text-slate-900 capitalize">{{ customer?.gender || '-' }}</span>
@@ -129,7 +134,7 @@
                 <span class="font-bold text-slate-700">โทรศัพท์ : </span>
                 <span class="font-mono font-bold text-slate-900">{{ customer?.phone || order?.customer_phone || '-' }}</span>
               </div>
-              <div class="text-right">
+              <div class="sm:text-right">
                 <span class="font-bold text-slate-700">Passport / ID : </span>
                 <span class="font-mono font-bold text-slate-900">{{ customer?.passport || customer?.id_card || '-' }}</span>
               </div>
@@ -138,21 +143,20 @@
 
           <!-- Order Summary Card -->
           <div class="border border-slate-300 rounded-lg p-3 space-y-1.5 bg-slate-50/50 mb-5 text-[11.5px]">
-            <div class="font-bold text-slate-900 border-b border-slate-200 pb-1 flex justify-between items-center">
-              <span class="flex items-center gap-1.5 text-slate-800">
-                <UIcon name="i-heroicons-clipboard-document-list" class="w-4 h-4 text-emerald-600" />
+            <div class="font-bold text-slate-900 border-b border-slate-200 pb-1 flex justify-between items-center flex-wrap gap-1">
+              <span class="font-bold text-slate-800">
                 รายละเอียดคำสั่งซื้อ (Order Details)
               </span>
               <span class="font-mono text-[11px] text-slate-600">
                 วันที่ส่งตรวจ: {{ formatInvoiceDate(order?.delivery_date) }}
               </span>
             </div>
-            <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
               <div>
                 <span class="font-bold text-slate-700">ช่องทางการชำระเงิน: </span>
                 <span class="font-bold text-slate-900 capitalize">{{ formatPaymentChannel(order?.payment_channel) }}</span>
               </div>
-              <div class="text-right">
+              <div class="sm:text-right">
                 <span class="font-bold text-slate-700">สถานะคำสั่งซื้อ: </span>
                 <span class="font-bold text-emerald-700 uppercase">{{ order?.status || 'Active' }}</span>
               </div>
@@ -174,42 +178,52 @@
               </span>
             </div>
 
-            <table v-if="labInItems.length > 0" class="w-full border-collapse border border-slate-300 text-[11px]">
-              <thead>
-                <tr class="bg-emerald-100/70 text-slate-900 font-bold border-b border-slate-300">
-                  <th class="px-2.5 py-2 text-center border-r border-slate-300 w-10">ลำดับ</th>
-                  <th class="px-2.5 py-2 text-left border-r border-slate-300 w-28">รหัสรหัส/SKU</th>
-                  <th class="px-2.5 py-2 text-left border-r border-slate-300">รายการทดสอบ (Test Name)</th>
-                  <th class="px-2.5 py-2 text-left border-r border-slate-300 w-36">ชนิดตัวอย่าง (Sample)</th>
-                  <th class="px-2.5 py-2 text-left border-r border-slate-300 w-32">วิธีวิเคราะห์ (Method)</th>
-                  <th class="px-2.5 py-2 text-center w-28">ผลลัพธ์ / หมายเหตุ</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-200">
-                <tr v-for="(item, idx) in labInItems" :key="idx" class="text-slate-800">
-                  <td class="px-2.5 py-2 text-center font-mono font-bold border-r border-slate-200">{{ idx + 1 }}</td>
-                  <td class="px-2.5 py-2 font-mono font-bold text-slate-900 border-r border-slate-200">
-                    {{ getItemSku(item) }}
-                  </td>
-                  <td class="px-2.5 py-2 border-r border-slate-200">
-                    <div class="font-extrabold text-slate-900">{{ getItemName(item) }}</div>
-                    <div v-if="item.principle" class="text-[9.5px] text-slate-500 italic">{{ item.principle }}</div>
-                  </td>
-                  <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
-                    {{ item.sample_type_volum || item.product?.sample_type_volum || '-' }}
-                  </td>
-                  <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
-                    {{ item.method || item.product?.method || '-' }}
-                  </td>
-                  <td class="px-2.5 py-2 text-center text-slate-400 font-mono text-[10px]">
-                    [ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="overflow-x-auto border border-slate-300 rounded-lg">
+              <table v-if="labInItems.length > 0" class="w-full border-collapse text-[11px] min-w-[550px] sm:min-w-full">
+                <thead>
+                  <tr class="bg-emerald-100/70 text-slate-900 font-bold border-b border-slate-300">
+                    <th class="px-2.5 py-2 text-center border-r border-slate-300 w-10">ลำดับ</th>
+                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-28">รหัส/SKU</th>
+                    <th class="px-2.5 py-2 text-left border-r border-slate-300">รายการทดสอบ (Test Name)</th>
+                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-36">ชนิดตัวอย่าง (Sample)</th>
+                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-32">วิธีวิเคราะห์ (Method)</th>
+                    <th class="px-2.5 py-2 text-center w-28">ผลลัพธ์ / หมายเหตุ</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <tr v-for="(item, idx) in labInItems" :key="idx" class="text-slate-800">
+                    <td class="px-2.5 py-2 text-center font-mono font-bold border-r border-slate-200">{{ idx + 1 }}</td>
+                    <td class="px-2.5 py-2 font-mono font-bold text-slate-900 border-r border-slate-200">
+                      {{ getItemSku(item) }}
+                    </td>
+                    <td class="px-2.5 py-2 border-r border-slate-200">
+                      <div class="font-extrabold text-slate-900">{{ getItemName(item) }}</div>
+                      <div v-if="getItemPackageName(item)" class="text-[9.5px] text-slate-500 font-semibold">
+                        Package: {{ getItemPackageName(item) }}
+                      </div>
+                      <div v-if="item.principle || item.product?.principle" class="text-[9.5px] text-slate-500 italic">
+                        {{ item.principle || item.product?.principle }}
+                      </div>
+                    </td>
+                    <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
+                      {{ item.sample_type_volum || item.product?.sample_type_volum || '-' }}
+                    </td>
+                    <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
+                      {{ item.method || item.product?.method || '-' }}
+                      <span v-if="item.reference_range_unit || item.product?.reference_range_unit" class="text-[10px] text-slate-500">
+                        ({{ item.reference_range_unit || item.product?.reference_range_unit }})
+                      </span>
+                    </td>
+                    <td class="px-2.5 py-2 text-center text-slate-400 font-mono text-[10px]">
+                      [ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-            <div v-else class="p-3 border border-dashed border-slate-300 rounded text-center text-xs text-slate-500 font-medium bg-slate-50">
-              ไม่มีรายการทดสอบ Lab In สำหรับคำสั่งซื้อนี้ (No Lab In tests required)
+              <div v-else class="p-3 text-center text-xs text-slate-500 font-medium bg-slate-50">
+                ไม่มีรายการทดสอบ Lab In สำหรับคำสั่งซื้อนี้ (No Lab In tests required)
+              </div>
             </div>
           </div>
 
@@ -225,66 +239,50 @@
               </span>
             </div>
 
-            <table v-if="labOutItems.length > 0" class="w-full border-collapse border border-slate-300 text-[11px]">
-              <thead>
-                <tr class="bg-amber-100/70 text-slate-900 font-bold border-b border-slate-300">
-                  <th class="px-2.5 py-2 text-center border-r border-slate-300 w-10">ลำดับ</th>
-                  <th class="px-2.5 py-2 text-left border-r border-slate-300 w-28">รหัสรหัส/SKU</th>
-                  <th class="px-2.5 py-2 text-left border-r border-slate-300">รายการทดสอบ (Test Name)</th>
-                  <th class="px-2.5 py-2 text-left border-r border-slate-300 w-36">ชนิดตัวอย่าง (Sample)</th>
-                  <th class="px-2.5 py-2 text-left border-r border-slate-300 w-32">Lead Time / จัดเก็บ</th>
-                  <th class="px-2.5 py-2 text-center w-28">สถานะการส่งตรวจ</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-200">
-                <tr v-for="(item, idx) in labOutItems" :key="idx" class="text-slate-800">
-                  <td class="px-2.5 py-2 text-center font-mono font-bold border-r border-slate-200">{{ idx + 1 }}</td>
-                  <td class="px-2.5 py-2 font-mono font-bold text-slate-900 border-r border-slate-200">
-                    {{ getItemSku(item) }}
-                  </td>
-                  <td class="px-2.5 py-2 border-r border-slate-200">
-                    <div class="font-extrabold text-slate-900">{{ getItemName(item) }}</div>
-                    <div v-if="item.collection_remark || item.product?.collection_remark" class="text-[9.5px] text-amber-700 italic">
-                      Instruction: {{ item.collection_remark || item.product?.collection_remark }}
-                    </div>
-                  </td>
-                  <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
-                    {{ item.sample_type_volum || item.product?.sample_type_volum || '-' }}
-                  </td>
-                  <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
-                    {{ item.leadtime || item.product?.leadtime || '-' }} / {{ item.storage_condition || item.product?.storage_condition || '-' }}
-                  </td>
-                  <td class="px-2.5 py-2 text-center font-bold text-amber-700 text-[10.5px]">
-                    Pending Outsource
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="overflow-x-auto border border-slate-300 rounded-lg">
+              <table v-if="labOutItems.length > 0" class="w-full border-collapse text-[11px] min-w-[550px] sm:min-w-full">
+                <thead>
+                  <tr class="bg-amber-100/70 text-slate-900 font-bold border-b border-slate-300">
+                    <th class="px-2.5 py-2 text-center border-r border-slate-300 w-10">ลำดับ</th>
+                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-28">รหัส/SKU</th>
+                    <th class="px-2.5 py-2 text-left border-r border-slate-300">รายการทดสอบ (Test Name)</th>
+                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-36">ชนิดตัวอย่าง (Sample)</th>
+                    <th class="px-2.5 py-2 text-left border-r border-slate-300 w-32">Lead Time / จัดเก็บ</th>
+                    <th class="px-2.5 py-2 text-center w-28">สถานะการส่งตรวจ</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <tr v-for="(item, idx) in labOutItems" :key="idx" class="text-slate-800">
+                    <td class="px-2.5 py-2 text-center font-mono font-bold border-r border-slate-200">{{ idx + 1 }}</td>
+                    <td class="px-2.5 py-2 font-mono font-bold text-slate-900 border-r border-slate-200">
+                      {{ getItemSku(item) }}
+                    </td>
+                    <td class="px-2.5 py-2 border-r border-slate-200">
+                      <div class="font-extrabold text-slate-900">{{ getItemName(item) }}</div>
+                      <div v-if="getItemPackageName(item)" class="text-[9.5px] text-slate-500 font-semibold">
+                        Package: {{ getItemPackageName(item) }}
+                      </div>
+                      <div v-if="item.collection_remark || item.product?.collection_remark" class="text-[9.5px] text-amber-700 italic">
+                        Instruction: {{ item.collection_remark || item.product?.collection_remark }}
+                      </div>
+                    </td>
+                    <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
+                      {{ item.sample_type_volum || item.product?.sample_type_volum || '-' }}
+                    </td>
+                    <td class="px-2.5 py-2 border-r border-slate-200 font-medium">
+                      {{ item.leadtime || item.product?.leadtime || '-' }} / {{ item.storage_condition || item.product?.storage_condition || '-' }}
+                    </td>
+                    <td class="px-2.5 py-2 text-center font-bold text-amber-700 text-[10.5px]">
+                      Pending Outsource
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-            <div v-else class="p-3 border border-dashed border-slate-300 rounded text-center text-xs text-slate-500 font-medium bg-slate-50">
-              ไม่มีรายการทดสอบ Lab Out สำหรับคำสั่งซื้อนี้ (No Lab Out tests required)
+              <div v-else class="p-3 text-center text-xs text-slate-500 font-medium bg-slate-50">
+                ไม่มีรายการทดสอบ Lab Out สำหรับคำสั่งซื้อนี้ (No Lab Out tests required)
+              </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Footer Signatures -->
-        <div class="mt-12 pt-4 border-t border-slate-300">
-          <div class="grid grid-cols-2 gap-8 text-[11px] text-center">
-            <div>
-              <p class="font-bold text-slate-800">ผู้บันทึก / เจ้าหน้าที่ห้องปฏิบัติการ (Lab Technician)</p>
-              <div class="mt-8 border-b border-dashed border-slate-400 w-48 mx-auto"></div>
-              <p class="text-[9.5px] text-slate-500 mt-1">วันที่ ( Date ) ....... / ....... / .......</p>
-            </div>
-            <div>
-              <p class="font-bold text-slate-800">ผู้ตรวจสอบ / อนุมัติผล (Verified By)</p>
-              <div class="mt-8 border-b border-dashed border-slate-400 w-48 mx-auto"></div>
-              <p class="text-[9.5px] text-slate-500 mt-1">วันที่ ( Date ) ....... / ....... / .......</p>
-            </div>
-          </div>
-
-          <div class="flex justify-between items-center text-[9px] font-bold text-slate-400 mt-6">
-            <span>Flow Bright SRP Lab Module</span>
-            <span>Printed Date: {{ printDate }}</span>
           </div>
         </div>
       </div>
@@ -320,8 +318,42 @@ const errorMsg = ref<string | null>(null)
 const order = ref<any>(null)
 const company = ref<any>(null)
 const customer = ref<any>(null)
-const rawItems = ref<any[]>([])
+const labItems = ref<any[]>([])
 const printDate = ref('')
+
+const extractLabItemsFromOrder = (orderData: any): any[] => {
+  if (!orderData || !Array.isArray(orderData.items)) return []
+  const list: any[] = []
+  orderData.items.forEach((item: any) => {
+    if (item.package && Array.isArray(item.package.items)) {
+      item.package.items.forEach((pkgItem: any) => {
+        if (pkgItem.product) {
+          list.push({
+            package_id: item.package_id,
+            package_name_en: item.package?.name_en || item.package_name_en,
+            package_name_th: item.package?.name_th || item.package_name_th,
+            product_id: pkgItem.product_id,
+            product_name_en: pkgItem.product.name_en,
+            product_name_th: pkgItem.product.name_th,
+            sku: pkgItem.product.sku,
+            unit: pkgItem.product.unit,
+            quantity: pkgItem.quantity || item.quantity || 1,
+            lab_flag: pkgItem.product.lab_flag || 'labout',
+            method: pkgItem.product.method,
+            sample_type_volum: pkgItem.product.sample_type_volum,
+            reference_range_unit: pkgItem.product.reference_range_unit,
+            leadtime: pkgItem.product.leadtime,
+            storage_condition: pkgItem.product.storage_condition,
+            collection_remark: pkgItem.product.collection_remark
+          })
+        }
+      })
+    } else {
+      list.push(item)
+    }
+  })
+  return list
+}
 
 const fetchLabFormData = async () => {
   isLoading.value = true
@@ -335,7 +367,7 @@ const fetchLabFormData = async () => {
         order.value = json.data.order || json.data
         company.value = json.data.company || authCompany.value
         customer.value = json.data.customer || json.data.order?.customer
-        rawItems.value = json.data.items || json.data.order?.items || []
+        labItems.value = json.data.lab_items || json.data.order?.lab_items || extractLabItemsFromOrder(order.value)
         isLoading.value = false
         return
       }
@@ -348,8 +380,8 @@ const fetchLabFormData = async () => {
       if (orderJson.success && orderJson.data) {
         order.value = orderJson.data
         customer.value = orderJson.data?.customer
-        company.value = authCompany.value
-        rawItems.value = orderJson.data?.items || []
+        company.value = orderJson.data?.company || authCompany.value
+        labItems.value = orderJson.data?.lab_items || extractLabItemsFromOrder(orderJson.data)
       } else {
         throw new Error('Order details not found')
       }
@@ -366,16 +398,16 @@ const fetchLabFormData = async () => {
 
 // Categorized items by lab_flag ('labin' vs 'labout')
 const labInItems = computed(() => {
-  return rawItems.value.filter((item: any) => {
+  return labItems.value.filter((item: any) => {
     const flag = (item.lab_flag || item.product?.lab_flag || item.package?.lab_flag || '').toLowerCase()
     return flag === 'labin'
   })
 })
 
 const labOutItems = computed(() => {
-  return rawItems.value.filter((item: any) => {
+  return labItems.value.filter((item: any) => {
     const flag = (item.lab_flag || item.product?.lab_flag || item.package?.lab_flag || '').toLowerCase()
-    return flag !== 'labin' // Default non-labin or labout to labout table
+    return flag === 'labout' || flag !== 'labin'
   })
 })
 
@@ -410,13 +442,20 @@ const getCustomerFullName = () => {
 
 const getItemName = (item: any) => {
   if (locale.value === 'th') {
-    return item.product?.name_th || item.package?.name_th || item.package_name_th || item.name_th || item.name_en || item.package_name_en || 'Unspecified Test'
+    return item.product_name_th || item.product?.name_th || item.package_name_th || item.name_th || item.name_en || 'Unspecified Test'
   }
-  return item.product?.name_en || item.package?.name_en || item.package_name_en || item.name_en || item.name_th || item.package_name_th || 'Unspecified Test'
+  return item.product_name_en || item.product?.name_en || item.package_name_en || item.name_en || item.name_th || 'Unspecified Test'
+}
+
+const getItemPackageName = (item: any) => {
+  if (locale.value === 'th') {
+    return item.package_name_th || item.package?.name_th || ''
+  }
+  return item.package_name_en || item.package?.name_en || ''
 }
 
 const getItemSku = (item: any) => {
-  return item.product?.sku || item.package?.sku || item.sku || item.code || '-'
+  return item.sku || item.product?.sku || item.package?.sku || item.code || '-'
 }
 
 const calculatePreciseAge = (birthDateStr?: string, referenceDateStr?: string) => {

@@ -124,7 +124,7 @@
                     </span>
                   </div>
                   <div class="text-[11px] text-indigo-700 dark:text-indigo-300 mt-0.5">
-                    {{ $t('orders.credit_card_auto_charge_hint') || 'Automatic rate loaded from company profile settings (srp_company_profile).' }}
+                    {{ $t('orders.credit_card_auto_charge_hint') || 'Automatic rate applied from company profile settings.' }}
                   </div>
                 </div>
               </div>
