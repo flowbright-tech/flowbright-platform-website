@@ -8,11 +8,11 @@
           @click="isMobileMenuOpen = true" />
 
         <NuxtLink :to="localePath('/')" class="flex items-center gap-2.5">
-          <img src="/icon.svg" alt="Flow Bright Logo"
+          <img src="/swiftcrownlogo.svg" alt="Swift Crown Logo"
             class="w-10 h-10 rounded-xl object-contain bg-white p-1 border border-slate-200/40 dark:border-slate-800/40 shadow-sm" />
           <div class="hidden sm:block">
             <span class="font-bold text-base text-slate-900 dark:text-white tracking-tight">
-              Flow Bright
+              Swift Crown
             </span>
             <span
               class="ml-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded-md">
@@ -81,34 +81,25 @@
           <template v-for="item in navItems" :key="item.key">
             <!-- Collapsible Submenu Parent -->
             <div v-if="item.children && item.children.length > 0" class="space-y-1">
-              <button
-                @click="toggleMenu(item.key)"
-                type="button"
-                class="w-full flex items-center justify-between gap-3.5 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-150 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white"
-              >
+              <button @click="toggleMenu(item.key)" type="button"
+                class="w-full flex items-center justify-between gap-3.5 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-150 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white">
                 <div class="flex items-center gap-3.5">
                   <UIcon :name="item.icon" class="w-6 h-6 shrink-0" />
                   <span>{{ $t(item.labelKey) }}</span>
                 </div>
-                <UIcon
-                  :name="expandedMenus[item.key] ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
-                  class="w-4.5 h-4.5 text-slate-400 dark:text-slate-500 transition-transform duration-200"
-                />
+                <UIcon :name="expandedMenus[item.key] ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
+                  class="w-4.5 h-4.5 text-slate-400 dark:text-slate-500 transition-transform duration-200" />
               </button>
-              
+
               <!-- Submenu Children -->
               <div v-if="expandedMenus[item.key]" class="pl-4 space-y-1">
-                <NuxtLink
-                  v-for="child in item.children"
-                  :key="child.key"
-                  :to="child.to!"
+                <NuxtLink v-for="child in item.children" :key="child.key" :to="child.to!"
                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150"
                   :class="[
                     route.path.startsWith(child.to!)
                       ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 font-bold border-l-2 border-indigo-600 dark:border-indigo-400'
                       : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-950 dark:hover:text-white'
-                  ]"
-                >
+                  ]">
                   <UIcon :name="child.icon" class="w-4.5 h-4.5 shrink-0" />
                   <span>{{ $t(child.labelKey) }}</span>
                 </NuxtLink>
@@ -116,16 +107,13 @@
             </div>
 
             <!-- Standard Menu Link -->
-            <NuxtLink
-              v-else
-              :to="item.to!"
+            <NuxtLink v-else :to="item.to!"
               class="flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
               :class="[
                 route.path === item.to
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
-              ]"
-            >
+              ]">
               <UIcon :name="item.icon" class="w-6 h-6 shrink-0" />
               <span>{{ $t(item.labelKey) }}</span>
             </NuxtLink>
@@ -142,9 +130,9 @@
             <div class="space-y-6">
               <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
                 <div class="flex items-center gap-2">
-                  <img src="/icon.svg" alt="Flow Bright Logo"
+                  <img src="/icon.svg" alt="Swift Crown Logo"
                     class="w-10 h-10 rounded-xl object-contain bg-white p-1 border border-slate-200/40 dark:border-slate-800/40 shadow-sm" />
-                  <span class="font-bold text-slate-900 dark:text-white">Flow Bright SRP</span>
+                  <span class="font-bold text-slate-900 dark:text-white">Swift Crown SRP</span>
                 </div>
                 <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark" size="sm"
                   @click="isMobileMenuOpen = false" />
@@ -159,35 +147,24 @@
                 <template v-for="item in navItems" :key="item.key">
                   <!-- Collapsible Submenu Parent -->
                   <div v-if="item.children && item.children.length > 0" class="space-y-1">
-                    <button
-                      @click="toggleMenu(item.key)"
-                      type="button"
-                      class="w-full flex items-center justify-between gap-3.5 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                    >
+                    <button @click="toggleMenu(item.key)" type="button"
+                      class="w-full flex items-center justify-between gap-3.5 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
                       <div class="flex items-center gap-3.5">
                         <UIcon :name="item.icon" class="w-6 h-6 shrink-0" />
                         <span>{{ $t(item.labelKey) }}</span>
                       </div>
-                      <UIcon
-                        :name="expandedMenus[item.key] ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
-                        class="w-4.5 h-4.5 text-slate-400 dark:text-slate-500 transition-transform duration-200"
-                      />
+                      <UIcon :name="expandedMenus[item.key] ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
+                        class="w-4.5 h-4.5 text-slate-400 dark:text-slate-500 transition-transform duration-200" />
                     </button>
-                    
+
                     <!-- Submenu Children -->
                     <div v-if="expandedMenus[item.key]" class="pl-4 space-y-1">
-                      <NuxtLink
-                        v-for="child in item.children"
-                        :key="child.key"
-                        :to="child.to!"
-                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold"
-                        :class="[
+                      <NuxtLink v-for="child in item.children" :key="child.key" :to="child.to!"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold" :class="[
                           route.path.startsWith(child.to!)
                             ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 font-bold border-l-2 border-indigo-600 dark:border-indigo-400'
                             : 'text-slate-650 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-950 dark:hover:text-white'
-                        ]"
-                        @click="isMobileMenuOpen = false"
-                      >
+                        ]" @click="isMobileMenuOpen = false">
                         <UIcon :name="child.icon" class="w-4.5 h-4.5 shrink-0" />
                         <span>{{ $t(child.labelKey) }}</span>
                       </NuxtLink>
@@ -195,17 +172,12 @@
                   </div>
 
                   <!-- Standard Menu Link -->
-                  <NuxtLink
-                    v-else
-                    :to="item.to!"
-                    class="flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-sm font-semibold"
-                    :class="[
+                  <NuxtLink v-else :to="item.to!"
+                    class="flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-sm font-semibold" :class="[
                       route.path === item.to
                         ? 'bg-indigo-600 text-white'
                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    ]"
-                    @click="isMobileMenuOpen = false"
-                  >
+                    ]" @click="isMobileMenuOpen = false">
                     <UIcon :name="item.icon" class="w-6 h-6 shrink-0" />
                     <span>{{ $t(item.labelKey) }}</span>
                   </NuxtLink>
@@ -288,7 +260,7 @@ const companyName = computed(() => {
       ? company.value.name_th
       : company.value.name_en
   }
-  return activeTenant.value?.name || 'Flow Bright Company'
+  return activeTenant.value?.name || 'Swift Crown Company'
 })
 
 const toggleLanguage = () => {

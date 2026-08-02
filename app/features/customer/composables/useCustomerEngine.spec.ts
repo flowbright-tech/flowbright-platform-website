@@ -248,7 +248,7 @@ describe('Customer Engine API & Logic', () => {
 
     const { fetchCustomers, errorMsg } = useCustomerEngine()
     const { isAuthenticated } = useAuthEngine()
-    
+
     await fetchCustomers()
 
     // Assert authentication was cleared

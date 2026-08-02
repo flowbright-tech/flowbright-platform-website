@@ -1,11 +1,11 @@
 {
   "app": {
-    "title": "Flow Bright SRP",
+    "title": "Swift Crown SRP",
     "subtitle": "SME Resource Planning Platform",
     "description": "Next-Generation Multi-Tenant SME Resource Management"
   },
   "auth": {
-    "login_title": "Sign in to Flow Bright SRP",
+    "login_title": "Sign in to Swift Crown SRP",
     "login_subtitle": "Select active tenant organization and enter your credentials to access the platform",
     "email": "User Email",
     "email_placeholder": "name{'@'}company.com",
@@ -26,7 +26,7 @@
     "password_required": "Please enter your password",
     "password_min": "Password must be at least 6 characters",
     "confirm_logout_title": "Confirm Sign Out",
-    "confirm_logout_desc": "Are you sure you want to sign out of Flow Bright SRP? All localized session data and runtime caches will be securely scrubbed."
+    "confirm_logout_desc": "Are you sure you want to sign out of Swift Crown SRP? All localized session data and runtime caches will be securely scrubbed."
   },
   "nav": {
     "dashboard": "Executive Dashboard",

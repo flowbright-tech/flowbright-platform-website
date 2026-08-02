@@ -199,7 +199,7 @@ export const useAuthEngine = () => {
       try {
         const config = useRuntimeConfig()
         const apiDomain = config?.public?.apiDomain || 'https://flowbright-platform-api.onrender.com'
-        
+
         await fetch(`${apiDomain}/api/v1/auth/logout`, {
           method: 'POST',
           headers: {

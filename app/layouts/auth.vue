@@ -4,10 +4,10 @@
     <!-- Top Floating Header Controls -->
     <header class="w-full max-w-7xl mx-auto flex items-center justify-between py-2">
       <div class="flex items-center gap-2.5">
-        <img src="/icon.svg" alt="Flow Bright Logo"
+        <img src="/swiftcrownlogo.svg" alt="Swift Crown Logo"
           class="w-10 h-10 rounded-xl object-contain bg-white p-1 border border-slate-200/40 dark:border-slate-800/40 shadow-sm" />
         <span class="font-bold text-slate-900 dark:text-white tracking-tight">
-          Flow Bright SRP
+          Swift Crown SRP
         </span>
       </div>
 
@@ -30,7 +30,7 @@
 
     <!-- Footer -->
     <footer class="text-center text-xs text-slate-400 dark:text-slate-600">
-      © 2026 Flow Bright Tech. Built for modern SMEs with Nuxt 4 SSG architecture.
+      © 2026 Swift Crown Tech. Built for modern SMEs with Nuxt 4 SSG architecture.
     </footer>
   </div>
 </template>

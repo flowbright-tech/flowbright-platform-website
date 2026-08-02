@@ -1,4 +1,4 @@
-# Flow Bright SRP Agent Rules
+# Swift Crown SRP Agent Rules
 
 ## Browser Testing Credentials
 Whenever executing browser-based testing or opening subagents:

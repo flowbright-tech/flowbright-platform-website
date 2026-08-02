@@ -2,9 +2,9 @@
 trigger: always_on
 ---
 
-# Antigravity Development Rules: Flow Bright SRP Frontend
+# Antigravity Development Rules: Swift Crown SRP Frontend
 
-This document outlines the strict architectural constraints, security policies, and best practices for developing the **Flow Bright SRP (SME Resource Planning)** frontend platform using **Nuxt (v4.x+)** compiled as a **Static Site Generation (SSG)** asset.
+This document outlines the strict architectural constraints, security policies, and best practices for developing the **Swift Crown SRP (SME Resource Planning)** frontend platform using **Nuxt (v4.x+)** compiled as a **Static Site Generation (SSG)** asset.
 
 ---
 
@@ -143,10 +143,10 @@ Rule: Do not scatter chaotic, inline tailwind override utilities via the ui prop
 Atomic Primitives: Local feature views must inherit from structured primitives rather than inventing custom atomic styles per module.
 
 TypeScript
-// app.config.ts - Centralized Design Token Matrix for Flow Bright SRP
+// app.config.ts - Centralized Design Token Matrix for Swift Crown SRP
 export default defineAppConfig({
   ui: {
-    primary: 'emerald', // Flow Bright corporate aesthetic
+    primary: 'emerald', // Swift Crown corporate aesthetic
     gray: 'cool',
     button: {
       default: {

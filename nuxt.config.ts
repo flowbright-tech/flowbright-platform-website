@@ -1,7 +1,7 @@
 // nuxt.config.ts
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
-  
+
   future: {
     compatibilityVersion: 4
   },
@@ -25,8 +25,8 @@ export default defineNuxtConfig({
 
   pwa: {
     manifest: {
-      name: 'Flow Bright SRP',
-      short_name: 'FlowBright',
+      name: 'Swift Crown SRP',
+      short_name: 'SwiftCrown',
       description: 'SME Resource Planning Platform',
       theme_color: '#4f46e5',
       background_color: '#ffffff',
@@ -84,7 +84,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Flow Bright SRP - SME Resource Planning',
+      title: 'Swift Crown SRP - SME Resource Planning',
       meta: [
         { name: 'description', content: 'High-performance, multi-tenant SME Resource Planning (SRP) platform built with Nuxt, Nuxt UI, and static-first architecture.' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' }

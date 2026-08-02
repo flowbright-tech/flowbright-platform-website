@@ -2,7 +2,7 @@
   <div class="max-w-4xl mx-auto space-y-6">
     <UCard class="glass-panel" :ui="{ body: { padding: 'p-6 sm:p-8' } }">
       <form @submit.prevent="submitForm" class="space-y-6">
-        
+
         <!-- Section 1: Customer Type & Code -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <UFormField :error="errors.customer_type || undefined">
@@ -10,25 +10,12 @@
               <span>{{ $t('customers.customer_type') }}</span>
               <span class="text-red-500 font-bold ml-0.5">*</span>
             </template>
-            <USelectMenu
-              v-model="form.customer_type"
-              :items="customerTypeOptions"
-              value-key="value"
-              label-key="label"
-              searchable
-              size="md"
-              class="w-full"
-              :placeholder="$t('customers.select_type')"
-            />
+            <USelectMenu v-model="form.customer_type" :items="customerTypeOptions" value-key="value" label-key="label"
+              searchable size="md" class="w-full" :placeholder="$t('customers.select_type')" />
           </UFormField>
 
           <UFormField :label="$t('customers.customer_code')">
-            <UInput
-              v-model="form.code"
-              placeholder="HN2026000002"
-              size="md"
-              class="w-full"
-            />
+            <UInput v-model="form.code" placeholder="HN2026000002" size="md" class="w-full" />
           </UFormField>
         </div>
 
@@ -39,17 +26,13 @@
             <span class="text-red-500 font-bold ml-0.5">*</span>
           </label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div
-              v-for="opt in verificationTypes"
-              :key="opt.value"
+            <div v-for="opt in verificationTypes" :key="opt.value"
               class="border rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-200"
               :class="[
                 form.verification_type === opt.value
                   ? 'border-primary-600 bg-primary-500/10 text-primary-600 dark:border-primary-400 dark:bg-primary-400/10 dark:text-primary-400 shadow-sm ring-1 ring-primary-500/30'
                   : 'border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-              ]"
-              @click="form.verification_type = opt.value"
-            >
+              ]" @click="form.verification_type = opt.value">
               <UIcon :name="opt.icon" class="w-6 h-6 shrink-0" />
               <span class="text-xs font-bold capitalize">{{ opt.label }}</span>
             </div>
@@ -61,14 +44,11 @@
           <label class="block text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider">
             {{ $t('customers.doc_picture') }}
           </label>
-          
-          <div class="flex items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-6 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors cursor-pointer relative">
-            <input
-              type="file"
-              accept="image/*"
-              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              @change="handleImageUpload"
-            />
+
+          <div
+            class="flex items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-6 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors cursor-pointer relative">
+            <input type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              @change="handleImageUpload" />
             <div class="text-center space-y-2 pointer-events-none">
               <UIcon name="i-heroicons-arrow-up-tray" class="w-8 h-8 text-slate-400 mx-auto" />
               <div class="text-xs font-semibold text-slate-600 dark:text-slate-300">
@@ -88,44 +68,36 @@
                 {{ $t('customers.remove_image') }}
               </UButton>
             </div>
-            <div class="w-full h-80 sm:h-96 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-900/5 dark:bg-slate-900/50 overflow-hidden relative shadow-inner flex items-center justify-center p-2">
+            <div
+              class="w-full h-80 sm:h-96 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-900/5 dark:bg-slate-900/50 overflow-hidden relative shadow-inner flex items-center justify-center p-2">
               <img :src="form.image_url" class="max-w-full max-h-full object-contain rounded-xl" />
             </div>
           </div>
         </div>
 
         <!-- Section 4: Conditional Details (Thai vs English Name & ID) -->
-        <div v-if="form.verification_type === 'idcard' || form.verification_type === 'driver_license'" class="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div v-if="form.verification_type === 'idcard' || form.verification_type === 'driver_license'"
+          class="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">
             {{ form.verification_type === 'idcard' ? 'Thai Citizen Details' : 'Driver License Details' }}
           </h3>
-          
+
           <div class="space-y-4">
             <UFormField :error="errors.id_card || undefined">
               <template #label>
-                <span>{{ form.verification_type === 'idcard' ? $t('customers.id_card_num') : $t('customers.driver_license_num') }}</span>
+                <span>{{ form.verification_type === 'idcard' ? $t('customers.id_card_num') :
+                  $t('customers.driver_license_num') }}</span>
                 <span class="text-red-500 font-bold ml-0.5">*</span>
               </template>
-              <UInput
-                v-model="form.id_card"
-                :placeholder="form.verification_type === 'idcard' ? '1100700123456' : '1100700123456'"
-                size="md"
-                class="w-full"
-              />
+              <UInput v-model="form.id_card"
+                :placeholder="form.verification_type === 'idcard' ? '1100700123456' : '1100700123456'" size="md"
+                class="w-full" />
             </UFormField>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <UFormField :label="$t('customers.prefix_th')">
-                <USelectMenu
-                  v-model="form.prefix_th"
-                  :items="prefixThOptions"
-                  value-key="value"
-                  label-key="label"
-                  searchable
-                  size="md"
-                  class="w-full"
-                  :placeholder="$t('customers.select_prefix')"
-                />
+                <USelectMenu v-model="form.prefix_th" :items="prefixThOptions" value-key="value" label-key="label"
+                  searchable size="md" class="w-full" :placeholder="$t('customers.select_prefix')" />
               </UFormField>
 
               <UFormField :error="errors.first_name_th || undefined">
@@ -133,12 +105,7 @@
                   <span>{{ $t('customers.first_name_th') }}</span>
                   <span class="text-red-500 font-bold ml-0.5">*</span>
                 </template>
-                <UInput
-                  v-model="form.first_name_th"
-                  placeholder="สมชาย"
-                  size="md"
-                  class="w-full"
-                />
+                <UInput v-model="form.first_name_th" placeholder="สมชาย" size="md" class="w-full" />
               </UFormField>
 
               <UFormField :error="errors.last_name_th || undefined">
@@ -146,31 +113,20 @@
                   <span>{{ $t('customers.last_name_th') }}</span>
                   <span class="text-red-500 font-bold ml-0.5">*</span>
                 </template>
-                <UInput
-                  v-model="form.last_name_th"
-                  placeholder="ประเสริฐ"
-                  size="md"
-                  class="w-full"
-                />
+                <UInput v-model="form.last_name_th" placeholder="ประเสริฐ" size="md" class="w-full" />
               </UFormField>
             </div>
           </div>
 
           <!-- Optional English name fields when using Thai ID card -->
           <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">English Name (Optional)</h4>
+            <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">English Name
+              (Optional)
+            </h4>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <UFormField :label="$t('customers.prefix_en')">
-                <USelectMenu
-                  v-model="form.prefix_en"
-                  :items="prefixEnOptions"
-                  value-key="value"
-                  label-key="label"
-                  searchable
-                  size="md"
-                  class="w-full"
-                  :placeholder="$t('customers.select_prefix')"
-                />
+                <USelectMenu v-model="form.prefix_en" :items="prefixEnOptions" value-key="value" label-key="label"
+                  searchable size="md" class="w-full" :placeholder="$t('customers.select_prefix')" />
               </UFormField>
               <UFormField :label="$t('customers.first_name_en')">
                 <UInput v-model="form.first_name_en" placeholder="Somchai" size="md" class="w-full" />
@@ -191,25 +147,13 @@
                 <span>{{ $t('customers.passport_num') }}</span>
                 <span class="text-red-500 font-bold ml-0.5">*</span>
               </template>
-              <UInput
-                v-model="form.passport"
-                placeholder="AA1234567"
-                size="md"
-                class="w-full"
-              />
+              <UInput v-model="form.passport" placeholder="AA1234567" size="md" class="w-full" />
             </UFormField>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <UFormField :label="$t('customers.prefix_en')">
-                <USelectMenu
-                  v-model="form.prefix_en"
-                  :items="prefixEnOptions"
-                  value-key="value"
-                  label-key="label"
-                  searchable
-                  size="md"
-                  class="w-full"
-                />
+                <USelectMenu v-model="form.prefix_en" :items="prefixEnOptions" value-key="value" label-key="label"
+                  searchable size="md" class="w-full" />
               </UFormField>
 
               <UFormField :error="errors.first_name_en || undefined">
@@ -217,12 +161,7 @@
                   <span>{{ $t('customers.first_name_en') }}</span>
                   <span class="text-red-500 font-bold ml-0.5">*</span>
                 </template>
-                <UInput
-                  v-model="form.first_name_en"
-                  placeholder="Somchai"
-                  size="md"
-                  class="w-full"
-                />
+                <UInput v-model="form.first_name_en" placeholder="Somchai" size="md" class="w-full" />
               </UFormField>
 
               <UFormField :error="errors.last_name_en || undefined">
@@ -230,31 +169,20 @@
                   <span>{{ $t('customers.last_name_en') }}</span>
                   <span class="text-red-500 font-bold ml-0.5">*</span>
                 </template>
-                <UInput
-                  v-model="form.last_name_en"
-                  placeholder="Prasert"
-                  size="md"
-                  class="w-full"
-                />
+                <UInput v-model="form.last_name_en" placeholder="Prasert" size="md" class="w-full" />
               </UFormField>
             </div>
           </div>
 
           <!-- Optional Thai name fields when using Passport -->
           <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ชื่อภาษาไทย (Optional)</h4>
+            <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ชื่อภาษาไทย
+              (Optional)
+            </h4>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <UFormField :label="$t('customers.prefix_th')">
-                <USelectMenu
-                  v-model="form.prefix_th"
-                  :items="prefixThOptions"
-                  value-key="value"
-                  label-key="label"
-                  searchable
-                  size="md"
-                  class="w-full"
-                  :placeholder="$t('customers.select_prefix')"
-                />
+                <USelectMenu v-model="form.prefix_th" :items="prefixThOptions" value-key="value" label-key="label"
+                  searchable size="md" class="w-full" :placeholder="$t('customers.select_prefix')" />
               </UFormField>
               <UFormField :label="$t('customers.first_name_th')">
                 <UInput v-model="form.first_name_th" placeholder="สมชาย" size="md" class="w-full" />
@@ -268,7 +196,8 @@
 
         <!-- Section 5: General Contact & Demographics -->
         <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $t('customers.profile_contact_heading') }}</h3>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $t('customers.profile_contact_heading') }}
+          </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <UFormField :label="$t('customers.tax_id')" :error="errors.tax_id || undefined" class="md:col-span-2">
@@ -276,33 +205,17 @@
                 <span>{{ $t('customers.tax_id') }}</span>
                 <span class="text-red-500 font-bold ml-0.5">*</span>
               </template>
-              <UInput
-                v-model="form.tax_id"
-                placeholder="0105560012345"
-                size="md"
-                class="w-full"
-              />
+              <UInput v-model="form.tax_id" placeholder="0105560012345" size="md" class="w-full" />
             </UFormField>
 
             <UFormField :label="$t('customers.email')" :error="errors.email || undefined">
-              <UInput
-                v-model="form.email"
-                type="email"
-                placeholder="somchai.dev@flowbright.io"
-                size="md"
-                icon="i-heroicons-envelope"
-                class="w-full"
-              />
+              <UInput v-model="form.email" type="email" placeholder="somchai.dev@flowbright.io" size="md"
+                icon="i-heroicons-envelope" class="w-full" />
             </UFormField>
 
             <UFormField :label="$t('customers.phone')" :error="errors.phone || undefined">
-              <UInput
-                v-model="form.phone"
-                placeholder="+66812345678"
-                size="md"
-                icon="i-heroicons-phone"
-                class="w-full"
-              />
+              <UInput v-model="form.phone" placeholder="+66812345678" size="md" icon="i-heroicons-phone"
+                class="w-full" />
             </UFormField>
 
             <UFormField :error="errors.gender || undefined">
@@ -310,27 +223,13 @@
                 <span>{{ $t('customers.gender') }}</span>
                 <span class="text-red-500 font-bold ml-0.5">*</span>
               </template>
-              <USelectMenu
-                v-model="form.gender"
-                :items="genderOptions"
-                value-key="value"
-                label-key="label"
-                searchable
-                size="md"
-                class="w-full"
-                :placeholder="$t('customers.select_gender')"
-              />
+              <USelectMenu v-model="form.gender" :items="genderOptions" value-key="value" label-key="label" searchable
+                size="md" class="w-full" :placeholder="$t('customers.select_gender')" />
             </UFormField>
 
             <UFormField :label="$t('customers.nationality')">
-              <USelectMenu
-                v-model="form.nationality"
-                :items="nationalityOptions"
-                searchable
-                size="md"
-                class="w-full"
-                :placeholder="$t('customers.select_nationality')"
-              />
+              <USelectMenu v-model="form.nationality" :items="nationalityOptions" searchable size="md" class="w-full"
+                :placeholder="$t('customers.select_nationality')" />
             </UFormField>
 
             <UFormField :error="errors.birth_date || undefined">
@@ -353,10 +252,12 @@
 
           <div class="space-y-4">
             <UFormField :label="$t('customers.address_en')" class="w-full">
-              <UTextarea v-model="form.address_en" placeholder="456 Moo 5, Pattaya Naklua Road..." size="md" rows="2" class="w-full" />
+              <UTextarea v-model="form.address_en" placeholder="456 Moo 5, Pattaya Naklua Road..." size="md" rows="2"
+                class="w-full" />
             </UFormField>
             <UFormField :label="$t('customers.address_th')" class="w-full">
-              <UTextarea v-model="form.address_th" placeholder="456 หมู่ 5 ถนนพัทยานาเกลือ..." size="md" rows="2" class="w-full" />
+              <UTextarea v-model="form.address_th" placeholder="456 หมู่ 5 ถนนพัทยานาเกลือ..." size="md" rows="2"
+                class="w-full" />
             </UFormField>
           </div>
         </div>
@@ -365,13 +266,8 @@
         <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $t('customers.social_heading') }}</h3>
           <UFormField :label="$t('customers.social_media')">
-            <UInput
-              v-model="form.social_media"
-              placeholder="Line: somchai_line | LinkedIn: somchai-dev"
-              size="md"
-              icon="i-heroicons-hashtag"
-              class="w-full"
-            />
+            <UInput v-model="form.social_media" placeholder="Line: somchai_line | LinkedIn: somchai-dev" size="md"
+              icon="i-heroicons-hashtag" class="w-full" />
           </UFormField>
         </div>
 
@@ -379,13 +275,8 @@
         <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $t('customers.note_heading') }}</h3>
           <UFormField :label="$t('customers.note')">
-            <UTextarea
-              v-model="form.note"
-              :placeholder="$t('customers.note_placeholder')"
-              size="md"
-              :rows="3"
-              class="w-full"
-            />
+            <UTextarea v-model="form.note" :placeholder="$t('customers.note_placeholder')" size="md" :rows="3"
+              class="w-full" />
           </UFormField>
         </div>
 
@@ -394,7 +285,8 @@
           <UButton type="button" color="gray" variant="ghost" @click="$emit('cancel')">
             {{ $t('common.cancel') }}
           </UButton>
-          <UButton color="primary" icon="i-heroicons-check" class="font-semibold shadow-md text-white" type="submit" :loading="isLoading || isUploadingImage">
+          <UButton color="primary" icon="i-heroicons-check" class="font-semibold shadow-md text-white" type="submit"
+            :loading="isLoading || isUploadingImage">
             {{ $t('common.save') }}
           </UButton>
         </div>
@@ -491,7 +383,7 @@ watch(() => props.customerToEdit, (newVal) => {
     form.image_url = newVal.image_url || ''
     form.social_media = newVal.social_media || ''
     form.note = newVal.note || ''
-    
+
     if (newVal.verification_type) {
       form.verification_type = newVal.verification_type
     } else if (newVal.id_card) {
