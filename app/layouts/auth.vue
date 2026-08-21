@@ -3,13 +3,13 @@
     class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between p-4 sm:p-6 antialiased relative overflow-hidden">
     <!-- Top Floating Header Controls -->
     <header class="w-full max-w-7xl mx-auto flex items-center justify-between py-2">
-      <div class="flex items-center gap-2.5">
-        <img src="/swiftcrownlogo.svg" alt="Swift Crown Logo"
-          class="w-10 h-10 rounded-xl object-contain bg-white p-1 border border-slate-200/40 dark:border-slate-800/40 shadow-sm" />
-        <span class="font-bold text-slate-900 dark:text-white tracking-tight">
-          Swift Crown SRP
-        </span>
-      </div>
+      <NuxtLink :to="localePath('/')" class="inline-flex items-center group">
+        <div
+          class="flex items-center px-3 py-1.5 rounded-xl bg-white/90 dark:bg-white border border-slate-200/60 dark:border-slate-700/60 shadow-xs transition-all duration-200 group-hover:shadow-md group-hover:border-indigo-300 dark:group-hover:border-indigo-400 group-hover:scale-[1.02]">
+          <img src="/logo.png" alt="SRP"
+            class="h-8 sm:h-9 w-auto object-contain" />
+        </div>
+      </NuxtLink>
 
       <div class="flex items-center gap-2">
         <UButton color="gray" variant="ghost" size="md" class="font-semibold text-xs flex items-center gap-1.5"
@@ -39,10 +39,11 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useColorMode, useSwitchLocalePath } from '#imports'
+import { useColorMode, useLocalePath, useSwitchLocalePath } from '#imports'
 
 const router = useRouter()
 const { locale } = useI18n()
+const localePath = useLocalePath()
 const switchLocalePath = useSwitchLocalePath()
 const colorMode = useColorMode()
 
