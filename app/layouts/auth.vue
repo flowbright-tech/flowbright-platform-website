@@ -5,9 +5,8 @@
     <header class="w-full max-w-7xl mx-auto flex items-center justify-between py-2">
       <NuxtLink :to="localePath('/')" class="inline-flex items-center group">
         <div
-          class="flex items-center px-3 py-1.5 rounded-xl bg-white/90 dark:bg-white border border-slate-200/60 dark:border-slate-700/60 shadow-xs transition-all duration-200 group-hover:shadow-md group-hover:border-indigo-300 dark:group-hover:border-indigo-400 group-hover:scale-[1.02]">
-          <img src="/logo.png" alt="SRP"
-            class="h-8 sm:h-9 w-auto object-contain" />
+          class="flex items-center px-2.5 py-1 rounded-xl bg-transparent dark:bg-transparent transition-all duration-200 group-hover:bg-slate-200/40 dark:group-hover:bg-slate-800/60 group-hover:scale-[1.02]">
+          <img src="/logo.svg" alt="SRP" class="h-8 sm:h-9 w-auto object-contain" />
         </div>
       </NuxtLink>
 
@@ -30,7 +29,7 @@
 
     <!-- Footer -->
     <footer class="text-center text-xs text-slate-400 dark:text-slate-600">
-      © 2026 Swift Crown Tech. Built for modern SMEs with Nuxt 4 SSG architecture.
+      © 2026 SRP. Built for modern SMEs with Nuxt 4 SSG architecture.
     </footer>
   </div>
 </template>

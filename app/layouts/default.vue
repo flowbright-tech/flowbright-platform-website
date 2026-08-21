@@ -9,12 +9,8 @@
 
         <NuxtLink :to="localePath('/')" class="inline-flex items-center focus:outline-hidden group">
           <div
-            class="flex items-center px-3 py-1.5 rounded-xl bg-white/90 dark:bg-white border border-slate-200/60 dark:border-slate-700/60 shadow-xs transition-all duration-200 group-hover:shadow-md group-hover:border-indigo-300 dark:group-hover:border-indigo-400 group-hover:scale-[1.02]">
-            <img
-              src="/logo.png"
-              alt="SRP"
-              class="h-8 sm:h-9 w-auto object-contain"
-            />
+            class="flex items-center px-2.5 py-1 rounded-xl bg-transparent dark:bg-transparent transition-all duration-200 group-hover:bg-slate-200/40 dark:group-hover:bg-slate-800/60 group-hover:scale-[1.02]">
+            <img src="/logo.svg" alt="SRP" class="h-8 sm:h-9 w-auto object-contain" />
           </div>
         </NuxtLink>
       </div>
@@ -57,10 +53,9 @@
         <!-- Active Tenant Info Badge -->
         <div
           class="p-3 rounded-xl bg-indigo-50/50 dark:bg-indigo-500/10 border border-indigo-500/20 flex gap-2.5 items-center">
-          <div
-            class="w-9 h-9 rounded-lg bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-            <UIcon name="i-heroicons-building-office-2" class="w-5 h-5" />
-          </div>
+          <img v-if="company?.image_url" :src="company.image_url" alt="Company Logo"
+            class="w-10 h-10 rounded-lg object-contain bg-white p-0.5 border border-slate-200/40 dark:border-slate-800/40 shadow-sm shrink-0"
+            @error="handleImageError" />
           <div class="flex-1 min-w-0">
             <div class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-0.5">
               {{ locale === 'th' ? 'องค์กรที่ใช้งาน' : 'Active Organization' }}
@@ -127,11 +122,11 @@
           <div class="p-6 flex-1 flex flex-col justify-between h-full bg-white dark:bg-slate-900">
             <div class="space-y-6">
               <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
-                <NuxtLink :to="localePath('/')" class="inline-flex items-center focus:outline-hidden" @click="isMobileMenuOpen = false">
+                <NuxtLink :to="localePath('/')" class="inline-flex items-center focus:outline-hidden"
+                  @click="isMobileMenuOpen = false">
                   <div
-                    class="flex items-center px-3 py-1.5 rounded-xl bg-white dark:bg-white border border-slate-200/60 shadow-xs">
-                    <img src="/logo.png" alt="SRP"
-                      class="h-7 sm:h-8 w-auto object-contain" />
+                    class="flex items-center px-2.5 py-1 rounded-xl bg-transparent dark:bg-transparent">
+                    <img src="/logo.svg" alt="SRP" class="h-7 sm:h-8 w-auto object-contain" />
                   </div>
                 </NuxtLink>
                 <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark" size="sm"
@@ -260,7 +255,7 @@ const companyName = computed(() => {
       ? company.value.name_th
       : company.value.name_en
   }
-  return activeTenant.value?.name || 'Swift Crown Company'
+  return activeTenant.value?.name || 'SRP Company'
 })
 
 const toggleLanguage = () => {

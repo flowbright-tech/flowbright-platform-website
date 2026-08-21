@@ -110,7 +110,7 @@ const props = defineProps<{
 }>()
 
 const companyLogo = computed(() => {
-  return company.value?.image_url || '/logo.png'
+  return company.value?.image_url || '/logo.svg'
 })
 
 const statusCode = computed(() => {

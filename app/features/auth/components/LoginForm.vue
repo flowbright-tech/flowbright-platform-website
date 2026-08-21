@@ -68,7 +68,7 @@
 
       <template #footer>
         <div class="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 py-1">
-          <span>Swift Crown SRP v4.2</span>
+          <span>SRP v4.2</span>
           <span class="inline-flex items-center gap-1.5">
             <UIcon name="i-heroicons-check-badge" class="w-5 h-5 text-indigo-500" />
             SSG Client Isolated

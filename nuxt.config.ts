@@ -25,8 +25,8 @@ export default defineNuxtConfig({
 
   pwa: {
     manifest: {
-      name: 'Swift Crown SRP',
-      short_name: 'SwiftCrown',
+      name: 'SRP',
+      short_name: 'SRP',
       description: 'SME Resource Planning Platform',
       theme_color: '#4f46e5',
       background_color: '#ffffff',
@@ -84,7 +84,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Swift Crown SRP - SME Resource Planning',
+      title: 'SRP - SME Resource Planning',
       meta: [
         { name: 'description', content: 'High-performance, multi-tenant SME Resource Planning (SRP) platform built with Nuxt, Nuxt UI, and static-first architecture.' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' }
