@@ -265,7 +265,8 @@
     "showing_results": "Showing {from} to {to} of {total} entries",
     "no_data": "No records found",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "optional": "Optional"
   },
   "toast": {
     "create_title": "{resource} Created",
@@ -572,6 +573,9 @@
     "no_items_placeholder": "No packages added yet. Use the search dropdown above to select a package bundle.",
     "col_order_info": "Order / Customer",
     "col_delivery_date": "Delivery Date",
+    "col_transaction_date": "Transaction Date",
+    "transaction_date": "Transaction Date",
+    "walk_in_customer": "Walk-in / General Customer",
     "col_payment": "Payment",
     "col_status": "Status",
     "col_total": "Total Amount",

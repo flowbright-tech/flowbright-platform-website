@@ -48,6 +48,11 @@ export const useAuthEngine = () => {
     return companyProfileState.value?.company_type?.toLowerCase() === 'lab'
   })
 
+  const isStore = computed(() => {
+    initializeFromStorage()
+    return companyProfileState.value?.company_type?.toLowerCase() === 'store'
+  })
+
   const isAdmin = computed(() => {
     initializeFromStorage()
     const r = (userProfileState.value?.role || session.value?.role || '').toLowerCase()
@@ -56,7 +61,7 @@ export const useAuthEngine = () => {
     return r.includes('admin') || r.includes('manager') || r === 'system administrator' || r === ''
   })
 
-  const setCompanyType = (type: 'lab' | 'standard') => {
+  const setCompanyType = (type: 'lab' | 'standard' | 'store' | string) => {
     if (!companyProfileState.value) {
       companyProfileState.value = {
         id: 'comp-01',
@@ -266,6 +271,7 @@ export const useAuthEngine = () => {
     user,
     company,
     isLab,
+    isStore,
     isAdmin,
     setCompanyType,
     setUserRole

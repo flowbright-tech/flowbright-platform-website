@@ -25,6 +25,7 @@ export interface Order {
   customer_email: string
   customer_phone: string
   delivery_date: string // YYYY-MM-DD
+  transaction_date?: string
   payment_channel: PaymentChannel | string
   status: OrderStatus | string
   discount?: number
@@ -43,6 +44,7 @@ export interface OrderFormData {
   customer_email: string
   customer_phone: string
   delivery_date: string // YYYY-MM-DD
+  transaction_date?: string
   payment_channel: string
   status: string
   discount?: number

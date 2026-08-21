@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, formatDeliveryDate } from './useOrderEngine'
+import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, formatDeliveryDate, formatTransactionDate } from './useOrderEngine'
 
 describe('Order Calculation & Utility Engine', () => {
   describe('calculateItemSubtotal', () => {
@@ -71,18 +71,22 @@ describe('Order Calculation & Utility Engine', () => {
     })
   })
 
-  describe('formatDeliveryDate', () => {
+  describe('formatTransactionDate & formatDeliveryDate', () => {
     it('should format YYYY-MM-DD date into DD-MMM-YYYY format', () => {
+      expect(formatTransactionDate('2026-07-19')).toBe('19-Jul-2026')
+      expect(formatTransactionDate('2026-01-05')).toBe('05-Jan-2026')
+      expect(formatTransactionDate('2026-12-31')).toBe('31-Dec-2026')
       expect(formatDeliveryDate('2026-07-19')).toBe('19-Jul-2026')
-      expect(formatDeliveryDate('2026-01-05')).toBe('05-Jan-2026')
-      expect(formatDeliveryDate('2026-12-31')).toBe('31-Dec-2026')
     })
 
     it('should handle ISO date strings with timestamps', () => {
+      expect(formatTransactionDate('2026-07-19T10:30:00.000Z')).toBe('19-Jul-2026')
       expect(formatDeliveryDate('2026-07-19T10:30:00.000Z')).toBe('19-Jul-2026')
     })
 
     it('should return fallback dash when date string is null or empty', () => {
+      expect(formatTransactionDate(null)).toBe('-')
+      expect(formatTransactionDate('')).toBe('-')
       expect(formatDeliveryDate(null)).toBe('-')
       expect(formatDeliveryDate('')).toBe('-')
     })

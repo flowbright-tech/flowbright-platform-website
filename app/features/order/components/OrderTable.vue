@@ -10,16 +10,22 @@
             {{ row.original.code || row.original.order_number }}
           </UBadge>
           <span class="font-bold text-slate-900 dark:text-white text-sm">
-            {{ row.original.customer_name || 'N/A' }}
+            {{ row.original.customer_name || (isStore ? ($t('orders.walk_in_customer') || 'Walk-in / General Customer') : 'N/A') }}
           </span>
         </div>
       </template>
 
-      <!-- Delivery Date cell (Formatted as DD-MMM-YYYY) -->
+      <!-- Transaction Date cell (Formatted as DD-MMM-YYYY) -->
+      <template #transaction_date-cell="{ row }">
+        <div class="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300 text-xs font-mono">
+          <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-indigo-500 shrink-0" />
+          <span>{{ formatTransactionDate(row.original.transaction_date || row.original.delivery_date || row.original.created_at) }}</span>
+        </div>
+      </template>
       <template #delivery_date-cell="{ row }">
         <div class="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300 text-xs font-mono">
           <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-indigo-500 shrink-0" />
-          <span>{{ formatDeliveryDate(row.original.delivery_date) }}</span>
+          <span>{{ formatTransactionDate(row.original.transaction_date || row.original.delivery_date || row.original.created_at) }}</span>
         </div>
       </template>
 
@@ -107,7 +113,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Order } from '../types'
-import { formatDeliveryDate } from '../composables/useOrderEngine'
+import { formatTransactionDate, formatDeliveryDate } from '../composables/useOrderEngine'
+import { useAuthEngine } from '../../auth/composables/useAuthEngine'
 
 const props = defineProps<{
   orders: Order[]
@@ -128,10 +135,11 @@ defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { isStore } = useAuthEngine()
 
 const columns = computed(() => [
   { accessorKey: 'customer_name', header: t('orders.col_order_info') || 'Order / Customer' },
-  { accessorKey: 'delivery_date', header: t('orders.col_delivery_date') || 'Delivery Date' },
+  { accessorKey: 'transaction_date', header: t('orders.col_transaction_date') || 'Transaction Date' },
   { accessorKey: 'payment_channel', header: t('orders.col_payment') || 'Payment' },
   { accessorKey: 'status', header: t('orders.col_status') || 'Status' },
   { accessorKey: 'items', header: t('orders.col_items') || 'Items' },

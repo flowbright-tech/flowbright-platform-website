@@ -82,9 +82,9 @@ export const getTodayDateString = (dateObj: Date = new Date()): string => {
 }
 
 /**
- * Formats a date string (YYYY-MM-DD or ISO) into DD-MMM-YYYY format (e.g. 19-Jul-2026)
+ * Formats a transaction or delivery date string (YYYY-MM-DD or ISO) into DD-MMM-YYYY format (e.g. 19-Jul-2026)
  */
-export const formatDeliveryDate = (dateStr?: string | null): string => {
+export const formatTransactionDate = (dateStr?: string | null): string => {
   if (!dateStr) return '-'
   try {
     const cleanStr = dateStr.split('T')[0]
@@ -109,6 +109,8 @@ export const formatDeliveryDate = (dateStr?: string | null): string => {
     return dateStr
   }
 }
+
+export const formatDeliveryDate = formatTransactionDate
 
 export const useOrderEngine = () => {
   const { session } = useAuthEngine()
@@ -359,6 +361,7 @@ export const useOrderEngine = () => {
     calculateOrderTotal,
     getTodayDateString,
     formatDeliveryDate,
+    formatTransactionDate,
     safeLowerCase
   }
 }

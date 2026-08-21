@@ -39,7 +39,7 @@
               {{ $t('orders.sec_customer') || 'Customer Information' }}
             </div>
             <div class="font-bold text-slate-900 dark:text-white text-base">
-              {{ order.customer_name }}
+              {{ order.customer_name || $t('orders.walk_in_customer') || 'Walk-in / General Customer' }}
             </div>
             <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
               <div v-if="order.customer_email" class="flex items-center gap-2">
@@ -61,7 +61,7 @@
             </div>
             <div class="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm font-mono">
               <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-indigo-500" />
-              <span>{{ formatDeliveryDate(order.delivery_date) }}</span>
+              <span>{{ formatTransactionDate(order.transaction_date || order.delivery_date) }}</span>
             </div>
             <div class="text-xs text-slate-600 dark:text-slate-400">
               <span class="font-semibold">Channel:</span> {{ formatPaymentChannel(order.payment_channel) }}
@@ -163,7 +163,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import type { Order } from '../types'
-import { formatDeliveryDate } from '../composables/useOrderEngine'
+import { formatTransactionDate, formatDeliveryDate } from '../composables/useOrderEngine'
 
 const isOpen = defineModel<boolean>('open', { default: false })
 

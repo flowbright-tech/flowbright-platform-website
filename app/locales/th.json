@@ -265,7 +265,8 @@
     "showing_results": "แสดงผล {from} ถึง {to} จากทั้งหมด {total} รายการ",
     "no_data": "ไม่พบข้อมูลในระบบ",
     "active": "ใช้งานอยู่",
-    "inactive": "ระงับการใช้งาน"
+    "inactive": "ระงับการใช้งาน",
+    "optional": "ไม่บังคับ"
   },
   "toast": {
     "create_title": "สร้าง{resource}สำเร็จ",
@@ -572,6 +573,9 @@
     "no_items_placeholder": "ยังไม่มีรายการแพ็คเกจในคำสั่งซื้อ ใช้ช่องค้นหาด้านบนเพื่อเลือกแพ็คเกจ",
     "col_order_info": "คำสั่งซื้อ / ลูกค้า",
     "col_delivery_date": "วันจัดส่ง",
+    "col_transaction_date": "วันที่ทำรายการ",
+    "transaction_date": "วันที่ทำรายการ",
+    "walk_in_customer": "ลูกค้าทั่วไป (Walk-in)",
     "col_payment": "ช่องทางชำระเงิน",
     "col_status": "สถานะ",
     "col_total": "ราคารวมทั้งหมด",

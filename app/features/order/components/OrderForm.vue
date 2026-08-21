@@ -5,9 +5,14 @@
 
         <!-- Section 1: Customer Selection & Details -->
         <div class="space-y-4">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
-            <UIcon name="i-heroicons-user" class="w-5 h-5 text-indigo-500" />
-            {{ $t('orders.sec_customer') || 'Customer Information' }}
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-user" class="w-5 h-5 text-indigo-500" />
+              {{ $t('orders.sec_customer') || 'Customer Information' }}
+            </div>
+            <span v-if="isStore" class="text-xs font-medium text-slate-500 dark:text-slate-400 font-sans">
+              ({{ $t('common.optional') || 'Optional' }})
+            </span>
           </h3>
 
           <div class="space-y-4">
@@ -15,7 +20,8 @@
             <UFormField :error="errors.customer_name || undefined">
               <template #label>
                 <span>{{ $t('orders.select_customer') || 'Select Customer from Database' }}</span>
-                <span class="text-red-500 font-bold ml-0.5">*</span>
+                <span v-if="!isStore" class="text-red-500 font-bold ml-0.5">*</span>
+                <span v-else class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1.5 font-sans">({{ $t('common.optional') || 'Optional' }})</span>
               </template>
 
               <USelectMenu
@@ -37,7 +43,8 @@
               <UFormField :error="errors.customer_name || undefined">
                 <template #label>
                   <span>{{ $t('orders.customer_name') || 'Customer Name' }}</span>
-                  <span class="text-red-500 font-bold ml-0.5">*</span>
+                  <span v-if="!isStore" class="text-red-500 font-bold ml-0.5">*</span>
+                  <span v-else class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1.5 font-sans">({{ $t('common.optional') || 'Optional' }})</span>
                 </template>
                 <UInput
                   v-model="form.customer_name"
@@ -356,7 +363,7 @@ import type { Package } from '../../package/types'
 const { t, locale } = useI18n()
 const { apiFetch } = useApiFetch()
 const { showError } = useAppToast()
-const { company } = useAuthEngine()
+const { company, isStore } = useAuthEngine()
 
 // Helper to look up credit_card_percent_charge from local storage company profile
 const getCompanyCreditCardPercentCharge = (): number => {
@@ -679,7 +686,7 @@ const submitForm = () => {
 
   let isValid = true
 
-  if (!form.customer_name.trim()) {
+  if (!isStore.value && !form.customer_name.trim()) {
     errors.customer_name = safeLowerCase(t('orders.err_customer_required') || 'please select or specify customer information')
     isValid = false
   }
@@ -722,6 +729,7 @@ const submitForm = () => {
 
   emit('save', {
     ...form,
+    transaction_date: form.delivery_date,
     discount: Number(form.discount || 0),
     credit_card_charge_percent: ccChargePercent,
     credit_card_percent_charge: ccChargePercent,
