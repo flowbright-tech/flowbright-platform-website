@@ -3,6 +3,7 @@ import { useState } from '#imports'
 import type { AuditLog, AuditLogFilterParams, AuditLogApiResponse, AuditLogUser } from '../types'
 import { useAuthEngine } from '../../auth/composables/useAuthEngine'
 import { useApiFetch } from '../../../composables/useApiFetch'
+import { useFormatter } from '../../../composables/useFormatter'
 
 /**
  * Format audit action color for badge display
@@ -18,6 +19,23 @@ export const getActionColor = (action: string): 'success' | 'warning' | 'error' 
       return 'error'
     default:
       return 'primary'
+  }
+}
+
+/**
+ * Status badge class matching Order status styling exactly
+ */
+export const getActionBadgeClass = (action: string): string => {
+  const upper = (action || '').toUpperCase()
+  switch (upper) {
+    case 'CREATE':
+      return 'bg-emerald-500/15 text-emerald-950 border border-emerald-400/60 dark:bg-emerald-500/25 dark:text-emerald-300 dark:border-emerald-400/50 shadow-sm'
+    case 'UPDATE':
+      return 'bg-amber-500/15 text-amber-950 border border-amber-400/60 dark:bg-amber-500/25 dark:text-amber-300 dark:border-amber-400/50 shadow-sm'
+    case 'DELETE':
+      return 'bg-rose-500/15 text-rose-950 border border-rose-400/60 dark:bg-rose-500/25 dark:text-rose-300 dark:border-rose-400/50 shadow-sm'
+    default:
+      return 'bg-slate-200/80 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 shadow-sm'
   }
 }
 
@@ -70,25 +88,11 @@ export const getEntityTypeIcon = (entityType: string): string => {
 }
 
 /**
- * Format audit datetime into readable string
+ * Format audit datetime into readable string consistent with other features (dd-mmm-yy hh:mm)
  */
 export const formatAuditDateTime = (dateStr?: string | null): string => {
-  if (!dateStr) return '-'
-  try {
-    const d = new Date(dateStr)
-    if (isNaN(d.getTime())) return dateStr
-    return new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    }).format(d)
-  } catch {
-    return dateStr
-  }
+  const { formatDateTime } = useFormatter()
+  return formatDateTime(dateStr)
 }
 
 /**
@@ -151,12 +155,12 @@ export const useAuditLogEngine = () => {
       }
 
       const action = customParams?.action ?? selectedAction.value
-      if (action) {
+      if (action && action !== 'ALL') {
         searchParams.append('action', action)
       }
 
       const entityType = customParams?.entity_type ?? selectedEntityType.value
-      if (entityType) {
+      if (entityType && entityType !== 'ALL') {
         searchParams.append('entity_type', entityType)
       }
 

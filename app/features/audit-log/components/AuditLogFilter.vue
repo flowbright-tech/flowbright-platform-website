@@ -119,8 +119,8 @@ const props = defineProps<{
 }>()
 
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
-const action = defineModel<string>('action', { default: '' })
-const entityType = defineModel<string>('entityType', { default: '' })
+const action = defineModel<string>('action', { default: 'ALL' })
+const entityType = defineModel<string>('entityType', { default: 'ALL' })
 const startDate = defineModel<string>('startDate', { default: '' })
 const endDate = defineModel<string>('endDate', { default: '' })
 
@@ -131,15 +131,16 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+// All values must be non-empty strings to comply with ComboboxItem requirements
 const actionOptions = computed(() => [
-  { value: '', label: t('audit_logs.all_actions') },
+  { value: 'ALL', label: t('audit_logs.all_actions') },
   { value: 'CREATE', label: 'CREATE' },
   { value: 'UPDATE', label: 'UPDATE' },
   { value: 'DELETE', label: 'DELETE' }
 ])
 
 const entityTypeOptions = computed(() => [
-  { value: '', label: t('audit_logs.all_entities') },
+  { value: 'ALL', label: t('audit_logs.all_entities') },
   { value: 'product', label: t('audit_logs.entity_product') },
   { value: 'customer', label: t('audit_logs.entity_customer') },
   { value: 'order', label: t('audit_logs.entity_order') },
@@ -152,13 +153,19 @@ const entityTypeOptions = computed(() => [
 ])
 
 const hasActiveFilters = computed(() => {
-  return !!(searchQuery.value || action.value || entityType.value || startDate.value || endDate.value)
+  return !!(
+    searchQuery.value ||
+    (action.value && action.value !== 'ALL') ||
+    (entityType.value && entityType.value !== 'ALL') ||
+    startDate.value ||
+    endDate.value
+  )
 })
 
 const handleReset = () => {
   searchQuery.value = ''
-  action.value = ''
-  entityType.value = ''
+  action.value = 'ALL'
+  entityType.value = 'ALL'
   startDate.value = ''
   endDate.value = ''
   emit('reset')

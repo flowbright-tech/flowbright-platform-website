@@ -18,14 +18,13 @@
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <UBadge
-                  :color="getActionColor(log.action)"
-                  variant="solid"
-                  size="sm"
-                  class="font-mono font-bold uppercase tracking-wider text-xs"
+                <span
+                  :class="getActionBadgeClass(log.action)"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase transition-all"
                 >
+                  <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
                   {{ log.action }}
-                </UBadge>
+                </span>
                 <UBadge color="neutral" variant="soft" size="sm" class="font-bold capitalize flex items-center gap-1">
                   <UIcon :name="getEntityTypeIcon(log.entity_type)" class="w-3.5 h-3.5" />
                   {{ log.entity_type }}
@@ -80,7 +79,7 @@
             </span>
             <div class="space-y-1">
               <div class="flex items-center gap-1.5 text-xs font-mono font-medium text-slate-700 dark:text-slate-300">
-                <UIcon name="i-heroicons-clock" class="w-4 h-4 text-indigo-500 shrink-0" />
+                <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-indigo-500 shrink-0" />
                 <span>{{ formatAuditDateTime(log.created_at) }}</span>
               </div>
               <div class="flex items-center justify-between gap-2 text-xs font-mono text-slate-500 dark:text-slate-400">
@@ -149,7 +148,7 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { AuditLog } from '../types'
 import {
-  getActionColor,
+  getActionBadgeClass,
   getActionIcon,
   getEntityTypeIcon,
   formatAuditDateTime,

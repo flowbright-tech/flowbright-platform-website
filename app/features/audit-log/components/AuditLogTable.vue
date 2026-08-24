@@ -6,16 +6,11 @@
         :columns="columns"
         :loading="isLoading"
       >
-        <!-- Timestamp Cell -->
+        <!-- Created Date Column formatted as dd-mmm-yy hh:mm (consistent with other features) -->
         <template #created_at-cell="{ row }">
-          <div class="flex items-center gap-2 py-1">
-            <UIcon name="i-heroicons-clock" class="w-4 h-4 text-indigo-500 shrink-0" />
-            <div class="flex flex-col">
-              <span class="font-mono font-bold text-xs text-slate-900 dark:text-white">
-                {{ formatAuditDateTime(row.original.created_at) }}
-              </span>
-            </div>
-          </div>
+          <span class="text-slate-500 dark:text-slate-400 text-xs font-mono">
+            {{ formatAuditDateTime(row.original.created_at) }}
+          </span>
         </template>
 
         <!-- User / Operator Cell -->
@@ -46,17 +41,15 @@
           </div>
         </template>
 
-        <!-- Action Cell -->
+        <!-- Action Cell (Same style and color as Order Status) -->
         <template #action-cell="{ row }">
-          <UBadge
-            :color="getActionColor(row.original.action)"
-            variant="solid"
-            size="sm"
-            class="font-mono font-bold uppercase tracking-wider text-xs inline-flex items-center gap-1"
+          <span
+            :class="getActionBadgeClass(row.original.action)"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase transition-all"
           >
-            <UIcon :name="getActionIcon(row.original.action)" class="w-3.5 h-3.5" />
-            <span>{{ row.original.action }}</span>
-          </UBadge>
+            <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
+            {{ row.original.action }}
+          </span>
         </template>
 
         <!-- Entity Type & Target ID Cell -->
@@ -150,8 +143,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { AuditLog } from '../types'
 import {
-  getActionColor,
-  getActionIcon,
+  getActionBadgeClass,
   getEntityTypeIcon,
   formatAuditDateTime,
   getAuditUserDisplayName

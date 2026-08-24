@@ -3,6 +3,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 import {
   useAuditLogEngine,
   getActionColor,
+  getActionBadgeClass,
   getActionIcon,
   getEntityTypeIcon,
   formatAuditDateTime,
@@ -225,12 +226,16 @@ describe('Audit Log Engine API & Logic', () => {
   })
 
   describe('Helper Utilities', () => {
-    it('should return correct action badge colors', () => {
+    it('should return correct action badge colors and classes matching order status', () => {
       expect(getActionColor('CREATE')).toBe('success')
-      expect(getActionColor('create')).toBe('success')
       expect(getActionColor('UPDATE')).toBe('warning')
       expect(getActionColor('DELETE')).toBe('error')
       expect(getActionColor('OTHER')).toBe('primary')
+
+      expect(getActionBadgeClass('CREATE')).toContain('emerald')
+      expect(getActionBadgeClass('UPDATE')).toContain('amber')
+      expect(getActionBadgeClass('DELETE')).toContain('rose')
+      expect(getActionBadgeClass('OTHER')).toContain('slate')
     })
 
     it('should return correct action icons', () => {
