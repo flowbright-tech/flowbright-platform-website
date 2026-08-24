@@ -25,10 +25,12 @@
                   <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
                   {{ log.action }}
                 </span>
-                <UBadge color="neutral" variant="soft" size="sm" class="font-bold capitalize flex items-center gap-1">
-                  <UIcon :name="getEntityTypeIcon(log.entity_type)" class="w-3.5 h-3.5" />
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-xs"
+                >
+                  <UIcon :name="getEntityTypeIcon(log.entity_type)" class="w-3.5 h-3.5 text-indigo-500" />
                   {{ log.entity_type }}
-                </UBadge>
+                </span>
               </div>
               <h3 class="text-base font-bold text-slate-900 dark:text-white mt-1">
                 {{ $t('audit_logs.detail_title') }}

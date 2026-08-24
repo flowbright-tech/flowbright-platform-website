@@ -52,13 +52,15 @@
           </span>
         </template>
 
-        <!-- Entity Type Cell (Clean badge without raw ID) -->
+        <!-- Entity Type Cell (Equal size and presence as Action badge) -->
         <template #entity_type-cell="{ row }">
-          <div class="flex items-center gap-1.5 py-1">
-            <UBadge color="neutral" variant="soft" size="xs" class="font-bold capitalize flex items-center gap-1">
-              <UIcon :name="getEntityTypeIcon(row.original.entity_type)" class="w-3.5 h-3.5 text-indigo-500" />
-              {{ row.original.entity_type }}
-            </UBadge>
+          <div class="flex items-center py-1">
+            <span
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 shadow-xs"
+            >
+              <UIcon :name="getEntityTypeIcon(row.original.entity_type)" class="w-4 h-4 text-indigo-500 shrink-0" />
+              <span>{{ row.original.entity_type }}</span>
+            </span>
           </div>
         </template>
 
