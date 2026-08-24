@@ -46,7 +46,8 @@
     "tests": "รายการตรวจ",
     "boms": "สูตรการผลิต (BOM)",
     "packages": "หน่วยแพ็คเกจ",
-    "orders": "จัดการข้อมูลคำสั่งซื้อ"
+    "orders": "จัดการข้อมูลคำสั่งซื้อ",
+    "audit_logs": "บันทึกประวัติการใช้งาน"
   },
   "header": {
     "active_tenant": "องค์กรปัจจุบัน",
@@ -266,7 +267,12 @@
     "no_data": "ไม่พบข้อมูลในระบบ",
     "active": "ใช้งานอยู่",
     "inactive": "ระงับการใช้งาน",
-    "optional": "ไม่บังคับ"
+    "optional": "ไม่บังคับ",
+    "reset": "ล้างตัวกรอง",
+    "filter": "ค้นหา",
+    "copy": "คัดลอก",
+    "copy_json": "คัดลอก JSON",
+    "copied": "คัดลอกแล้ว!"
   },
   "toast": {
     "create_title": "สร้าง{resource}สำเร็จ",
@@ -605,6 +611,44 @@
     "print_document": "พิมพ์เอกสารประจำตัว",
     "lab_form": "พิมพ์ใบส่งตรวจแล็บ (Lab In/Out)",
     "col_tests": "รายการตรวจ"
+  },
+  "audit_logs": {
+    "title": "บันทึกประวัติการใช้งานระบบ (Audit Logs)",
+    "subtitle": "ตรวจสอบประวัติการทำรายการ การเปลี่ยนแปลงข้อมูล และกิจกรรมของผู้ใช้งานในระบบ",
+    "load_error_title": "ไม่สามารถโหลดข้อมูลบันทึกประวัติการใช้งานได้",
+    "filter_action": "การกระทำ (Action)",
+    "filter_entity_type": "ประเภทข้อมูล (Entity Type)",
+    "filter_user_id": "รหัสผู้ใช้งาน (User ID)",
+    "filter_start_date": "ตั้งแต่วันที่",
+    "filter_end_date": "ถึงวันที่",
+    "placeholder_user_id": "กรองด้วย User ID...",
+    "all_actions": "ทุกการกระทำ",
+    "all_entities": "ทุกประเภทข้อมูล",
+    "entity_order": "คำสั่งซื้อ (Order)",
+    "entity_product": "สินค้า / รายการตรวจ (Product)",
+    "entity_customer": "ลูกค้า (Customer)",
+    "entity_vendor": "ซัพพลายเออร์ (Vendor)",
+    "entity_package": "แพ็กเกจ (Package)",
+    "entity_bom": "สูตรการผลิต (BOM)",
+    "entity_category": "หมวดหมู่ (Category)",
+    "entity_user": "ผู้ใช้งาน (User)",
+    "active_filters": "กำลังใช้งานตัวกรองข้อมูล",
+    "no_filters_applied": "ไม่ได้ใช้ตัวกรอง",
+    "col_timestamp": "วันและเวลา",
+    "col_operator": "ผู้ทำรายการ",
+    "col_action": "การกระทำ",
+    "col_entity": "ประเภทและรหัสข้อมูล",
+    "col_details": "สรุปข้อมูลการเปลี่ยนแปลง",
+    "col_actions": "จัดการ",
+    "view_details": "ดูรายละเอียด",
+    "no_logs_found": "ไม่พบบันทึกประวัติการใช้งาน",
+    "no_logs_hint": "ลองปรับเปลี่ยนเงื่อนไขการกรอง เช่น การกระทำ ประเภทข้อมูล หรือช่วงเวลา",
+    "detail_title": "ตรวจสอบรายละเอียดบันทึกประวัติ",
+    "operator": "ข้อมูลผู้ทำรายการ",
+    "timestamp": "เวลาที่เกิดรายการ",
+    "target": "ข้อมูลเป้าหมาย",
+    "details_payload": "ข้อมูลการเปลี่ยนแปลง (JSON Payload)",
+    "unknown_user": "ระบบ / ไม่ระบุผู้ใช้"
   },
   "errors": {
     "bad_request_title": "คำขอไม่ถูกต้อง (400)",

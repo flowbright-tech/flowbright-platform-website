@@ -46,7 +46,8 @@
     "tests": "Tests",
     "boms": "BOMs",
     "packages": "Packages",
-    "orders": "Orders"
+    "orders": "Orders",
+    "audit_logs": "Audit Logs"
   },
   "header": {
     "active_tenant": "Active Tenant",
@@ -266,7 +267,12 @@
     "no_data": "No records found",
     "active": "Active",
     "inactive": "Inactive",
-    "optional": "Optional"
+    "optional": "Optional",
+    "reset": "Reset",
+    "filter": "Filter",
+    "copy": "Copy",
+    "copy_json": "Copy JSON",
+    "copied": "Copied!"
   },
   "toast": {
     "create_title": "{resource} Created",
@@ -605,6 +611,44 @@
     "print_document": "Print Document",
     "lab_form": "Lab Technician Worksheet (Lab In/Out)",
     "col_tests": "Tests"
+  },
+  "audit_logs": {
+    "title": "System Audit Logs",
+    "subtitle": "Track administrative and operational changes across all ERP entities and records",
+    "load_error_title": "Failed to load audit logs",
+    "filter_action": "Action",
+    "filter_entity_type": "Entity Type",
+    "filter_user_id": "User ID",
+    "filter_start_date": "Start Date",
+    "filter_end_date": "End Date",
+    "placeholder_user_id": "Filter by user ID...",
+    "all_actions": "All Actions",
+    "all_entities": "All Entities",
+    "entity_order": "Order",
+    "entity_product": "Product / Test",
+    "entity_customer": "Customer",
+    "entity_vendor": "Vendor",
+    "entity_package": "Product Package",
+    "entity_bom": "BOM (Bill of Materials)",
+    "entity_category": "Category",
+    "entity_user": "User",
+    "active_filters": "Active filter parameters applied",
+    "no_filters_applied": "No custom filters active",
+    "col_timestamp": "Timestamp",
+    "col_operator": "Operator / User",
+    "col_action": "Action",
+    "col_entity": "Entity Type & ID",
+    "col_details": "Details Preview",
+    "col_actions": "Actions",
+    "view_details": "View Details",
+    "no_logs_found": "No audit logs found",
+    "no_logs_hint": "Try adjusting your action, entity, user, or date range filters to view more records.",
+    "detail_title": "Audit Log Event Inspection",
+    "operator": "Operator Profile",
+    "timestamp": "Event Timestamp",
+    "target": "Target Entity",
+    "details_payload": "Details Payload (JSON)",
+    "unknown_user": "Unknown / System"
   },
   "errors": {
     "bad_request_title": "Invalid Request (400)",
