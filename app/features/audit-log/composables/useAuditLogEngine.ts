@@ -62,6 +62,8 @@ export const getEntityTypeIcon = (entityType: string): string => {
       return 'i-heroicons-tag'
     case 'user':
       return 'i-heroicons-user'
+    case 'company':
+      return 'i-heroicons-building-office'
     default:
       return 'i-heroicons-cube'
   }
@@ -114,6 +116,7 @@ export const useAuditLogEngine = () => {
   const errorMsg = useState<string | null>('srp_audit_logs_error', () => null)
 
   // Filter refs
+  const searchQuery = ref<string>('')
   const selectedAction = ref<string>('')
   const selectedEntityType = ref<string>('')
   const selectedUserId = ref<string>('')
@@ -142,6 +145,11 @@ export const useAuditLogEngine = () => {
       searchParams.append('page', String(page))
       searchParams.append('limit', String(limit))
 
+      const search = customParams?.search ?? searchQuery.value
+      if (search) {
+        searchParams.append('search', search)
+      }
+
       const action = customParams?.action ?? selectedAction.value
       if (action) {
         searchParams.append('action', action)
@@ -159,14 +167,12 @@ export const useAuditLogEngine = () => {
 
       const start = customParams?.start_date ?? startDate.value
       if (start) {
-        // Convert to ISO string if needed or pass as is if formatted
         const isoStart = start.includes('T') ? start : new Date(start).toISOString()
         searchParams.append('start_date', isoStart)
       }
 
       const end = customParams?.end_date ?? endDate.value
       if (end) {
-        // If it's a date only without time, set to end of day in ISO
         const isoEnd = end.includes('T') ? end : new Date(`${end}T23:59:59.999Z`).toISOString()
         searchParams.append('end_date', isoEnd)
       }
@@ -194,6 +200,7 @@ export const useAuditLogEngine = () => {
 
   // Reset all filters to default
   const resetFilters = () => {
+    searchQuery.value = ''
     selectedAction.value = ''
     selectedEntityType.value = ''
     selectedUserId.value = ''
@@ -225,6 +232,7 @@ export const useAuditLogEngine = () => {
     totalFilteredCount,
     isLoading,
     errorMsg,
+    searchQuery,
     selectedAction,
     selectedEntityType,
     selectedUserId,

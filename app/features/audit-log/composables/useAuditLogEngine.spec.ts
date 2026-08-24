@@ -111,7 +111,7 @@ describe('Audit Log Engine API & Logic', () => {
     expect(isLoading.value).toBe(false)
   })
 
-  it('should pass action, entity_type, user_id, start_date, and end_date query parameters to API', async () => {
+  it('should pass search, action, entity_type, user_id, start_date, and end_date query parameters to API', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -124,6 +124,7 @@ describe('Audit Log Engine API & Logic', () => {
 
     const {
       fetchAuditLogs,
+      searchQuery,
       selectedAction,
       selectedEntityType,
       selectedUserId,
@@ -131,6 +132,7 @@ describe('Audit Log Engine API & Logic', () => {
       endDate
     } = useAuditLogEngine()
 
+    searchQuery.value = 'OR2026'
     selectedAction.value = 'UPDATE'
     selectedEntityType.value = 'product'
     selectedUserId.value = 'user-999'
@@ -139,6 +141,10 @@ describe('Audit Log Engine API & Logic', () => {
 
     await fetchAuditLogs()
 
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('search=OR2026'),
+      expect.any(Object)
+    )
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('action=UPDATE'),
       expect.any(Object)
@@ -161,7 +167,7 @@ describe('Audit Log Engine API & Logic', () => {
     )
   })
 
-  it('should reset all filters and reload page 1 when resetFilters is called', async () => {
+  it('should reset all filters including searchQuery and reload page 1 when resetFilters is called', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -174,6 +180,7 @@ describe('Audit Log Engine API & Logic', () => {
 
     const {
       resetFilters,
+      searchQuery,
       selectedAction,
       selectedEntityType,
       selectedUserId,
@@ -182,6 +189,7 @@ describe('Audit Log Engine API & Logic', () => {
       currentPage
     } = useAuditLogEngine()
 
+    searchQuery.value = 'Test'
     selectedAction.value = 'DELETE'
     selectedEntityType.value = 'order'
     selectedUserId.value = 'user-1'
@@ -191,6 +199,7 @@ describe('Audit Log Engine API & Logic', () => {
 
     resetFilters()
 
+    expect(searchQuery.value).toBe('')
     expect(selectedAction.value).toBe('')
     expect(selectedEntityType.value).toBe('')
     expect(selectedUserId.value).toBe('')
@@ -239,6 +248,8 @@ describe('Audit Log Engine API & Logic', () => {
       expect(getEntityTypeIcon('product_package')).toBe('i-heroicons-gift')
       expect(getEntityTypeIcon('bom')).toBe('i-heroicons-cog-8-tooth')
       expect(getEntityTypeIcon('category')).toBe('i-heroicons-tag')
+      expect(getEntityTypeIcon('user')).toBe('i-heroicons-user')
+      expect(getEntityTypeIcon('company')).toBe('i-heroicons-building-office')
     })
 
     it('should format audit datetime properly', () => {

@@ -59,9 +59,9 @@
 
       <!-- Search & Filter Controls -->
       <AuditLogFilter
+        v-model:search-query="searchQuery"
         v-model:action="selectedAction"
         v-model:entity-type="selectedEntityType"
-        v-model:user-id="selectedUserId"
         v-model:start-date="startDate"
         v-model:end-date="endDate"
         :is-loading="isLoading"
@@ -127,9 +127,9 @@ const {
   totalFilteredCount,
   isLoading,
   errorMsg,
+  searchQuery,
   selectedAction,
   selectedEntityType,
-  selectedUserId,
   startDate,
   endDate,
   currentPage,

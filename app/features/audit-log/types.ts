@@ -34,6 +34,7 @@ export interface AuditLogPagination {
 }
 
 export interface AuditLogFilterParams {
+  search?: string
   action?: string
   entity_type?: string
   user_id?: string
