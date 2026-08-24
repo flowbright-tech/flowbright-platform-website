@@ -26,7 +26,7 @@
                 {{ getAuditUserDisplayName(row.original.user, locale) }}
               </span>
               <div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                <span class="truncate">{{ row.original.user?.email || row.original.user_id || $t('audit_logs.unknown_user') }}</span>
+                <span class="truncate">{{ row.original.user?.email || $t('audit_logs.unknown_user') }}</span>
               </div>
             </div>
             <UBadge
@@ -52,18 +52,13 @@
           </span>
         </template>
 
-        <!-- Entity Type & Target ID Cell -->
+        <!-- Entity Type Cell (Clean badge without raw ID) -->
         <template #entity_type-cell="{ row }">
-          <div class="flex flex-col gap-1 py-1">
-            <div class="flex items-center gap-1.5">
-              <UBadge color="neutral" variant="soft" size="xs" class="font-bold capitalize flex items-center gap-1">
-                <UIcon :name="getEntityTypeIcon(row.original.entity_type)" class="w-3 h-3 text-indigo-500" />
-                {{ row.original.entity_type }}
-              </UBadge>
-            </div>
-            <span class="font-mono text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[140px]" :title="row.original.entity_id">
-              {{ row.original.entity_id }}
-            </span>
+          <div class="flex items-center gap-1.5 py-1">
+            <UBadge color="neutral" variant="soft" size="xs" class="font-bold capitalize flex items-center gap-1">
+              <UIcon :name="getEntityTypeIcon(row.original.entity_type)" class="w-3.5 h-3.5 text-indigo-500" />
+              {{ row.original.entity_type }}
+            </UBadge>
           </div>
         </template>
 

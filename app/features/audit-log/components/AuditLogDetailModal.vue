@@ -63,7 +63,7 @@
                   {{ getAuditUserDisplayName(log.user, locale) }}
                 </div>
                 <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  {{ log.user?.email || log.user_id || $t('audit_logs.unknown_user') }}
+                  {{ log.user?.email || $t('audit_logs.unknown_user') }}
                 </div>
               </div>
               <UBadge v-if="log.user?.role" color="primary" variant="subtle" size="xs" class="capitalize">
@@ -72,27 +72,14 @@
             </div>
           </div>
 
-          <!-- Timestamp & Target ID -->
+          <!-- Timestamp -->
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 space-y-2">
             <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              {{ $t('audit_logs.timestamp') }} & {{ $t('audit_logs.target') }}
+              {{ $t('audit_logs.timestamp') }}
             </span>
-            <div class="space-y-1">
-              <div class="flex items-center gap-1.5 text-xs font-mono font-medium text-slate-700 dark:text-slate-300">
-                <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-indigo-500 shrink-0" />
-                <span>{{ formatAuditDateTime(log.created_at) }}</span>
-              </div>
-              <div class="flex items-center justify-between gap-2 text-xs font-mono text-slate-500 dark:text-slate-400">
-                <span class="truncate">ID: {{ log.entity_id }}</span>
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  icon="i-heroicons-clipboard-document"
-                  size="xs"
-                  :title="$t('common.copy')"
-                  @click="copyToClipboard(log.entity_id)"
-                />
-              </div>
+            <div class="flex items-center gap-1.5 text-xs font-mono font-medium text-slate-700 dark:text-slate-300">
+              <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-indigo-500 shrink-0" />
+              <span>{{ formatAuditDateTime(log.created_at) }}</span>
             </div>
           </div>
         </div>
@@ -117,18 +104,6 @@
 
           <div class="relative rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-slate-100 p-4 font-mono text-xs overflow-x-auto shadow-inner max-h-72">
             <pre class="leading-relaxed whitespace-pre-wrap break-words">{{ formattedDetails }}</pre>
-          </div>
-        </div>
-
-        <!-- Additional Identifiers Card -->
-        <div class="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/20 text-[11px] text-slate-600 dark:text-slate-400 font-mono space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-slate-400">Log UUID:</span>
-            <span class="text-slate-700 dark:text-slate-300 select-all">{{ log.id }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-400">Company ID:</span>
-            <span class="text-slate-700 dark:text-slate-300 select-all">{{ log.company_id }}</span>
           </div>
         </div>
 
@@ -172,15 +147,6 @@ const formattedDetails = computed(() => {
     return String(props.log.details)
   }
 })
-
-const copyToClipboard = async (text: string) => {
-  if (!text) return
-  try {
-    await navigator.clipboard.writeText(text)
-  } catch (err) {
-    console.error('Failed to copy to clipboard', err)
-  }
-}
 
 const copyJsonPayload = async () => {
   if (!props.log?.details) return

@@ -638,7 +638,7 @@
     "col_timestamp": "วันและเวลา",
     "col_operator": "ผู้ทำรายการ",
     "col_action": "การกระทำ",
-    "col_entity": "ประเภทและรหัสข้อมูล",
+    "col_entity": "ประเภทข้อมูล",
     "col_details": "สรุปข้อมูลการเปลี่ยนแปลง",
     "col_actions": "จัดการ",
     "view_details": "ดูรายละเอียด",

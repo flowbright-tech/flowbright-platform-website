@@ -638,7 +638,7 @@
     "col_timestamp": "Timestamp",
     "col_operator": "Operator / User",
     "col_action": "Action",
-    "col_entity": "Entity Type & ID",
+    "col_entity": "Entity Type",
     "col_details": "Details Preview",
     "col_actions": "Actions",
     "view_details": "View Details",
