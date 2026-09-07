@@ -1,17 +1,33 @@
 <template>
   <div class="space-y-6 max-w-7xl mx-auto">
-    <!-- Page Title Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60 dark:border-slate-800/80">
-      <div>
-        <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-          <UIcon name="i-heroicons-user-group" class="w-7 h-7 text-indigo-500" />
-          {{ $t('customers.title') }}
-        </h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          {{ $t('customers.subtitle') }} • <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ activeTenant.name }}</span>
-        </p>
-      </div>
+    <!-- Non-Applicable Restriction Banner for Logistic Company -->
+    <div v-if="isLogistic" class="p-8 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-sm">
+      <UIcon name="i-heroicons-information-circle" class="w-12 h-12 text-slate-400 mx-auto" />
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+        {{ locale === 'th' ? 'ไม่เปิดใช้งานสำหรับประเภทโลจิสติกส์' : 'Not Applicable for Logistics Type' }}
+      </h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+        {{ locale === 'th' ? 'ระบบการจัดการลูกค้า (Customers) ไม่จำเป็นต้องใช้งานสำหรับบริษัทประเภทโลจิสติกส์' : 'Customer management is not required for logistics company types.' }}
+      </p>
+      <UButton color="neutral" variant="outline" :to="localePath('/')" class="font-bold">
+        {{ locale === 'th' ? 'กลับไปยังหน้าแรก' : 'Return to Dashboard' }}
+      </UButton>
     </div>
+
+    <!-- Active Content for non-logistic tenants -->
+    <template v-else>
+      <!-- Page Title Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60 dark:border-slate-800/80">
+        <div>
+          <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <UIcon name="i-heroicons-user-group" class="w-7 h-7 text-indigo-500" />
+            {{ $t('customers.title') }}
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            {{ $t('customers.subtitle') }} • <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ activeTenant.name }}</span>
+          </p>
+        </div>
+      </div>
 
     <!-- Error Alert banner if fetch fails -->
     <UAlert
@@ -95,34 +111,37 @@
       @delete="handleOpenDelete"
     />
 
-    <!-- Reusable Delete Confirmation Modal -->
-    <ConfirmModal
-      v-model:open="isDeleteModalOpen"
-      :title="$t('customers.confirm_delete_title')"
-      :description="$t('customers.confirm_delete_desc')"
-      confirm-color="primary"
-      confirm-icon="i-heroicons-trash"
-      :confirm-text="$t('common.delete')"
-      @confirm="confirmDelete"
-    />
+      <!-- Reusable Delete Confirmation Modal -->
+      <ConfirmModal
+        v-model:open="isDeleteModalOpen"
+        :title="$t('customers.confirm_delete_title')"
+        :description="$t('customers.confirm_delete_desc')"
+        confirm-color="primary"
+        confirm-icon="i-heroicons-trash"
+        :confirm-text="$t('common.delete')"
+        @confirm="confirmDelete"
+      />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useLocalePath } from '#imports'
-import { useAuthEngine } from '../../features/auth/composables/useAuthEngine.ts'
-import { useCustomerEngine } from '../../features/customer/composables/useCustomerEngine.ts'
+import { useAuthEngine } from '../../features/auth/composables/useAuthEngine'
+import { useCustomerEngine } from '../../features/customer/composables/useCustomerEngine'
 import CustomerFilter from '../../features/customer/components/CustomerFilter.vue'
 import CustomerTable from '../../features/customer/components/CustomerTable.vue'
 import ConfirmModal from '../../components/app/ConfirmModal.vue'
 import { useAppToast } from '../../composables/useAppToast'
-import type { Customer } from '../../features/customer/types.ts'
+import type { Customer } from '../../features/customer/types'
 
 const router = useRouter()
 const localePath = useLocalePath()
-const { activeTenant } = useAuthEngine()
+const { locale } = useI18n()
+const { activeTenant, isLogistic } = useAuthEngine()
 const {
   searchQuery,
   currentPage,
@@ -140,7 +159,9 @@ const isDeleteModalOpen = ref(false)
 const customerToDelete = ref<Customer | null>(null)
 
 onMounted(async () => {
-  await fetchCustomers()
+  if (!isLogistic.value) {
+    await fetchCustomers()
+  }
 })
 
 const handleOpenCreate = () => {

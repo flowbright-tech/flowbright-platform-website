@@ -16,7 +16,7 @@
         {{ $t('orders.form_title_edit') || 'Edit Order' }}
       </h1>
       <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-        {{ $t('orders.form_subtitle_edit') || 'Update order status, delivery date, customer info, or package quantities' }}
+        {{ isLogistic ? ($t('orders.form_subtitle_edit_logistic') || 'Update order status, delivery date, or package quantities') : ($t('orders.form_subtitle_edit') || 'Update order status, delivery date, customer info, or package quantities') }}
       </p>
     </div>
 
@@ -59,6 +59,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLocalePath } from '#imports'
 import { useOrderEngine } from '../../../features/order/composables/useOrderEngine'
+import { useAuthEngine } from '../../../features/auth/composables/useAuthEngine'
 import type { Order, OrderFormData } from '../../../features/order/types'
 import OrderForm from '../../../features/order/components/OrderForm.vue'
 import { useAppToast } from '../../../composables/useAppToast'
@@ -66,6 +67,7 @@ import { useAppToast } from '../../../composables/useAppToast'
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
+const { isLogistic } = useAuthEngine()
 const { showSuccess, showError } = useAppToast()
 
 const { fetchOrderById, updateOrder, isLoading, errorMsg } = useOrderEngine()

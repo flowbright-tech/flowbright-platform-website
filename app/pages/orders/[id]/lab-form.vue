@@ -273,9 +273,10 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
+const localePath = useLocalePath()
 const { locale } = useI18n()
 const { apiFetch } = useApiFetch()
-const { company: authCompany } = useAuthEngine()
+const { company: authCompany, isLab, isLogistic } = useAuthEngine()
 
 const orderId = String(route.params.id)
 const isLoading = ref(true)
@@ -473,6 +474,10 @@ const formatPrintDate = (dObj: Date = new Date()) => {
 }
 
 onMounted(() => {
+  if (isLogistic.value || !isLab.value) {
+    router.push(localePath('/orders'))
+    return
+  }
   printDate.value = formatPrintDate()
   fetchLabFormData()
 })

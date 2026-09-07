@@ -9,7 +9,7 @@
             class="font-mono font-bold text-xs sm:text-sm px-2.5 py-1">
             {{ row.original.code || row.original.order_number }}
           </UBadge>
-          <span class="font-bold text-slate-900 dark:text-white text-sm">
+          <span v-if="!isLogistic" class="font-bold text-slate-900 dark:text-white text-sm">
             {{ row.original.customer_name || (isStore ? ($t('orders.walk_in_customer') || 'Walk-in / General Customer') : 'N/A') }}
           </span>
         </div>
@@ -69,7 +69,7 @@
       <!-- Actions cell -->
       <template #actions-cell="{ row }">
         <div class="flex items-center justify-end gap-1">
-          <UButton color="neutral" variant="ghost" icon="i-heroicons-beaker" size="md"
+          <UButton v-if="isLab" color="neutral" variant="ghost" icon="i-heroicons-beaker" size="md"
             :title="$t('orders.lab_form') || 'Lab In/Out Form'" @click="$emit('openLabForm', row.original)" />
           <UButton color="neutral" variant="ghost" icon="i-heroicons-identification" size="md"
             :title="$t('orders.print_document') || 'Print Document'" @click="$emit('printDocument', row.original)" />
@@ -135,10 +135,10 @@ defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { isStore } = useAuthEngine()
+const { isStore, isLogistic, isLab } = useAuthEngine()
 
 const columns = computed(() => [
-  { accessorKey: 'customer_name', header: t('orders.col_order_info') || 'Order / Customer' },
+  { accessorKey: 'customer_name', header: isLogistic.value ? (t('orders.col_order_number') || 'Order Number') : (t('orders.col_order_info') || 'Order / Customer') },
   { accessorKey: 'transaction_date', header: t('orders.col_transaction_date') || 'Transaction Date' },
   { accessorKey: 'payment_channel', header: t('orders.col_payment') || 'Payment' },
   { accessorKey: 'status', header: t('orders.col_status') || 'Status' },

@@ -31,9 +31,9 @@
         </div>
 
         <!-- Customer & Delivery Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Customer Info -->
-          <div class="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-2">
+        <div class="grid grid-cols-1 gap-4" :class="{ 'md:grid-cols-2': !isLogistic }">
+          <!-- Customer Info (Hidden for logistic company type) -->
+          <div v-if="!isLogistic" class="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-2">
             <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <UIcon name="i-heroicons-user" class="w-4 h-4 text-indigo-500" />
               {{ $t('orders.sec_customer') || 'Customer Information' }}
@@ -142,8 +142,8 @@
           </div>
         </div>
 
-        <!-- Action Bar in Modal -->
-        <div class="flex items-center justify-end gap-3 pt-2">
+        <!-- Action Bar in Modal (Lab In/Out Form visible only for Lab companies) -->
+        <div v-if="isLab" class="flex items-center justify-end gap-3 pt-2">
           <UButton
             color="emerald"
             variant="soft"
@@ -164,6 +164,7 @@
 import { useI18n } from 'vue-i18n'
 import type { Order } from '../types'
 import { formatTransactionDate, formatDeliveryDate } from '../composables/useOrderEngine'
+import { useAuthEngine } from '../../auth/composables/useAuthEngine'
 
 const isOpen = defineModel<boolean>('open', { default: false })
 
@@ -172,6 +173,7 @@ defineProps<{
 }>()
 
 const { t, locale } = useI18n()
+const { isLogistic, isLab } = useAuthEngine()
 
 const formatCurrency = (val?: number) => {
   return Number(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })

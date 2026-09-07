@@ -14,7 +14,7 @@ export interface NavItem {
 export const useNavigation = () => {
   const { t } = useI18n()
   const localePath = useLocalePath()
-  const { isLab, isAdmin } = useAuthEngine()
+  const { isLab, isAdmin, isLogistic } = useAuthEngine()
 
   const navItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [
@@ -23,14 +23,18 @@ export const useNavigation = () => {
         labelKey: 'nav.dashboard',
         icon: 'i-heroicons-squares-2x2',
         to: localePath('/')
-      },
-      {
+      }
+    ]
+
+    // Customer management is hidden for logistic company type
+    if (!isLogistic.value) {
+      items.push({
         key: 'customers',
         labelKey: 'nav.customers',
         icon: 'i-heroicons-user-group',
         to: localePath('/customers')
-      }
-    ]
+      })
+    }
 
     // Requirement 3: Vendor management is not required for lab company type, required for other types
     if (!isLab.value) {
@@ -100,6 +104,7 @@ export const useNavigation = () => {
   return {
     navItems,
     isLab,
+    isLogistic,
     isAdmin
   }
 }

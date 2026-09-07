@@ -145,14 +145,19 @@
           </div>
         </div>
 
-        <!-- Section 3: Description -->
+        <!-- Section 3: Description & Remarks -->
         <div class="space-y-4 pt-4 border-t border-muted">
           <h3 class="text-sm font-bold text-highlighted pb-2 border-b border-muted">
             {{ $t('products.description') || 'General Description' }}
           </h3>
-          <UFormField>
-            <UTextarea v-model="form.description" :rows="3" autoresize :maxrows="6" placeholder="Product description details..." class="w-full" />
-          </UFormField>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <UFormField :label="$t('products.description') || 'General Description'">
+              <UTextarea v-model="form.description" :rows="3" autoresize :maxrows="6" placeholder="Product description details..." class="w-full" />
+            </UFormField>
+            <UFormField :label="$t('products.remark') || 'General Remark'">
+              <UTextarea v-model="form.remark" :rows="3" autoresize :maxrows="6" placeholder="Additional remarks..." class="w-full" />
+            </UFormField>
+          </div>
         </div>
 
         <!-- Section 4: Pricing & Financials / Inventory -->
@@ -257,8 +262,8 @@
           </div>
         </div>
 
-        <!-- Section 5: Specifications / Lab Details -->
-        <div class="space-y-4 pt-4 border-t border-muted">
+        <!-- Section 5: Specifications / Lab Details (Hidden for logistic and non-lab) -->
+        <div v-if="!isLogistic && isLab" class="space-y-4 pt-4 border-t border-muted">
           <h3 class="text-sm font-bold text-highlighted pb-2 border-b border-muted">
             {{ $t('products.sec_specs') || 'Specifications / Lab Details' }}
           </h3>
@@ -296,15 +301,9 @@
             <UTextarea v-model="form.clinical_use" :rows="3" autoresize :maxrows="6" placeholder="Document the medical or diagnostics clinical use..." class="w-full" />
           </UFormField>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UFormField :label="$t('products.collection_remark') || 'Collection Remark'">
-              <UTextarea v-model="form.collection_remark" :rows="3" autoresize :maxrows="6" placeholder="Instructions for collecting samples..." class="w-full" />
-            </UFormField>
-
-            <UFormField :label="$t('products.remark') || 'General Remark'">
-              <UTextarea v-model="form.remark" :rows="3" autoresize :maxrows="6" placeholder="Additional remarks..." class="w-full" />
-            </UFormField>
-          </div>
+          <UFormField :label="$t('products.collection_remark') || 'Collection Remark'">
+            <UTextarea v-model="form.collection_remark" :rows="3" autoresize :maxrows="6" placeholder="Instructions for collecting samples..." class="w-full" />
+          </UFormField>
         </div>
 
         <!-- Action buttons -->
@@ -331,9 +330,11 @@ import { useImageUpload } from '../../../composables/useImageUpload'
 import { useAppToast } from '../../../composables/useAppToast'
 
 import { useDomainLabels } from '../../../composables/useDomainLabels'
+import { useAuthEngine } from '../../../features/auth/composables/useAuthEngine'
 
 const { t, locale } = useI18n()
 const { dl, isLab } = useDomainLabels()
+const { isLogistic } = useAuthEngine()
 const { uploadImage } = useImageUpload()
 const { showError } = useAppToast()
 const isUploadingImage = ref(false)
@@ -354,7 +355,7 @@ const form = reactive({
   name_th: '',
   sku: '',
   barcode: '',
-  product_type: 'test',
+  product_type: isLogistic.value ? 'standard' : (isLab.value ? 'test' : 'standard'),
   subcategory_id: 'root',
   selling_price: 0,
   cost: 0,
@@ -404,12 +405,17 @@ const labFlagOptions = [
   { label: 'Lab In', value: 'labin' }
 ]
 
-const productTypeOptions = computed(() => [
-  { label: dl('type_test', isLab.value ? 'Clinical Test' : 'Test Product'), value: 'test' },
-  { label: dl('type_standard', 'Standard Item'), value: 'standard' },
-  { label: dl('type_service', 'Service Charge / Non-Stock'), value: 'service' },
-  { label: dl('type_kit', 'Kit / Assembly Bundle'), value: 'kit' }
-])
+const productTypeOptions = computed(() => {
+  const options = [
+    { label: dl('type_standard', 'Standard Item'), value: 'standard' },
+    { label: dl('type_service', 'Service Charge / Non-Stock'), value: 'service' },
+    { label: dl('type_kit', 'Kit / Assembly Bundle'), value: 'kit' }
+  ]
+  if (!isLogistic.value) {
+    options.unshift({ label: dl('type_test', isLab.value ? 'Clinical Test' : 'Test Product'), value: 'test' })
+  }
+  return options
+})
 
 const categoryOptions = computed(() => {
   const list = props.categories || []
@@ -428,7 +434,7 @@ watch(() => props.categoryToEdit, (newVal) => {
     form.name_th = newVal.name_th || ''
     form.sku = newVal.sku || ''
     form.barcode = newVal.barcode || ''
-    form.product_type = newVal.product_type || 'test'
+    form.product_type = newVal.product_type || (isLogistic.value ? 'standard' : (isLab.value ? 'test' : 'standard'))
     form.subcategory_id = newVal.subcategory_id || 'root'
     form.selling_price = Number(newVal.selling_price ?? 0)
     form.cost = Number(newVal.cost ?? 0)
@@ -560,9 +566,9 @@ const submitForm = async () => {
     return String(val)
   }
 
-  const selectedType = extractVal(form.product_type) || 'test'
+  const selectedType = extractVal(form.product_type) || (isLogistic.value ? 'standard' : (isLab.value ? 'test' : 'standard'))
   const selectedCat = extractVal(form.subcategory_id)
-  const selectedLabFlag = extractVal(form.lab_flag) || 'labout'
+  const selectedLabFlag = isLogistic.value ? null : (extractVal(form.lab_flag) || 'labout')
 
   const payload: ProductFormData = {
     name_en: form.name_en,
@@ -581,13 +587,13 @@ const submitForm = async () => {
     is_active: form.is_active,
     remark: form.remark || '',
     leadtime: form.leadtime || '',
-    sample_type_volum: form.sample_type_volum || '',
+    sample_type_volum: isLogistic.value ? '' : (form.sample_type_volum || ''),
     storage_condition: form.storage_condition || '',
-    collection_remark: form.collection_remark || '',
-    principle: form.principle || '',
-    method: form.method || '',
-    clinical_use: form.clinical_use || '',
-    reference_range_unit: form.reference_range_unit || '',
+    collection_remark: isLogistic.value ? '' : (form.collection_remark || ''),
+    principle: isLogistic.value ? '' : (form.principle || ''),
+    method: isLogistic.value ? '' : (form.method || ''),
+    clinical_use: isLogistic.value ? '' : (form.clinical_use || ''),
+    reference_range_unit: isLogistic.value ? '' : (form.reference_range_unit || ''),
     lab_flag: selectedLabFlag
   }
 

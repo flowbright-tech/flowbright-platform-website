@@ -39,10 +39,11 @@
     />
   </div>
 </template>
-
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLocalePath } from '#imports'
+import { useAuthEngine } from '../../features/auth/composables/useAuthEngine'
 import { useCustomerEngine } from '../../features/customer/composables/useCustomerEngine'
 import { useAppToast } from '../../composables/useAppToast'
 import CustomerForm from '../../features/customer/components/CustomerForm.vue'
@@ -50,8 +51,15 @@ import type { CustomerFormData } from '../../features/customer/types'
 
 const router = useRouter()
 const localePath = useLocalePath()
+const { isLogistic } = useAuthEngine()
 const { addCustomer, isLoading, errorMsg } = useCustomerEngine()
 const { showSuccess } = useAppToast()
+
+onMounted(() => {
+  if (isLogistic.value) {
+    router.push(localePath('/'))
+  }
+})
 
 const handleSave = async (data: CustomerFormData) => {
   try {

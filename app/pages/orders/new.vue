@@ -16,7 +16,7 @@
         {{ $t('orders.form_title_new') || 'Create New Order' }}
       </h1>
       <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-        {{ $t('orders.form_subtitle_new') || 'Fill in customer details, select delivery date, and add package items' }}
+        {{ isLogistic ? ($t('orders.form_subtitle_new_logistic') || 'Select delivery date and add package items') : ($t('orders.form_subtitle_new') || 'Fill in customer details, select delivery date, and add package items') }}
       </p>
     </div>
 
@@ -43,6 +43,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useLocalePath } from '#imports'
+import { useAuthEngine } from '../../features/auth/composables/useAuthEngine'
 import { useOrderEngine } from '../../features/order/composables/useOrderEngine'
 import { useAppToast } from '../../composables/useAppToast'
 import OrderForm from '../../features/order/components/OrderForm.vue'
@@ -50,6 +51,7 @@ import type { OrderFormData } from '../../features/order/types'
 
 const router = useRouter()
 const localePath = useLocalePath()
+const { isLogistic } = useAuthEngine()
 const { addOrder, isLoading, errorMsg } = useOrderEngine()
 const { showSuccess } = useAppToast()
 

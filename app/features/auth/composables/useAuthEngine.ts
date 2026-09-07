@@ -53,6 +53,15 @@ export const useAuthEngine = () => {
     return companyProfileState.value?.company_type?.toLowerCase() === 'store'
   })
 
+  const isLogistic = computed(() => {
+    initializeFromStorage()
+    const compType = companyProfileState.value?.company_type?.toLowerCase()
+    if (compType === 'logistic' || compType === 'logistics') return true
+    const tenantName = activeTenant.value?.name?.toLowerCase() || ''
+    if (tenantName.includes('logistic')) return true
+    return false
+  })
+
   const isAdmin = computed(() => {
     initializeFromStorage()
     const r = (userProfileState.value?.role || session.value?.role || '').toLowerCase()
@@ -61,7 +70,7 @@ export const useAuthEngine = () => {
     return r.includes('admin') || r.includes('manager') || r === 'system administrator' || r === ''
   })
 
-  const setCompanyType = (type: 'lab' | 'standard' | 'store' | string) => {
+  const setCompanyType = (type: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | string) => {
     if (!companyProfileState.value) {
       companyProfileState.value = {
         id: 'comp-01',
@@ -272,6 +281,7 @@ export const useAuthEngine = () => {
     company,
     isLab,
     isStore,
+    isLogistic,
     isAdmin,
     setCompanyType,
     setUserRole

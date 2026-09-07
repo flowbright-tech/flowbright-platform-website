@@ -61,6 +61,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLocalePath } from '#imports'
 import { useCustomerEngine } from '../../features/customer/composables/useCustomerEngine'
+import { useAuthEngine } from '../../features/auth/composables/useAuthEngine'
 import { useAppToast } from '../../composables/useAppToast'
 import CustomerForm from '../../features/customer/components/CustomerForm.vue'
 import type { Customer, CustomerFormData } from '../../features/customer/types'
@@ -68,6 +69,7 @@ import type { Customer, CustomerFormData } from '../../features/customer/types'
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
+const { isLogistic } = useAuthEngine()
 const { updateCustomer, fetchCustomerById, isLoading, errorMsg } = useCustomerEngine()
 const { showSuccess } = useAppToast()
 
@@ -76,6 +78,10 @@ const customerToEdit = ref<Customer | null>(null)
 const isLoadingData = ref(true)
 
 onMounted(async () => {
+  if (isLogistic.value) {
+    router.push(localePath('/'))
+    return
+  }
   try {
     const data = await fetchCustomerById(id)
     if (data) {
