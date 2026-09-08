@@ -112,8 +112,13 @@ export const formatTransactionDate = (dateStr?: string | null): string => {
 
 export const formatDeliveryDate = formatTransactionDate
 
+export const resolveDefaultOrderStatus = (isLogisticOrPos: boolean, currentStatus?: string): string => {
+  if (isLogisticOrPos) return 'completed'
+  return safeLowerCase(currentStatus || 'pending')
+}
+
 export const useOrderEngine = () => {
-  const { session } = useAuthEngine()
+  const { session, isLogistic, isPos } = useAuthEngine()
   const { apiFetch } = useApiFetch()
 
   // State refs
@@ -211,9 +216,11 @@ export const useOrderEngine = () => {
       ? Number(data.credit_card_charge_percent ?? data.credit_card_percent_charge ?? 0)
       : 0
 
+    const isLogisticOrPos = isLogistic.value || isPos.value
+
     const payload = {
       ...data,
-      status: safeLowerCase(data.status || 'pending'),
+      status: resolveDefaultOrderStatus(isLogisticOrPos, data.status),
       payment_channel: paymentChannelClean,
       discount: Number(data.discount || 0),
       credit_card_charge_percent: ccChargePercent,
@@ -262,9 +269,11 @@ export const useOrderEngine = () => {
       ? Number(data.credit_card_charge_percent ?? data.credit_card_percent_charge ?? 0)
       : 0
 
+    const isLogisticOrPos = isLogistic.value || isPos.value
+
     const payload = {
       ...data,
-      status: safeLowerCase(data.status || 'pending'),
+      status: resolveDefaultOrderStatus(isLogisticOrPos, data.status),
       payment_channel: paymentChannelClean,
       discount: Number(data.discount || 0),
       credit_card_charge_percent: ccChargePercent,

@@ -4,8 +4,12 @@
       <template #header>
         <div class="text-center space-y-3 py-4">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-inner">
-            <UIcon name="i-heroicons-building-office-2" class="w-10 h-10" />
+            class="relative inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500/15 via-purple-500/10 to-indigo-500/5 dark:from-indigo-400/20 dark:to-purple-500/10 p-2.5 ring-1 ring-indigo-500/20 shadow-xl shadow-indigo-500/10 backdrop-blur-sm group transition-transform duration-300 hover:scale-105">
+            <img
+              src="/apple-touch-icon.png"
+              alt="FlowBright Platform"
+              class="w-full h-full object-contain rounded-2xl drop-shadow-md"
+            />
           </div>
           <h1 class="text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">
             {{ $t('auth.login_title') }}
@@ -67,12 +71,9 @@
       </form>
 
       <template #footer>
-        <div class="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 py-1">
-          <span>SRP v4.2</span>
-          <span class="inline-flex items-center gap-1.5">
-            <UIcon name="i-heroicons-check-badge" class="w-5 h-5 text-indigo-500" />
-            SSG Client Isolated
-          </span>
+        <div class="flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500 py-1">
+          <UIcon name="i-heroicons-shield-check" class="w-4 h-4 text-emerald-500 shrink-0" />
+          <span>{{ $t('auth.card_footer_security') }}</span>
         </div>
       </template>
     </UCard>

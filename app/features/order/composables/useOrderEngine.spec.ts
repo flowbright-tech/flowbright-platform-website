@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, formatDeliveryDate, formatTransactionDate } from './useOrderEngine'
+import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, formatDeliveryDate, formatTransactionDate, resolveDefaultOrderStatus } from './useOrderEngine'
 
 describe('Order Calculation & Utility Engine', () => {
   describe('calculateItemSubtotal', () => {
@@ -89,6 +89,22 @@ describe('Order Calculation & Utility Engine', () => {
       expect(formatTransactionDate('')).toBe('-')
       expect(formatDeliveryDate(null)).toBe('-')
       expect(formatDeliveryDate('')).toBe('-')
+    })
+  })
+
+  describe('resolveDefaultOrderStatus', () => {
+    it('should always return completed when isLogisticOrPos is true', () => {
+      expect(resolveDefaultOrderStatus(true)).toBe('completed')
+      expect(resolveDefaultOrderStatus(true, 'pending')).toBe('completed')
+      expect(resolveDefaultOrderStatus(true, 'cancelled')).toBe('completed')
+      expect(resolveDefaultOrderStatus(true, 'processing')).toBe('completed')
+    })
+
+    it('should return currentStatus or fallback to pending when isLogisticOrPos is false', () => {
+      expect(resolveDefaultOrderStatus(false)).toBe('pending')
+      expect(resolveDefaultOrderStatus(false, 'processing')).toBe('processing')
+      expect(resolveDefaultOrderStatus(false, 'completed')).toBe('completed')
+      expect(resolveDefaultOrderStatus(false, 'Cancelled')).toBe('cancelled')
     })
   })
 })

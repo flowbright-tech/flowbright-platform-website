@@ -154,16 +154,24 @@
               </div>
             </div>
 
-            <!-- Order Status (Default Pending, Searchable Dropdown) -->
+            <!-- Order Status (Default Pending, or Completed for Logistic/POS) -->
             <UFormField :label="$t('orders.status') || 'Order Status'">
-              <USelectMenu
-                v-model="form.status"
-                :items="statusOptions"
-                value-key="value"
-                label-key="label"
-                size="md"
-                class="w-full"
-              />
+              <div class="relative">
+                <USelectMenu
+                  v-model="form.status"
+                  :items="statusOptions"
+                  value-key="value"
+                  label-key="label"
+                  :disabled="isLogisticOrPos"
+                  size="md"
+                  class="w-full"
+                  :class="{ 'opacity-85 cursor-not-allowed bg-slate-50 dark:bg-slate-900/50 rounded-lg': isLogisticOrPos }"
+                />
+              </div>
+              <p v-if="isLogisticOrPos" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1.5">
+                <UIcon name="i-heroicons-lock-closed" class="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span>{{ $t('orders.status_locked_completed') || 'Status is automatically set to Completed for this business type.' }}</span>
+              </p>
             </UFormField>
           </div>
         </div>
@@ -363,7 +371,8 @@ import type { Package } from '../../package/types'
 const { t, locale } = useI18n()
 const { apiFetch } = useApiFetch()
 const { showError } = useAppToast()
-const { company, isStore, isLogistic } = useAuthEngine()
+const { company, isStore, isLogistic, isPos } = useAuthEngine()
+const isLogisticOrPos = computed(() => isLogistic.value || isPos.value)
 
 // Helper to look up credit_card_percent_charge from local storage company profile
 const getCompanyCreditCardPercentCharge = (): number => {
@@ -404,7 +413,7 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Form reactive state - Payment channel has NO DEFAULT value (required field), Status defaults to 'pending'
+// Form reactive state - Payment channel has NO DEFAULT value (required field), Status defaults to 'completed' for logistic/pos or 'pending'
 const form = reactive<OrderFormData>({
   customer_id: '',
   customer_name: '',
@@ -412,7 +421,7 @@ const form = reactive<OrderFormData>({
   customer_phone: '',
   delivery_date: getTodayDateString(), // Default today date
   payment_channel: '', // No default value
-  status: 'pending', // Default pending
+  status: isLogisticOrPos.value ? 'completed' : 'pending',
   discount: 0,
   credit_card_charge_percent: 3,
   credit_card_percent_charge: 3,
@@ -420,6 +429,13 @@ const form = reactive<OrderFormData>({
   total_amount: 0,
   items: []
 })
+
+// Watch isLogisticOrPos to enforce completed status when active
+watch(isLogisticOrPos, (fixed) => {
+  if (fixed) {
+    form.status = 'completed'
+  }
+}, { immediate: true })
 
 // Validation errors
 const errors = reactive({
@@ -657,7 +673,7 @@ watch(() => props.orderToEdit, (newVal) => {
     form.customer_phone = newVal.customer_phone || ''
     form.delivery_date = newVal.delivery_date ? newVal.delivery_date.split('T')[0] : getTodayDateString()
     form.payment_channel = newVal.payment_channel ? newVal.payment_channel.toLowerCase() : ''
-    form.status = (newVal.status || 'pending').toLowerCase()
+    form.status = isLogisticOrPos.value ? 'completed' : (newVal.status || 'pending').toLowerCase()
     form.discount = Number(newVal.discount || 0)
     form.credit_card_charge_percent = Number(newVal.credit_card_charge_percent ?? newVal.credit_card_percent_charge ?? 3)
     form.credit_card_percent_charge = Number(newVal.credit_card_percent_charge ?? newVal.credit_card_charge_percent ?? 3)
@@ -740,7 +756,7 @@ const submitForm = () => {
     discount: Number(form.discount || 0),
     credit_card_charge_percent: ccChargePercent,
     credit_card_percent_charge: ccChargePercent,
-    status: safeLowerCase(form.status || 'pending'),
+    status: isLogisticOrPos.value ? 'completed' : safeLowerCase(form.status || 'pending'),
     payment_channel: safeLowerCase(form.payment_channel)
   })
 }

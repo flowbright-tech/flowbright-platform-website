@@ -69,6 +69,21 @@ describe('Auth Engine & Tenant Memory Cleansing', () => {
     expect(isLogistic.value).toBe(false)
   })
 
+  it('should evaluate isPos correctly when company_type is pos or store', () => {
+    const { setCompanyType, isPos } = useAuthEngine()
+    setCompanyType('pos')
+    expect(isPos.value).toBe(true)
+
+    setCompanyType('store')
+    expect(isPos.value).toBe(true)
+
+    setCompanyType('lab')
+    expect(isPos.value).toBe(false)
+
+    setCompanyType('standard')
+    expect(isPos.value).toBe(false)
+  })
+
   it('should evaluate isAdmin correctly based on user role', () => {
     const { login, setUserRole, isAdmin } = useAuthEngine()
     login('user@flowbright.co', 'mock-token', MOCK_TENANTS[0].id)

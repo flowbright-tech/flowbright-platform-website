@@ -55,10 +55,19 @@ export const useAuthEngine = () => {
 
   const isLogistic = computed(() => {
     initializeFromStorage()
-    const compType = companyProfileState.value?.company_type?.toLowerCase()
+    const compType = (companyProfileState.value?.company_type || (companyProfileState.value as any)?.business_type || '')?.toLowerCase()
     if (compType === 'logistic' || compType === 'logistics') return true
     const tenantName = activeTenant.value?.name?.toLowerCase() || ''
     if (tenantName.includes('logistic')) return true
+    return false
+  })
+
+  const isPos = computed(() => {
+    initializeFromStorage()
+    const compType = (companyProfileState.value?.company_type || (companyProfileState.value as any)?.business_type || '')?.toLowerCase()
+    if (compType === 'pos' || compType === 'store') return true
+    const tenantName = activeTenant.value?.name?.toLowerCase() || ''
+    if (tenantName.includes('pos')) return true
     return false
   })
 
@@ -70,7 +79,7 @@ export const useAuthEngine = () => {
     return r.includes('admin') || r.includes('manager') || r === 'system administrator' || r === ''
   })
 
-  const setCompanyType = (type: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | string) => {
+  const setCompanyType = (type: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | 'pos' | string) => {
     if (!companyProfileState.value) {
       companyProfileState.value = {
         id: 'comp-01',
@@ -282,6 +291,7 @@ export const useAuthEngine = () => {
     isLab,
     isStore,
     isLogistic,
+    isPos,
     isAdmin,
     setCompanyType,
     setUserRole

@@ -5,8 +5,8 @@
     "description": "แพลตฟอร์มการจัดการทรัพยากร SME ยุคใหม่"
   },
   "auth": {
-    "login_title": "เข้าสู่ระบบ SRP",
-    "login_subtitle": "เลือกองค์กร (Tenant) และกรอกข้อมูลประจำตัวเพื่อเข้าใช้งานระบบ",
+    "login_title": "เข้าสู่ระบบ FlowBright",
+    "login_subtitle": "กรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบบริหารจัดการธุรกิจของคุณ",
     "email": "อีเมลผู้ใช้งาน",
     "email_placeholder": "name{'@'}company.com",
     "password": "รหัสผ่าน",
@@ -21,6 +21,8 @@
     "login_success": "เข้าสู่ระบบเรียบร้อยแล้ว",
     "invalid_credentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
     "forgot_password": "ลืมรหัสผ่าน?",
+    "card_footer_security": "ปกป้องข้อมูลด้วยมาตรฐานความปลอดภัยระดับองค์กร",
+    "footer_copyright": "© 2026 FlowBright แพลตฟอร์มบริหารจัดการทรัพยากรสำหรับธุรกิจ สงวนลิขสิทธิ์",
     "email_required": "กรุณากรอกอีเมลติดต่อ",
     "email_invalid": "รูปแบบอีเมลไม่ถูกต้อง (เช่น name{'@'}company.com)",
     "password_required": "กรุณากรอกรหัสผ่านเพื่อเข้าใช้งาน",
@@ -552,6 +554,7 @@
     "status_processing": "กำลังจัดเตรียม",
     "status_completed": "เสร็จสมบูรณ์",
     "status_cancelled": "ยกเลิก",
+    "status_locked_completed": "สถานะคำสั่งซื้อถูกกำหนดเป็น 'เสร็จสมบูรณ์' อัตโนมัติตามประเภทธุรกิจ",
     "payment_cash": "เงินสด",
     "payment_credit_card": "บัตรเครดิต",
     "payment_internet_banking": "อินเทอร์เน็ตแบงก์กิ้ง",

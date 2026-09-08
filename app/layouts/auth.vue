@@ -28,8 +28,8 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-center text-xs text-slate-400 dark:text-slate-600">
-      © 2026 SRP. Built for modern SMEs with Nuxt 4 SSG architecture.
+    <footer class="text-center text-xs text-slate-400 dark:text-slate-500 font-medium py-2">
+      {{ $t('auth.footer_copyright') }}
     </footer>
   </div>
 </template>

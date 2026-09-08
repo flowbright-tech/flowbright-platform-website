@@ -28,7 +28,7 @@ export interface CompanyProfile {
   plan: string
   status: string
   image_url: string
-  company_type?: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | string
+  company_type?: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | 'pos' | string
   credit_card_percent_charge?: number
   credit_card_charge_percent?: number
   created_at: string
