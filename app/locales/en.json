@@ -284,6 +284,7 @@
     "delete_desc": "The {resource} record has been removed from the database.",
     "action_failed": "Action Failed",
     "validation_error": "Validation Error",
+    "err_insufficient_stock": "Insufficient stock for product items in this order",
     "api_error": "Request Failed",
     "customer": "Customer",
     "vendor": "Vendor",

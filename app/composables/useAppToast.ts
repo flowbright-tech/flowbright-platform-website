@@ -61,6 +61,23 @@ export const parseErrorMessage = (
     ? (te('toast.validation_error') ? t('toast.validation_error') : 'Validation Error')
     : (te('toast.action_failed') ? t('toast.action_failed') : 'Action Failed')
 
+  // Unified error validation message for all stock availability errors
+  const isStockAvailabilityError =
+    (lower.includes('stock') || lower.includes('inventory') || (lower.includes('insufficient') && !lower.includes('funds') && !lower.includes('balance'))) &&
+    !lower.includes('non-negative') &&
+    !lower.includes('negative')
+
+  if (isStockAvailabilityError) {
+    const unifiedStockMsg = locale === 'th'
+      ? (te('orders.err_insufficient_stock') ? t('orders.err_insufficient_stock') : 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ')
+      : (te('orders.err_insufficient_stock') ? t('orders.err_insufficient_stock') : 'Insufficient stock for product items in this order')
+
+    return {
+      title: defaultTitle,
+      description: unifiedStockMsg
+    }
+  }
+
   // Common dictionary mappings for bilingual backend messages
   const dictTh: Record<string, string> = {
     'failed to create order': 'ไม่สามารถสร้างคำสั่งซื้อได้',
@@ -105,10 +122,10 @@ export const parseErrorMessage = (
     'reserve stock must be a non-negative number': 'จำนวนสำรองสต็อกต้องไม่ติดลบ',
     'insufficient stock': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
     'not enough stock': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
-    'out of stock': 'สินค้าหมดหรือไม่เพียงพอในคลัง',
+    'out of stock': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
     'stock is insufficient': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
-    'stock not available': 'ไม่มีสินค้าในคลังสำหรับทำรายการ',
-    'exceeds available stock': 'จำนวนที่สั่งซื้อเกินกว่าสินค้าที่มีอยู่ในคลัง',
+    'stock not available': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
+    'exceeds available stock': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
     'product stock is not enough': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
     'insufficient inventory': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
     'stock': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
