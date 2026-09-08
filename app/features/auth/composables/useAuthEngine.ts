@@ -364,32 +364,126 @@ export const validatePasswordRules = (pwd: string): PasswordValidationRules => {
   return { minLength, hasUpper, hasLower, hasNumber, isValid }
 }
 
-export const extractRecoveryToken = (routeQuery?: Record<string, any>): string | null => {
+export interface RecoveryDetails {
+  token: string | null
+  refreshToken: string | null
+  type: string | null
+  error: string | null
+  errorCode: string | null
+  errorDescription: string | null
+}
+
+/**
+ * Extracts Supabase Auth recovery credentials and error metadata from URL hash,
+ * URL query string, or Vue Route objects.
+ * Supports:
+ * - Supabase implicit flow hash: `#access_token=...&refresh_token=...&type=recovery`
+ * - Supabase token_hash / PKCE: `?token_hash=...&type=recovery` or `?code=...`
+ * - Supabase error hashes/queries: `#error=access_denied&error_code=otp_expired&error_description=...`
+ */
+export const extractRecoveryDetails = (
+  routeOrQuery?: { query?: Record<string, any>; hash?: string } | Record<string, any>
+): RecoveryDetails => {
+  let token: string | null = null
+  let refreshToken: string | null = null
+  let type: string | null = null
+  let error: string | null = null
+  let errorCode: string | null = null
+  let errorDescription: string | null = null
+
+  const parseParamString = (paramStr: string) => {
+    if (!paramStr) return
+    let cleaned = paramStr.replace(/^[#?]+[\/]?/, '')
+    if (cleaned.includes('#')) {
+      cleaned = cleaned.split('#').pop() || cleaned
+    }
+    if (cleaned.includes('?')) {
+      cleaned = cleaned.split('?').pop() || cleaned
+    }
+
+    try {
+      const params = new URLSearchParams(cleaned)
+      if (!token) {
+        token =
+          params.get('access_token') ||
+          params.get('token') ||
+          params.get('token_hash') ||
+          params.get('code') ||
+          null
+      }
+      if (!refreshToken) {
+        refreshToken = params.get('refresh_token') || null
+      }
+      if (!type) {
+        type = params.get('type') || null
+      }
+      if (!error) {
+        error = params.get('error') || null
+      }
+      if (!errorCode) {
+        errorCode = params.get('error_code') || null
+      }
+      if (!errorDescription) {
+        const rawDesc = params.get('error_description')
+        if (rawDesc) {
+          errorDescription = decodeURIComponent(rawDesc.replace(/\+/g, ' '))
+        }
+      }
+    } catch {
+      // Ignore malformed URI components
+    }
+  }
+
+  // 1. Check window.location if in browser context
   if (typeof window !== 'undefined') {
-    // 1. Check URL Hash fragment (#access_token=... or #token=...)
     if (window.location.hash) {
-      const cleanHash = window.location.hash.startsWith('#')
-        ? window.location.hash.slice(1)
-        : window.location.hash
-      const params = new URLSearchParams(cleanHash)
-      const hashToken = params.get('access_token') || params.get('token')
-      if (hashToken) return hashToken
+      parseParamString(window.location.hash)
     }
-
-    // 2. Check query string in window location (?access_token=... or ?token=... or ?code=...)
     if (window.location.search) {
-      const searchParams = new URLSearchParams(window.location.search)
-      const searchToken = searchParams.get('access_token') || searchParams.get('token') || searchParams.get('code')
-      if (searchToken) return searchToken
+      parseParamString(window.location.search)
     }
   }
 
-  // 3. Check Vue Route query object
-  if (routeQuery) {
-    const qToken = routeQuery.access_token || routeQuery.token || routeQuery.code
-    if (qToken) return String(qToken)
+  // 2. Check route object or query object
+  if (routeOrQuery) {
+    if ('hash' in routeOrQuery && typeof routeOrQuery.hash === 'string' && routeOrQuery.hash) {
+      parseParamString(routeOrQuery.hash)
+    }
+
+    const queryDict =
+      'query' in routeOrQuery && routeOrQuery.query && typeof routeOrQuery.query === 'object'
+        ? routeOrQuery.query
+        : routeOrQuery
+
+    if (queryDict && typeof queryDict === 'object') {
+      if (!token) {
+        const qToken = queryDict.access_token || queryDict.token || queryDict.token_hash || queryDict.code
+        if (qToken) token = String(qToken)
+      }
+      if (!refreshToken && queryDict.refresh_token) {
+        refreshToken = String(queryDict.refresh_token)
+      }
+      if (!type && queryDict.type) {
+        type = String(queryDict.type)
+      }
+      if (!error && queryDict.error) {
+        error = String(queryDict.error)
+      }
+      if (!errorCode && queryDict.error_code) {
+        errorCode = String(queryDict.error_code)
+      }
+      if (!errorDescription && queryDict.error_description) {
+        errorDescription = decodeURIComponent(String(queryDict.error_description).replace(/\+/g, ' '))
+      }
+    }
   }
 
-  return null
+  return { token, refreshToken, type, error, errorCode, errorDescription }
+}
+
+export const extractRecoveryToken = (
+  routeOrQuery?: { query?: Record<string, any>; hash?: string } | Record<string, any>
+): string | null => {
+  return extractRecoveryDetails(routeOrQuery).token
 }
 

@@ -1,5 +1,5 @@
 import { vi, describe, it, expect } from 'vitest'
-import { useAuthEngine, validatePasswordRules, extractRecoveryToken } from './useAuthEngine'
+import { useAuthEngine, validatePasswordRules, extractRecoveryToken, extractRecoveryDetails } from './useAuthEngine'
 import { MOCK_TENANTS } from '../types'
 
 describe('Auth Engine & Tenant Memory Cleansing', () => {
@@ -129,16 +129,55 @@ describe('Auth Engine & Tenant Memory Cleansing', () => {
     })
   })
 
-  describe('extractRecoveryToken', () => {
-    it('should extract token from route query access_token or token or code', () => {
+  describe('extractRecoveryToken & extractRecoveryDetails (Supabase Auth support)', () => {
+    it('should extract token from route query access_token or token or code or token_hash', () => {
       expect(extractRecoveryToken({ access_token: 'rec-jwt-token-123' })).toBe('rec-jwt-token-123')
       expect(extractRecoveryToken({ token: 'rec-token-456' })).toBe('rec-token-456')
       expect(extractRecoveryToken({ code: 'rec-code-789' })).toBe('rec-code-789')
+      expect(extractRecoveryToken({ token_hash: 'rec-hash-999' })).toBe('rec-hash-999')
     })
 
-    it('should return null when no token is present in route query and window is empty', () => {
+    it('should extract Supabase recovery details from hash fragment', () => {
+      const hash = '#access_token=supabase.jwt.token&refresh_token=mock-refresh-token&expires_at=1725800000&expires_in=3600&token_type=bearer&type=recovery'
+      const details = extractRecoveryDetails({ hash, query: {} })
+
+      expect(details.token).toBe('supabase.jwt.token')
+      expect(details.refreshToken).toBe('mock-refresh-token')
+      expect(details.type).toBe('recovery')
+      expect(details.error).toBeNull()
+      expect(details.errorDescription).toBeNull()
+    })
+
+    it('should extract Supabase error details from hash fragment when link is expired or invalid', () => {
+      const hash = '#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired'
+      const details = extractRecoveryDetails({ hash, query: {} })
+
+      expect(details.token).toBeNull()
+      expect(details.error).toBe('access_denied')
+      expect(details.errorCode).toBe('otp_expired')
+      expect(details.errorDescription).toBe('Email link is invalid or has expired')
+    })
+
+    it('should extract Supabase error details from query parameters', () => {
+      const query = {
+        error: 'unauthorized_client',
+        error_code: '401',
+        error_description: 'Token+has+expired'
+      }
+      const details = extractRecoveryDetails({ query })
+
+      expect(details.token).toBeNull()
+      expect(details.error).toBe('unauthorized_client')
+      expect(details.errorCode).toBe('401')
+      expect(details.errorDescription).toBe('Token has expired')
+    })
+
+    it('should return null/empty when no token is present in route query or hash', () => {
       expect(extractRecoveryToken({})).toBeNull()
       expect(extractRecoveryToken(undefined)).toBeNull()
+      const details = extractRecoveryDetails({})
+      expect(details.token).toBeNull()
+      expect(details.error).toBeNull()
     })
   })
 

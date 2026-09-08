@@ -51,7 +51,7 @@
           <div class="space-y-1">
             <p class="font-bold">{{ $t('toast.action_failed') }}</p>
             <p class="text-slate-600 dark:text-slate-300">
-              {{ $t('auth.invalid_or_missing_token') }}
+              {{ recoveryErrorDescription || $t('auth.invalid_or_missing_token') }}
             </p>
           </div>
         </div>
@@ -189,10 +189,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useAuthEngine, validatePasswordRules, extractRecoveryToken } from '../composables/useAuthEngine'
+import { useAuthEngine, validatePasswordRules, extractRecoveryDetails } from '../composables/useAuthEngine'
 import { useAppToast } from '../../../composables/useAppToast'
 import { useLocalePath } from '#imports'
 
@@ -200,7 +200,7 @@ const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
 const { t } = useI18n()
-const { updatePassword } = useAuthEngine()
+const { updatePassword, clearSession } = useAuthEngine()
 const { showError, showSuccess } = useAppToast()
 
 const loading = ref(false)
@@ -209,6 +209,7 @@ const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const tokenChecked = ref(false)
 const recoveryToken = ref<string | null>(null)
+const recoveryErrorDescription = ref<string | null>(null)
 
 const form = reactive({
   new_password: '',
@@ -226,9 +227,30 @@ const passwordsMatch = computed(() => {
   return form.new_password && form.confirm_password && form.new_password === form.confirm_password
 })
 
-onMounted(() => {
-  recoveryToken.value = extractRecoveryToken(route.query)
+const syncRecoveryCredentials = () => {
+  const details = extractRecoveryDetails(route)
+  if (details.token) {
+    recoveryToken.value = details.token
+  }
+  if (details.errorDescription) {
+    recoveryErrorDescription.value = details.errorDescription
+  } else if (details.error) {
+    recoveryErrorDescription.value = details.error
+  }
   tokenChecked.value = true
+}
+
+onMounted(() => {
+  syncRecoveryCredentials()
+  if (typeof window !== 'undefined') {
+    window.addEventListener('hashchange', syncRecoveryCredentials)
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('hashchange', syncRecoveryCredentials)
+  }
 })
 
 const navigateToLogin = () => {
@@ -240,7 +262,7 @@ const handleSubmit = async () => {
   errors.confirmPassword = ''
 
   if (!recoveryToken.value) {
-    showError(t('auth.invalid_or_missing_token'))
+    showError(recoveryErrorDescription.value || t('auth.invalid_or_missing_token'))
     return
   }
 
@@ -267,11 +289,25 @@ const handleSubmit = async () => {
     await updatePassword(form.new_password, recoveryToken.value)
     isSuccess.value = true
     showSuccess('update', t('auth.password'))
+
+    // Scrub token from address bar for security
+    if (typeof window !== 'undefined' && window.history?.replaceState) {
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+
+    // Cleanse any old session memory
+    clearSession()
+
     setTimeout(() => {
       router.push(localePath('/login'))
     }, 2000)
   } catch (err: any) {
     showError(err)
+    const msg = (err?.message || '').toLowerCase()
+    if (msg.includes('token') || msg.includes('expired') || msg.includes('unauthorized')) {
+      recoveryToken.value = null
+      recoveryErrorDescription.value = err.message
+    }
   } finally {
     loading.value = false
   }

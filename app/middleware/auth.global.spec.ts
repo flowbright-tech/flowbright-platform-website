@@ -65,6 +65,17 @@ describe('Global Auth Middleware (auth.global.ts)', () => {
       const resultProducts = authMiddleware({ path: '/products', meta: {} } as any)
       expect(resultProducts).toEqual({ to: '/login', redirected: true })
     })
+
+    it('should forward Supabase Auth recovery redirects landing on root to /resetpassword preserving hash', () => {
+      const hash = '#access_token=jwt_supa_123&refresh_token=rt_456&type=recovery'
+      const result = authMiddleware({ path: '/', hash, meta: {} } as any)
+      expect(result).toEqual({ to: `/resetpassword${hash}`, redirected: true })
+    })
+
+    it('should forward Supabase Auth recovery query landing on root to /resetpassword preserving query params', () => {
+      const result = authMiddleware({ path: '/', query: { token_hash: 'pkce_789', type: 'recovery' }, meta: {} } as any)
+      expect(result).toEqual({ to: '/resetpassword?token_hash=pkce_789&type=recovery', redirected: true })
+    })
   })
 
   describe('Authenticated User', () => {
