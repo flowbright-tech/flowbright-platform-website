@@ -61,7 +61,7 @@ export const useApiFetch = () => {
     // Show error toast for any non-ok response (unless caller explicitly requested suppression)
     if (!res.ok && !options?.suppressToast) {
       const errData = await res.clone().json().catch(() => ({}))
-      const errMsg = errData.message || errData.error || `Action failed with status: ${res.status}`
+      const errMsg = errData.error?.message || errData.message || (typeof errData.error === 'string' ? errData.error : null) || `Action failed with status: ${res.status}`
       showError(errMsg)
     }
 

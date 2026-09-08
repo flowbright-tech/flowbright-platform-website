@@ -235,8 +235,8 @@ export const useOrderEngine = () => {
 
       if (!res.ok) {
         const errorJson = await res.json().catch(() => ({}))
-        const msg = errorJson?.message || errorJson?.error || `failed to create order: ${res.status}`
-        throw new Error(safeLowerCase(msg))
+        const msg = errorJson?.error?.message || errorJson?.message || (typeof errorJson?.error === 'string' ? errorJson.error : null) || `failed to create order: ${res.status}`
+        throw new Error(msg)
       }
 
       const json = await res.json().catch(() => ({}))
@@ -288,8 +288,8 @@ export const useOrderEngine = () => {
 
       if (!res.ok) {
         const errorJson = await res.json().catch(() => ({}))
-        const msg = errorJson?.message || errorJson?.error || `failed to update order: ${res.status}`
-        throw new Error(safeLowerCase(msg))
+        const msg = errorJson?.error?.message || errorJson?.message || (typeof errorJson?.error === 'string' ? errorJson.error : null) || `failed to update order: ${res.status}`
+        throw new Error(msg)
       }
 
       const json = await res.json().catch(() => ({}))

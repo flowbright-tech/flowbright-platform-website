@@ -76,36 +76,61 @@ describe('parseErrorMessage Centralized Error Parser', () => {
     expect(res3.description).toBe('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
   })
 
-  it('should use the same unified error validation message for all stock validation variants', () => {
-    // English locale: all variations return the exact same unified message
-    const stockVariants = [
-      'Insufficient stock for product PROD-001',
-      'Product is out of stock',
-      'Quantity exceeds available stock',
-      'Not enough stock in inventory',
-      'Stock is insufficient for this order'
-    ]
+  it('should format clear error validation message with specific available stock numbers', () => {
+    // 1. Real backend error string with item name, available stock, and required quantity
+    const realBackendMsg = "BOM item 'Glucose Kit' has insufficient stock (available: 104, required: 9.9999999e+07)"
+    const resRealEn = parseErrorMessage(realBackendMsg, mockT, mockTe, 'en')
+    expect(resRealEn.title).toBe('Validation Error')
+    expect(resRealEn.description).toBe("Insufficient stock for 'Glucose Kit': Available: 104, Required: 99,999,999")
 
-    for (const variant of stockVariants) {
-      const resEn = parseErrorMessage(variant, mockT, mockTe, 'en')
-      expect(resEn.title).toBe('Validation Error')
-      expect(resEn.description).toBe('Insufficient stock for product items in this order')
-    }
-
-    // Thai locale: all variations return the exact same unified Thai message
     const mockTTh = (key: string) => {
       if (key === 'toast.validation_error') return 'ข้อมูลไม่ถูกต้องตามเงื่อนไข'
       if (key === 'orders.err_insufficient_stock') return 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ'
       return translations[key] || key
     }
 
-    for (const variant of stockVariants) {
-      const resTh = parseErrorMessage(variant, mockTTh, mockTe, 'th')
-      expect(resTh.title).toBe('ข้อมูลไม่ถูกต้องตามเงื่อนไข')
-      expect(resTh.description).toBe('สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ')
-    }
+    const resRealTh = parseErrorMessage(realBackendMsg, mockTTh, mockTe, 'th')
+    expect(resRealTh.title).toBe('ข้อมูลไม่ถูกต้องตามเงื่อนไข')
+    expect(resRealTh.description).toBe("สินค้าคงคลังไม่เพียงพอสำหรับ 'Glucose Kit': คงเหลือในสต็อก 104 ชิ้น (จำนวนที่ต้องใช้: 99,999,999 ชิ้น)")
 
-    // Non-negative initial stock input error remains distinct from availability errors
+    // 2. Available stock is 0
+    const zeroStockMsg = "Product 'Glucose Test' has insufficient stock (available: 0, required: 1)"
+    const resZeroEn = parseErrorMessage(zeroStockMsg, mockT, mockTe, 'en')
+    expect(resZeroEn.description).toBe("Insufficient stock for 'Glucose Test': Available: 0, Required: 1")
+
+    const resZeroTh = parseErrorMessage(zeroStockMsg, mockTTh, mockTe, 'th')
+    expect(resZeroTh.description).toBe("สินค้าคงคลังไม่เพียงพอสำหรับ 'Glucose Test': คงเหลือในสต็อก 0 ชิ้น (จำนวนที่ต้องใช้: 1 ชิ้น)")
+
+    // 3. Available stock number only without item
+    const availOnlyMsg = "Insufficient stock: available: 5"
+    const resAvailEn = parseErrorMessage(availOnlyMsg, mockT, mockTe, 'en')
+    expect(resAvailEn.description).toBe('Insufficient stock: Available: 5')
+
+    const resAvailTh = parseErrorMessage(availOnlyMsg, mockTTh, mockTe, 'th')
+    expect(resAvailTh.description).toBe('สินค้าคงคลังไม่เพียงพอ: คงเหลือในสต็อก 5 ชิ้น')
+
+    // 4. Object error response with structured available_stock field
+    const objectError = {
+      error: {
+        code: 'OUT_OF_STOCK',
+        message: 'Insufficient stock in inventory',
+        available_stock: 12,
+        required_stock: 20,
+        product_name: 'CBC Tube'
+      }
+    }
+    const resObjEn = parseErrorMessage(objectError, mockT, mockTe, 'en')
+    expect(resObjEn.description).toBe("Insufficient stock for 'CBC Tube': Available: 12, Required: 20")
+
+    // 5. Generic stock error without specific numbers falls back cleanly
+    const genericMsg = 'Product is out of stock'
+    const resGenEn = parseErrorMessage(genericMsg, mockT, mockTe, 'en')
+    expect(resGenEn.description).toBe('Insufficient stock for product items in this order')
+
+    const resGenTh = parseErrorMessage(genericMsg, mockTTh, mockTe, 'th')
+    expect(resGenTh.description).toBe('สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ')
+
+    // 6. Non-negative initial stock input error remains distinct from availability errors
     const nonNegativeEn = parseErrorMessage('Stock count must be a non-negative number', mockT, mockTe, 'en')
     expect(nonNegativeEn.description).toBe('Stock count must be a non-negative number')
 

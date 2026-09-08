@@ -5,6 +5,105 @@ export interface ParsedToastError {
   description: string
 }
 
+export const formatNumber = (val: any): string => {
+  const n = Number(val)
+  return !isNaN(n) ? n.toLocaleString('en-US') : String(val)
+}
+
+export interface StockErrorDetails {
+  available: string | null
+  required: string | null
+  item: string | null
+}
+
+export const extractStockDetails = (err: any, rawMsg: string): StockErrorDetails => {
+  let available: string | null = null
+  let required: string | null = null
+  let item: string | null = null
+
+  // 1. Check object fields
+  if (err && typeof err === 'object') {
+    const src = err.data || err.error || err
+    if (src.available_stock !== undefined && src.available_stock !== null) {
+      available = formatNumber(src.available_stock)
+    } else if (src.available !== undefined && src.available !== null) {
+      available = formatNumber(src.available)
+    } else if (src.stock !== undefined && src.stock !== null && !src.items) {
+      available = formatNumber(src.stock)
+    }
+
+    if (src.required_stock !== undefined && src.required_stock !== null) {
+      required = formatNumber(src.required_stock)
+    } else if (src.required !== undefined && src.required !== null) {
+      required = formatNumber(src.required)
+    } else if (src.requested !== undefined && src.requested !== null) {
+      required = formatNumber(src.requested)
+    }
+
+    if (src.product_name || src.item_name || src.product || src.item) {
+      item = String(src.product_name || src.item_name || src.product || src.item)
+    }
+  }
+
+  // 2. Parse from message string if not found
+  if (!available) {
+    const availMatch =
+      rawMsg.match(/(?:available(?:\s+stock)?|stock(?:\s+available)?|in stock)[:\s]+([0-9e\+\.\-]+)/i) ||
+      rawMsg.match(/\(available:\s*([0-9e\+\.\-]+)/i) ||
+      rawMsg.match(/only\s+([0-9e\+\.\-]+)\s+available/i)
+    if (availMatch) available = formatNumber(availMatch[1])
+  }
+
+  if (!required) {
+    const reqMatch =
+      rawMsg.match(/(?:required|requested)(?:\s+quantity|\s+stock)?[:\s]+([0-9e\+\.\-]+)/i) ||
+      rawMsg.match(/\brequired:\s*([0-9e\+\.\-]+)/i)
+    if (reqMatch) required = formatNumber(reqMatch[1])
+  }
+
+  if (!item) {
+    const itemMatch = rawMsg.match(/'([^']+)'/) || rawMsg.match(/"([^"]+)"/)
+    if (itemMatch) item = itemMatch[1]
+  }
+
+  return { available, required, item }
+}
+
+export const formatStockMessage = (details: StockErrorDetails, locale: string): string => {
+  const { available, required, item } = details
+  const isTh = locale === 'th'
+
+  if (available !== null) {
+    if (item && required) {
+      return isTh
+        ? `สินค้าคงคลังไม่เพียงพอสำหรับ '${item}': คงเหลือในสต็อก ${available} ชิ้น (จำนวนที่ต้องใช้: ${required} ชิ้น)`
+        : `Insufficient stock for '${item}': Available: ${available}, Required: ${required}`
+    } else if (item) {
+      return isTh
+        ? `สินค้าคงคลังไม่เพียงพอสำหรับ '${item}': คงเหลือในสต็อก ${available} ชิ้น`
+        : `Insufficient stock for '${item}': Available: ${available}`
+    } else if (required) {
+      return isTh
+        ? `สินค้าคงคลังไม่เพียงพอ: คงเหลือในสต็อก ${available} ชิ้น (จำนวนที่ต้องใช้: ${required} ชิ้น)`
+        : `Insufficient stock: Available: ${available}, Required: ${required}`
+    } else {
+      return isTh
+        ? `สินค้าคงคลังไม่เพียงพอ: คงเหลือในสต็อก ${available} ชิ้น`
+        : `Insufficient stock: Available: ${available}`
+    }
+  }
+
+  if (item) {
+    return isTh
+      ? `สินค้าคงคลังไม่เพียงพอสำหรับ '${item}' ในการสั่งซื้อ`
+      : `Insufficient stock for '${item}' in this order`
+  }
+
+  return isTh
+    ? 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ'
+    : 'Insufficient stock for product items in this order'
+}
+
 /**
  * Pure parser to extract and localize error titles and messages for toasts
  */
@@ -24,6 +123,8 @@ export const parseErrorMessage = (
     rawMsg = err.message
   } else if (err.error && typeof err.error === 'string') {
     rawMsg = err.error
+  } else if (err.error && typeof err.error === 'object') {
+    rawMsg = err.error.message || err.error.error || JSON.stringify(err.error)
   } else if (err.data && typeof err.data === 'object') {
     rawMsg = err.data.message || err.data.error || JSON.stringify(err.data)
   } else {
@@ -61,20 +162,17 @@ export const parseErrorMessage = (
     ? (te('toast.validation_error') ? t('toast.validation_error') : 'Validation Error')
     : (te('toast.action_failed') ? t('toast.action_failed') : 'Action Failed')
 
-  // Unified error validation message for all stock availability errors
+  // Stock availability validation with specific available stock numbers and clear formatting
   const isStockAvailabilityError =
     (lower.includes('stock') || lower.includes('inventory') || (lower.includes('insufficient') && !lower.includes('funds') && !lower.includes('balance'))) &&
     !lower.includes('non-negative') &&
     !lower.includes('negative')
 
   if (isStockAvailabilityError) {
-    const unifiedStockMsg = locale === 'th'
-      ? (te('orders.err_insufficient_stock') ? t('orders.err_insufficient_stock') : 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ')
-      : (te('orders.err_insufficient_stock') ? t('orders.err_insufficient_stock') : 'Insufficient stock for product items in this order')
-
+    const details = extractStockDetails(err, rawMsg)
     return {
       title: defaultTitle,
-      description: unifiedStockMsg
+      description: formatStockMessage(details, locale)
     }
   }
 
