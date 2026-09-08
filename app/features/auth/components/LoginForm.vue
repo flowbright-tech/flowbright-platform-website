@@ -49,7 +49,7 @@
 
           <!-- Forgot Password Link -->
           <div class="flex items-center justify-end pt-1">
-            <NuxtLink :to="localePath('/forgot-password')"
+            <NuxtLink id="link-forgot-password" :to="localePath('/forgot-password')"
               class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
               {{ $t('auth.forgot_password') }}
             </NuxtLink>

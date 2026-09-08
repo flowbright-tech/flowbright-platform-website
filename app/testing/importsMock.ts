@@ -36,3 +36,12 @@ export function useRuntimeConfig() {
     }
   }
 }
+
+export function defineNuxtRouteMiddleware(middleware: (to: any, from?: any) => any) {
+  return middleware
+}
+
+export function navigateTo(to: string) {
+  return { to, redirected: true }
+}
+

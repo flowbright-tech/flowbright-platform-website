@@ -6,6 +6,7 @@
 import ForgotPasswordForm from '../features/auth/components/ForgotPasswordForm.vue'
 
 definePageMeta({
-  layout: 'auth'
+  layout: 'auth',
+  auth: false
 })
 </script>

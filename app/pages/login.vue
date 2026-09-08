@@ -6,6 +6,7 @@
 import LoginForm from '../features/auth/components/LoginForm.vue'
 
 definePageMeta({
-  layout: 'auth'
+  layout: 'auth',
+  auth: false
 })
 </script>
