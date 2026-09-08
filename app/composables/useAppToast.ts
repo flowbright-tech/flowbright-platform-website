@@ -48,22 +48,31 @@ export const extractStockDetails = (err: any, rawMsg: string): StockErrorDetails
   // 2. Parse from message string if not found
   if (!available) {
     const availMatch =
-      rawMsg.match(/(?:available(?:\s+stock)?|stock(?:\s+available)?|in stock)[:\s]+([0-9e\+\.\-]+)/i) ||
+      rawMsg.match(/(?:available(?:\s+stock)?|stock(?:\s+available)?|in stock|remaining|current stock)[:\s=]+([0-9e\+\.\-]+)/i) ||
       rawMsg.match(/\(available:\s*([0-9e\+\.\-]+)/i) ||
-      rawMsg.match(/only\s+([0-9e\+\.\-]+)\s+available/i)
+      rawMsg.match(/only\s+([0-9e\+\.\-]+)\s+(?:available|in stock|left|remaining)/i) ||
+      rawMsg.match(/([0-9e\+\.\-]+)\s+(?:available|in stock|left|remaining)/i) ||
+      rawMsg.match(/(?:คงเหลือ|มีอยู่|เหลือ)(?:\s*ในสต็อก)?[:\s]+([0-9]+)/)
     if (availMatch) available = formatNumber(availMatch[1])
   }
 
   if (!required) {
     const reqMatch =
-      rawMsg.match(/(?:required|requested)(?:\s+quantity|\s+stock)?[:\s]+([0-9e\+\.\-]+)/i) ||
-      rawMsg.match(/\brequired:\s*([0-9e\+\.\-]+)/i)
+      rawMsg.match(/(?:required|requested|needed|demand)(?:\s+quantity|\s+stock|\s+amount)?[:\s=]+([0-9e\+\.\-]+)/i) ||
+      rawMsg.match(/\brequired:\s*([0-9e\+\.\-]+)/i) ||
+      rawMsg.match(/need\s+([0-9e\+\.\-]+)/i) ||
+      rawMsg.match(/(?:จำนวนที่ต้องใช้|ต้องการ)[:\s]+([0-9]+)/)
     if (reqMatch) required = formatNumber(reqMatch[1])
   }
 
   if (!item) {
-    const itemMatch = rawMsg.match(/'([^']+)'/) || rawMsg.match(/"([^"]+)"/)
-    if (itemMatch) item = itemMatch[1]
+    const itemMatch =
+      rawMsg.match(/'([^']+)'/) ||
+      rawMsg.match(/"([^"]+)"/) ||
+      rawMsg.match(/‘([^’]+)’/) ||
+      rawMsg.match(/“([^”]+)”/) ||
+      rawMsg.match(/(?:item|product|package|bom item)\s+([A-Za-z0-9\s_-]+?)\s+(?:has|is|only)/i)
+    if (itemMatch) item = itemMatch[1].trim()
   }
 
   return { available, required, item }
@@ -76,20 +85,20 @@ export const formatStockMessage = (details: StockErrorDetails, locale: string): 
   if (available !== null) {
     if (item && required) {
       return isTh
-        ? `สินค้าคงคลังไม่เพียงพอสำหรับ '${item}': คงเหลือในสต็อก ${available} ชิ้น (จำนวนที่ต้องใช้: ${required} ชิ้น)`
-        : `Insufficient stock for '${item}': Available: ${available}, Required: ${required}`
+        ? `คงเหลือในสต็อกสำหรับ '${item}': ${available} ชิ้น (จำนวนที่ต้องใช้: ${required} ชิ้น)`
+        : `Available stock for '${item}': ${available} (Required: ${required})`
     } else if (item) {
       return isTh
-        ? `สินค้าคงคลังไม่เพียงพอสำหรับ '${item}': คงเหลือในสต็อก ${available} ชิ้น`
-        : `Insufficient stock for '${item}': Available: ${available}`
+        ? `คงเหลือในสต็อกสำหรับ '${item}': ${available} ชิ้น`
+        : `Available stock for '${item}': ${available}`
     } else if (required) {
       return isTh
-        ? `สินค้าคงคลังไม่เพียงพอ: คงเหลือในสต็อก ${available} ชิ้น (จำนวนที่ต้องใช้: ${required} ชิ้น)`
-        : `Insufficient stock: Available: ${available}, Required: ${required}`
+        ? `คงเหลือในสต็อก: ${available} ชิ้น (จำนวนที่ต้องใช้: ${required} ชิ้น)`
+        : `Available stock: ${available} (Required: ${required})`
     } else {
       return isTh
-        ? `สินค้าคงคลังไม่เพียงพอ: คงเหลือในสต็อก ${available} ชิ้น`
-        : `Insufficient stock: Available: ${available}`
+        ? `คงเหลือในสต็อก: ${available} ชิ้น`
+        : `Available stock: ${available}`
     }
   }
 
@@ -164,14 +173,20 @@ export const parseErrorMessage = (
 
   // Stock availability validation with specific available stock numbers and clear formatting
   const isStockAvailabilityError =
-    (lower.includes('stock') || lower.includes('inventory') || (lower.includes('insufficient') && !lower.includes('funds') && !lower.includes('balance'))) &&
+    (lower.includes('stock') ||
+     lower.includes('inventory') ||
+     (lower.includes('insufficient') && !lower.includes('funds') && !lower.includes('balance')) ||
+     (err && typeof err === 'object' && (err.error?.code === 'OUT_OF_STOCK' || err.code === 'OUT_OF_STOCK'))) &&
     !lower.includes('non-negative') &&
     !lower.includes('negative')
 
   if (isStockAvailabilityError) {
     const details = extractStockDetails(err, rawMsg)
+    const stockTitle = te('toast.insufficient_stock')
+      ? t('toast.insufficient_stock')
+      : (locale === 'th' ? 'สินค้าคงคลังไม่เพียงพอ' : 'Insufficient Stock')
     return {
-      title: defaultTitle,
+      title: stockTitle,
       description: formatStockMessage(details, locale)
     }
   }
