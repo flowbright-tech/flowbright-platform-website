@@ -20,16 +20,6 @@
       </p>
     </div>
 
-    <!-- Error Alert banner if form fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="error"
-      variant="soft"
-      icon="i-lucide-alert-triangle"
-      title="Form Submission Error"
-      :description="errorMsg"
-      class="mb-6"
-    />
 
     <!-- BOM Form -->
     <BomForm
@@ -51,7 +41,7 @@ import type { BomFormData } from '../../features/bom/types'
 const router = useRouter()
 const localePath = useLocalePath()
 const { addBom, isLoading, errorMsg } = useBomEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 const handleSave = async (data: BomFormData) => {
   try {
@@ -59,7 +49,7 @@ const handleSave = async (data: BomFormData) => {
     showSuccess('create', 'BOM')
     router.push(localePath('/boms'))
   } catch (e) {
-    // Handled in composable
+    showError(e)
   }
 }
 

@@ -20,17 +20,6 @@
       </p>
     </div>
 
-    <!-- Error Alert if fetch or update fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="error"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle"
-      title="Form Error"
-      :description="errorMsg"
-      class="mb-6"
-    />
-
     <!-- Skeleton Loader while fetching target order -->
     <div v-if="isFetchingOrder" class="space-y-6 animate-pulse">
       <UCard class="glass-panel p-8">
@@ -80,8 +69,8 @@ onMounted(async () => {
   isFetchingOrder.value = true
   targetOrder.value = await fetchOrderById(orderId)
   isFetchingOrder.value = false
-  if (!targetOrder.value && !errorMsg.value) {
-    showError('Order not found')
+  if (!targetOrder.value) {
+    showError(errorMsg.value || 'Order not found')
     router.push(localePath('/orders'))
   }
 })
@@ -92,7 +81,7 @@ const handleSave = async (formData: OrderFormData) => {
     showSuccess('update', 'Order')
     router.push(localePath('/orders'))
   } catch (err: any) {
-    // Handled in composable / apiFetch
+    showError(err)
   }
 }
 

@@ -22,15 +22,6 @@
       </div>
     </div>
 
-    <!-- Error Alert banner if fetch or save fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="red"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle"
-      title="Error"
-      :description="errorMsg"
-    />
 
     <!-- Skeleton loader while fetching vendor details by ID -->
     <div v-if="isFetching" class="space-y-6">
@@ -67,7 +58,7 @@ const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
 const { fetchVendorById, updateVendor, isLoading, errorMsg } = useVendorEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 const vendorId = String(route.params.id)
 const vendorToEdit = ref<Vendor | null>(null)
@@ -91,7 +82,13 @@ const handleSave = async (data: VendorFormData) => {
     showSuccess('update', 'Vendor')
     goBack()
   } catch (err) {
-    // Error handled by composable errorMsg
+    showError(err)
   }
 }
+
+watch(errorMsg, (newVal) => {
+  if (newVal) {
+    showError(newVal)
+  }
+})
 </script>

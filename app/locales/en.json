@@ -283,9 +283,17 @@
     "delete_title": "{resource} Deleted",
     "delete_desc": "The {resource} record has been removed from the database.",
     "action_failed": "Action Failed",
+    "validation_error": "Validation Error",
+    "api_error": "Request Failed",
     "customer": "Customer",
     "vendor": "Vendor",
-    "category": "Category"
+    "category": "Category",
+    "order": "Order",
+    "product": "Product",
+    "package": "Package",
+    "bom": "Bill of Materials",
+    "user": "User",
+    "audit_log": "Audit Log"
   },
   "categories": {
     "title": "Product Categories",

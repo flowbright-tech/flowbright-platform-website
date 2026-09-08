@@ -20,16 +20,6 @@
       </p>
     </div>
 
-    <!-- Error Alert banner if form fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="error"
-      variant="soft"
-      icon="i-lucide-alert-triangle"
-      title="Form Submission Error"
-      :description="errorMsg"
-      class="mb-6"
-    />
 
     <!-- Product Form -->
     <ProductForm
@@ -55,7 +45,7 @@ const router = useRouter()
 const localePath = useLocalePath()
 const { addProduct, isLoading, errorMsg } = useProductEngine()
 const { allCategories, fetchAllCategories } = useCategoryEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 onMounted(async () => {
   await fetchAllCategories()
@@ -67,7 +57,7 @@ const handleSave = async (data: ProductFormData) => {
     showSuccess('create', 'Product')
     router.push(localePath('/products'))
   } catch (e) {
-    // Handled in composable
+    showError(e)
   }
 }
 

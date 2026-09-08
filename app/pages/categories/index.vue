@@ -29,16 +29,6 @@
         </div>
       </div>
 
-      <!-- Error Alert banner if fetch fails -->
-      <UAlert
-        v-if="errorMsg"
-        color="red"
-        variant="soft"
-        icon="i-heroicons-exclamation-triangle"
-        title="Failed to Load Categories"
-        :description="errorMsg"
-        class="mb-6"
-      />
 
       <!-- Search & Filter Controls -->
       <CategoryFilter
@@ -122,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useLocalePath } from '#imports'
@@ -150,7 +140,7 @@ const {
   totalFilteredCount,
   deleteCategory
 } = useCategoryEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 const isDeleteModalOpen = ref(false)
 const categoryToDelete = ref<Category | null>(null)
@@ -184,8 +174,14 @@ const confirmDelete = async () => {
       categoryToDelete.value = null
       isDeleteModalOpen.value = false
     } catch (err) {
-      // Handled in composable
+      showError(err)
     }
   }
 }
+
+watch(errorMsg, (newVal) => {
+  if (newVal) {
+    showError(newVal)
+  }
+})
 </script>

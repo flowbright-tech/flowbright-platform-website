@@ -29,16 +29,6 @@
         </div>
       </div>
 
-      <!-- Error Alert banner if fetch fails -->
-      <UAlert
-        v-if="errorMsg"
-        color="red"
-        variant="soft"
-        icon="i-heroicons-exclamation-triangle"
-        title="Failed to Load Data"
-        :description="errorMsg"
-        class="mb-6"
-      />
 
       <!-- Search & Filter Controls -->
       <ProductFilter
@@ -122,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useLocalePath } from '#imports'
@@ -151,7 +141,7 @@ const {
   totalFilteredCount,
   deleteProduct
 } = useProductEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 const isDeleteModalOpen = ref(false)
 const productToDelete = ref<Product | null>(null)
@@ -184,8 +174,14 @@ const confirmDelete = async () => {
       productToDelete.value = null
       isDeleteModalOpen.value = false
     } catch (err) {
-      // Handled in composable
+      showError(err)
     }
   }
 }
+
+watch(errorMsg, (newVal) => {
+  if (newVal) {
+    showError(newVal)
+  }
+})
 </script>

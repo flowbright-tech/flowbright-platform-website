@@ -13,16 +13,6 @@
       </div>
     </div>
 
-    <!-- Error Alert banner if fetch fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="error"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle"
-      title="Failed to Load Orders"
-      :description="errorMsg"
-      class="mb-6"
-    />
 
     <!-- Search & Filter Controls -->
     <OrderFilter
@@ -84,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useOrderEngine } from '../../features/order/composables/useOrderEngine'
@@ -177,5 +167,11 @@ const executeDelete = async () => {
 // Client-side hydration only (SSG Enforcer compliant)
 onMounted(() => {
   fetchOrders()
+})
+
+watch(errorMsg, (newVal) => {
+  if (newVal) {
+    showError(newVal)
+  }
 })
 </script>

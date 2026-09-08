@@ -703,42 +703,41 @@ const submitForm = () => {
   errors.payment_channel = ''
   errors.items = ''
 
-  let isValid = true
-
   if (!isStore.value && !isLogistic.value && !form.customer_name.trim()) {
-    errors.customer_name = safeLowerCase(t('orders.err_customer_required') || 'please select or specify customer information')
-    isValid = false
+    const errMsg = t('orders.err_customer_required') || 'Please select or specify customer information'
+    errors.customer_name = errMsg
+    showError(errMsg)
+    return
   }
 
   if (!form.delivery_date) {
-    errors.delivery_date = safeLowerCase(t('orders.err_delivery_date_required') || 'delivery date is required')
-    isValid = false
+    const errMsg = t('orders.err_delivery_date_required') || 'Delivery date is required'
+    errors.delivery_date = errMsg
+    showError(errMsg)
+    return
   }
 
   if (!form.payment_channel) {
-    errors.payment_channel = safeLowerCase(t('orders.err_payment_channel_required') || 'please select a payment channel')
-    isValid = false
+    const errMsg = t('orders.err_payment_channel_required') || 'Please select a payment channel'
+    errors.payment_channel = errMsg
+    showError(errMsg)
+    return
   }
 
   if (form.items.length === 0) {
-    const errMsg = safeLowerCase(t('orders.err_items_empty') || 'order must contain at least one package item')
+    const errMsg = t('orders.err_items_empty') || 'Order must contain at least one package item'
     errors.items = errMsg
     showError(errMsg)
-    isValid = false
+    return
   }
 
   for (let i = 0; i < form.items.length; i++) {
     if (form.items[i].quantity <= 0) {
-      const errMsg = `${safeLowerCase(t('orders.err_quantity_invalid') || 'quantity must be greater than 0')} (row ${i + 1})`
+      const errMsg = `${t('orders.err_quantity_invalid') || 'Quantity must be greater than 0'} (${t('orders.col_items') || 'Item'} ${i + 1})`
       errors.items = errMsg
       showError(errMsg)
-      isValid = false
-      break
+      return
     }
-  }
-
-  if (!isValid) {
-    return
   }
 
   recalculateOrderTotal()

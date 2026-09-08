@@ -20,16 +20,6 @@
       </p>
     </div>
 
-    <!-- Error Alert banner if fetch fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="red"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle"
-      title="Form Error"
-      :description="errorMsg"
-      class="mb-6"
-    />
 
     <!-- Package Form -->
     <PackageForm
@@ -51,7 +41,7 @@ import type { PackageFormData } from '../../features/package/types'
 const router = useRouter()
 const localePath = useLocalePath()
 const { addPackage, isLoading, errorMsg } = usePackageEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 const handleSave = async (data: PackageFormData) => {
   try {
@@ -59,7 +49,7 @@ const handleSave = async (data: PackageFormData) => {
     showSuccess('create', 'Package')
     router.push(localePath('/packages'))
   } catch (e) {
-    // Handled in composable
+    showError(e)
   }
 }
 

@@ -66,16 +66,6 @@
 
     <!-- Full Dashboard for Admin Users -->
     <template v-else>
-      <!-- Error Alert banner if any -->
-      <UAlert
-        v-if="errorMsg"
-        color="rose"
-        variant="subtle"
-        icon="i-heroicons-exclamation-triangle"
-        :title="$t('dashboard.sync_error')"
-        :description="errorMsg"
-        class="rounded-2xl text-sm"
-      />
 
       <!-- 4 Primary Executive Stat Cards Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -113,10 +103,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthEngine } from '../features/auth/composables/useAuthEngine'
 import { useDashboardEngine } from '../features/dashboard/composables/useDashboardEngine'
+import { useAppToast } from '../composables/useAppToast'
 import MetricCard from '../features/dashboard/components/MetricCard.vue'
 import DailyFinancialBarChart from '../features/dashboard/components/DailyFinancialBarChart.vue'
 import ForecastTrendChart from '../features/dashboard/components/ForecastTrendChart.vue'
@@ -126,6 +117,7 @@ import LowStockAlert from '../features/dashboard/components/LowStockAlert.vue'
 const { locale } = useI18n()
 const { user, session, company, activeTenant, isAdmin } = useAuthEngine()
 const { dashboardData, isLoading, errorMsg, metrics, dailyFinancialRecords, fetchDashboard } = useDashboardEngine()
+const { showError } = useAppToast()
 
 // Explicitly call /api/v1/dashboard only when user is Admin
 if (import.meta.client) {
@@ -135,6 +127,12 @@ if (import.meta.client) {
     }
   })
 }
+
+watch(errorMsg, (newVal) => {
+  if (newVal) {
+    showError(newVal)
+  }
+})
 
 const handleImageError = (e: Event) => {
   const target = e.target as HTMLImageElement

@@ -22,15 +22,6 @@
       </div>
     </div>
 
-    <!-- Error Alert banner if save fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="red"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle"
-      title="Failed to Save Vendor"
-      :description="errorMsg"
-    />
 
     <!-- Vendor Form Component -->
     <VendorForm
@@ -52,7 +43,7 @@ import type { VendorFormData } from '../../features/vendor/types'
 const router = useRouter()
 const localePath = useLocalePath()
 const { addVendor, isLoading, errorMsg } = useVendorEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 const goBack = () => {
   router.push(localePath('/vendors'))
@@ -64,7 +55,7 @@ const handleSave = async (data: VendorFormData) => {
     showSuccess('create', 'Vendor')
     goBack()
   } catch (err) {
-    // Error handled by composable errorMsg
+    showError(err)
   }
 }
 </script>

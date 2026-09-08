@@ -20,16 +20,6 @@
       </p>
     </div>
 
-    <!-- Error Alert banner if fetch fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="red"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle"
-      title="Form Error"
-      :description="errorMsg"
-      class="mb-6"
-    />
 
     <!-- Customer Form -->
     <CustomerForm
@@ -53,7 +43,7 @@ const router = useRouter()
 const localePath = useLocalePath()
 const { isLogistic } = useAuthEngine()
 const { addCustomer, isLoading, errorMsg } = useCustomerEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 onMounted(() => {
   if (isLogistic.value) {
@@ -67,7 +57,7 @@ const handleSave = async (data: CustomerFormData) => {
     showSuccess('create', 'Customer')
     router.push(localePath('/customers'))
   } catch (e) {
-    // Handled in composable errorMsg
+    showError(e)
   }
 }
 

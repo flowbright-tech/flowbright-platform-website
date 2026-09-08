@@ -455,7 +455,11 @@ const submitForm = async () => {
     }
   }
 
-  if (!isValid) return
+  if (!isValid) {
+    const firstError = Object.values(errors).find(e => !!e) || t('toast.validation_error')
+    showError(firstError)
+    return
+  }
 
   let uploadedImageUrl = form.image_url
   if (form.image_url && form.image_url.startsWith('data:image/')) {

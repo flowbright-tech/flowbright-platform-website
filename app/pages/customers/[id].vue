@@ -20,16 +20,6 @@
       </p>
     </div>
 
-    <!-- Error Alert banner if fetch fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="red"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle"
-      title="Form Error"
-      :description="errorMsg"
-      class="mb-6"
-    />
 
     <!-- Skeleton Loader when loading initial customer data -->
     <div v-if="isLoadingData && !customerToEdit" class="space-y-6">
@@ -71,7 +61,7 @@ const router = useRouter()
 const localePath = useLocalePath()
 const { isLogistic } = useAuthEngine()
 const { updateCustomer, fetchCustomerById, isLoading, errorMsg } = useCustomerEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 const id = route.params.id as string
 const customerToEdit = ref<Customer | null>(null)
@@ -90,7 +80,7 @@ onMounted(async () => {
       router.push(localePath('/customers'))
     }
   } catch (e) {
-    // Handled in composable errorMsg
+    showError(e)
   } finally {
     isLoadingData.value = false
   }
@@ -102,7 +92,7 @@ const handleSave = async (data: CustomerFormData) => {
     showSuccess('update', 'Customer')
     router.push(localePath('/customers'))
   } catch (e) {
-    // Handled in composable errorMsg
+    showError(e)
   }
 }
 

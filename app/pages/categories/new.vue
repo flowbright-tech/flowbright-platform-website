@@ -20,16 +20,6 @@
       </p>
     </div>
 
-    <!-- Error Alert banner if fetch fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="red"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle"
-      title="Form Error"
-      :description="errorMsg"
-      class="mb-6"
-    />
 
     <!-- Category Form -->
     <CategoryForm
@@ -53,7 +43,7 @@ import type { CategoryFormData } from '../../features/category/types'
 const router = useRouter()
 const localePath = useLocalePath()
 const { addCategory, isLoading, errorMsg, allCategories, fetchAllCategories } = useCategoryEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 onMounted(async () => {
   await fetchAllCategories()
@@ -65,7 +55,7 @@ const handleSave = async (data: CategoryFormData) => {
     showSuccess('create', 'Category')
     router.push(localePath('/categories'))
   } catch (e) {
-    // Handled in composable
+    showError(e)
   }
 }
 

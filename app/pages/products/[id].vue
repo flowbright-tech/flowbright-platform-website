@@ -20,16 +20,6 @@
       </p>
     </div>
 
-    <!-- Error Alert banner if form fails -->
-    <UAlert
-      v-if="errorMsg"
-      color="error"
-      variant="soft"
-      icon="i-lucide-alert-triangle"
-      title="Form Error"
-      :description="errorMsg"
-      class="mb-6"
-    />
 
     <!-- Product Form -->
     <ProductForm
@@ -76,7 +66,7 @@ const router = useRouter()
 const localePath = useLocalePath()
 const { fetchProductById, updateProduct, isLoading, errorMsg } = useProductEngine()
 const { allCategories, fetchAllCategories } = useCategoryEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 const { isLab } = useDomainLabels()
 
 const product = ref<Product | null>(null)
@@ -100,6 +90,7 @@ const handleSave = async (data: ProductFormData) => {
       router.push(localePath('/products'))
     } catch (e) {
       console.error('Save failed:', e)
+      showError(e)
     }
   }
 }
@@ -107,4 +98,10 @@ const handleSave = async (data: ProductFormData) => {
 const handleCancel = () => {
   router.push(localePath('/products'))
 }
+
+watch(errorMsg, (newVal) => {
+  if (newVal) {
+    showError(newVal)
+  }
+})
 </script>

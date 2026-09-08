@@ -249,9 +249,11 @@ import { useI18n } from 'vue-i18n'
 import type { Bom, BomFormData, BomItem } from '../types'
 import type { Product } from '../../product/types'
 import { useApiFetch } from '../../../composables/useApiFetch'
+import { useAppToast } from '../../../composables/useAppToast'
 
 const { t, locale } = useI18n()
 const { apiFetch } = useApiFetch()
+const { showError } = useAppToast()
 
 const props = defineProps<{
   categoryToEdit?: Bom | null
@@ -521,7 +523,11 @@ const submitForm = () => {
     }
   }
 
-  if (!isValid) return
+  if (!isValid) {
+    const firstError = Object.values(errors).find(e => !!e) || t('toast.validation_error')
+    showError(firstError)
+    return
+  }
 
   const payload: BomFormData = {
     bom_name: form.bom_name,

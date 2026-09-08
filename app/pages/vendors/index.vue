@@ -29,16 +29,6 @@
         </div>
       </div>
 
-      <!-- Error Alert banner if fetch fails -->
-      <UAlert
-        v-if="errorMsg"
-        color="red"
-        variant="soft"
-        icon="i-heroicons-exclamation-triangle"
-        title="Failed to Load Vendors"
-        :description="errorMsg"
-        class="mb-6"
-      />
 
       <!-- Search & Filter Controls -->
       <VendorFilter
@@ -119,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useLocalePath } from '#imports'
@@ -146,7 +136,7 @@ const {
   totalFilteredCount,
   deleteVendor
 } = useVendorEngine()
-const { showSuccess } = useAppToast()
+const { showSuccess, showError } = useAppToast()
 
 const isDeleteModalOpen = ref(false)
 const vendorToDelete = ref<Vendor | null>(null)
@@ -179,8 +169,14 @@ const confirmDelete = async () => {
       vendorToDelete.value = null
       isDeleteModalOpen.value = false
     } catch (err) {
-      // Error handled by composable errorMsg
+      showError(err)
     }
   }
 }
+
+watch(errorMsg, (newVal) => {
+  if (newVal) {
+    showError(newVal)
+  }
+})
 </script>

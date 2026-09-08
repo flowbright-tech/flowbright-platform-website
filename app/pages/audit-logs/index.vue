@@ -46,16 +46,7 @@
         </div>
       </div>
 
-      <!-- Error Alert banner if fetch fails -->
-      <UAlert
-        v-if="errorMsg"
-        color="red"
-        variant="soft"
-        icon="i-heroicons-exclamation-triangle"
-        :title="$t('audit_logs.load_error_title')"
-        :description="errorMsg"
-        class="mb-6"
-      />
+
 
       <!-- Search & Filter Controls -->
       <AuditLogFilter
@@ -108,11 +99,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocalePath } from '#imports'
 import { useAuthEngine } from '../../features/auth/composables/useAuthEngine'
 import { useAuditLogEngine } from '../../features/audit-log/composables/useAuditLogEngine'
+import { useAppToast } from '../../composables/useAppToast'
 import AuditLogFilter from '../../features/audit-log/components/AuditLogFilter.vue'
 import AuditLogTable from '../../features/audit-log/components/AuditLogTable.vue'
 import AuditLogDetailModal from '../../features/audit-log/components/AuditLogDetailModal.vue'
@@ -121,6 +113,7 @@ import type { AuditLog } from '../../features/audit-log/types'
 const localePath = useLocalePath()
 const { locale } = useI18n()
 const { isAdmin } = useAuthEngine()
+const { showError } = useAppToast()
 
 const {
   auditLogs,
@@ -160,4 +153,10 @@ const handleViewDetail = (log: AuditLog) => {
   selectedLog.value = log
   isDetailModalOpen.value = true
 }
+
+watch(errorMsg, (newVal) => {
+  if (newVal) {
+    showError(newVal)
+  }
+})
 </script>

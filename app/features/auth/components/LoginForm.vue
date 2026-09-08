@@ -78,12 +78,14 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthEngine } from '../composables/useAuthEngine'
+import { useAppToast } from '../../../composables/useAppToast'
 import { useLocalePath, useRuntimeConfig } from '#imports'
 
 const router = useRouter()
 const localePath = useLocalePath()
 const { t } = useI18n()
 const { tenants, login, loginWithProfile } = useAuthEngine()
+const { showError } = useAppToast()
 
 const cleansedNotice = ref(false)
 const loading = ref(false)
@@ -119,6 +121,7 @@ const handleLogin = async () => {
   }
 
   if (errors.email || errors.password) {
+    showError(t(errors.email || errors.password))
     return
   }
 
@@ -147,6 +150,7 @@ const handleLogin = async () => {
       } else {
         errors.api = data.message || t('auth.invalid_credentials')
       }
+      showError(errors.api)
       loading.value = false
       return
     }
@@ -170,6 +174,7 @@ const handleLogin = async () => {
   } catch (err: any) {
     loading.value = false
     errors.api = err.message || t('auth.invalid_credentials')
+    showError(errors.api)
   }
 }
 </script>
