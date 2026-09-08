@@ -69,13 +69,6 @@
           {{ loading ? $t('auth.signing_in') : $t('auth.sign_in') }}
         </UButton>
       </form>
-
-      <template #footer>
-        <div class="flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500 py-1">
-          <UIcon name="i-heroicons-shield-check" class="w-4 h-4 text-emerald-500 shrink-0" />
-          <span>{{ $t('auth.card_footer_security') }}</span>
-        </div>
-      </template>
     </UCard>
   </div>
 </template>

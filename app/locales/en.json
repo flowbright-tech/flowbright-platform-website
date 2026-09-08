@@ -21,7 +21,6 @@
     "login_success": "Authentication successful",
     "invalid_credentials": "Invalid email or password",
     "forgot_password": "Forgot Password?",
-    "card_footer_security": "Protected by 256-bit encrypted enterprise security",
     "footer_copyright": "© 2026 FlowBright Platform. Enterprise Resource Planning. All rights reserved.",
     "email_required": "Please enter your email address",
     "email_invalid": "Invalid email format (e.g. name{'@'}company.com)",

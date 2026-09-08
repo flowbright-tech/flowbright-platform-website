@@ -21,7 +21,6 @@
     "login_success": "เข้าสู่ระบบเรียบร้อยแล้ว",
     "invalid_credentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
     "forgot_password": "ลืมรหัสผ่าน?",
-    "card_footer_security": "ปกป้องข้อมูลด้วยมาตรฐานความปลอดภัยระดับองค์กร",
     "footer_copyright": "© 2026 FlowBright แพลตฟอร์มบริหารจัดการทรัพยากรสำหรับธุรกิจ สงวนลิขสิทธิ์",
     "email_required": "กรุณากรอกอีเมลติดต่อ",
     "email_invalid": "รูปแบบอีเมลไม่ถูกต้อง (เช่น name{'@'}company.com)",
