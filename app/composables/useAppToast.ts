@@ -49,7 +49,14 @@ export const parseErrorMessage = (
   }
 
   const lower = rawMsg.toLowerCase().trim()
-  const isValidation = lower.includes('validation') || lower.includes('required') || lower.includes('invalid') || lower.includes('empty')
+  const isValidation =
+    lower.includes('validation') ||
+    lower.includes('required') ||
+    lower.includes('invalid') ||
+    lower.includes('empty') ||
+    lower.includes('stock') ||
+    lower.includes('inventory') ||
+    lower.includes('insufficient')
   const defaultTitle = isValidation
     ? (te('toast.validation_error') ? t('toast.validation_error') : 'Validation Error')
     : (te('toast.action_failed') ? t('toast.action_failed') : 'Action Failed')
@@ -96,6 +103,15 @@ export const parseErrorMessage = (
     'selling price must be a non-negative number': 'ราคาขายต้องไม่ติดลบ',
     'stock count must be a non-negative number': 'จำนวนสต็อกต้องไม่ติดลบ',
     'reserve stock must be a non-negative number': 'จำนวนสำรองสต็อกต้องไม่ติดลบ',
+    'insufficient stock': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
+    'not enough stock': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
+    'out of stock': 'สินค้าหมดหรือไม่เพียงพอในคลัง',
+    'stock is insufficient': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
+    'stock not available': 'ไม่มีสินค้าในคลังสำหรับทำรายการ',
+    'exceeds available stock': 'จำนวนที่สั่งซื้อเกินกว่าสินค้าที่มีอยู่ในคลัง',
+    'product stock is not enough': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
+    'insufficient inventory': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
+    'stock': 'สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ',
     'tax id is required': 'กรุณาระบุเลขประจำตัวผู้เสียภาษี',
     'invalid email address format': 'รูปแบบอีเมลไม่ถูกต้อง',
     'vendor type is required': 'กรุณาเลือกประเภทผู้ให้บริการ',
@@ -131,11 +147,51 @@ export const parseErrorMessage = (
   }
 }
 
+/**
+ * Deduplication state and utility functions
+ */
+export interface ToastDedupeRecord {
+  key: string
+  timestamp: number
+}
+
+const errorRecord: ToastDedupeRecord = { key: '', timestamp: 0 }
+const successRecord: ToastDedupeRecord = { key: '', timestamp: 0 }
+
+export const shouldDedupeToast = (
+  newKey: string,
+  record: ToastDedupeRecord,
+  windowMs: number = 1500,
+  now: number = Date.now()
+): boolean => {
+  if (newKey && newKey === record.key && (now - record.timestamp) < windowMs) {
+    return true
+  }
+  return false
+}
+
+export const resetToastDedupe = () => {
+  errorRecord.key = ''
+  errorRecord.timestamp = 0
+  successRecord.key = ''
+  successRecord.timestamp = 0
+}
+
 export const useAppToast = () => {
   const toast = useToast()
   const { t, te, locale } = useI18n()
 
   const showSuccess = (action: 'create' | 'update' | 'delete' | string, resourceName: string) => {
+    const dedupeKey = `${action.toLowerCase()}::${resourceName.toLowerCase()}`
+    const now = Date.now()
+
+    if (shouldDedupeToast(dedupeKey, successRecord, 1500, now)) {
+      return
+    }
+
+    successRecord.key = dedupeKey
+    successRecord.timestamp = now
+
     const lowerResource = resourceName.toLowerCase().replace(/[\s-]+/g, '_')
     const translatedResource = te(`toast.${lowerResource}`)
       ? t(`toast.${lowerResource}`)
@@ -179,8 +235,20 @@ export const useAppToast = () => {
 
   const showError = (err: any, customTitle?: string) => {
     const { title, description } = parseErrorMessage(err, t, te, locale?.value || 'en')
+    const finalTitle = customTitle ? (te(customTitle) ? t(customTitle) : customTitle) : title
+
+    const dedupeKey = `${(finalTitle || '').trim().toLowerCase()}::${(description || '').trim().toLowerCase()}`
+    const now = Date.now()
+
+    if (shouldDedupeToast(dedupeKey, errorRecord, 1500, now)) {
+      return
+    }
+
+    errorRecord.key = dedupeKey
+    errorRecord.timestamp = now
+
     toast.add({
-      title: customTitle ? (te(customTitle) ? t(customTitle) : customTitle) : title,
+      title: finalTitle,
       description,
       color: 'error',
       icon: 'i-heroicons-x-circle',

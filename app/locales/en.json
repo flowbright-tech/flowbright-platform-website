@@ -618,6 +618,7 @@
     "err_payment_channel_required": "Please select a payment channel",
     "err_items_empty": "Order must contain at least one package item",
     "err_quantity_invalid": "Item quantity must be greater than 0",
+    "err_insufficient_stock": "Insufficient stock for product items in this order",
     "view_detail": "View Details",
     "order_detail_title": "Order Specification Detail",
     "print_invoice": "Print Invoice",

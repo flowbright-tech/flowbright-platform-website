@@ -2,13 +2,17 @@ import { useAuthEngine } from '../features/auth/composables/useAuthEngine'
 import { useAppToast } from './useAppToast'
 import { useRuntimeConfig } from '#imports'
 
+export interface ApiFetchOptions extends RequestInit {
+  suppressToast?: boolean
+}
+
 export const useApiFetch = () => {
   const { session, logout, refreshSessionToken } = useAuthEngine()
   const { showError } = useAppToast()
   const config = useRuntimeConfig()
   const apiDomain = config?.public?.apiDomain || 'https://flowbright-platform-api.onrender.com'
 
-  const apiFetch = async (path: string, options: RequestInit = {}) => {
+  const apiFetch = async (path: string, options: ApiFetchOptions = {}) => {
     const token = session.value?.token
     if (!token) {
       const errMsg = 'Authentication required'
@@ -54,8 +58,8 @@ export const useApiFetch = () => {
       }
     }
 
-    // Show error toast for any non-ok response
-    if (!res.ok) {
+    // Show error toast for any non-ok response (unless caller explicitly requested suppression)
+    if (!res.ok && !options?.suppressToast) {
       const errData = await res.clone().json().catch(() => ({}))
       const errMsg = errData.message || errData.error || `Action failed with status: ${res.status}`
       showError(errMsg)

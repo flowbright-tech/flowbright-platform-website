@@ -618,6 +618,7 @@
     "err_payment_channel_required": "กรุณาเลือกช่องทางการชำระเงิน",
     "err_items_empty": "คำสั่งซื้อต้องมีอย่างน้อยหนึ่งรายการแพ็คเกจ",
     "err_quantity_invalid": "จำนวนต้องมากกว่า 0",
+    "err_insufficient_stock": "สินค้าคงคลังไม่เพียงพอสำหรับการสั่งซื้อ",
     "view_detail": "ดูรายละเอียด",
     "order_detail_title": "รายละเอียดคำสั่งซื้อ",
     "print_invoice": "พิมพ์ใบเสร็จ/ใบแจ้งหนี้",
