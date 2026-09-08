@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { useAuthEngine } from './useAuthEngine'
+import { vi, describe, it, expect } from 'vitest'
+import { useAuthEngine, validatePasswordRules, extractRecoveryToken } from './useAuthEngine'
 import { MOCK_TENANTS } from '../types'
 
 describe('Auth Engine & Tenant Memory Cleansing', () => {
@@ -92,5 +92,111 @@ describe('Auth Engine & Tenant Memory Cleansing', () => {
 
     setUserRole('admin')
     expect(isAdmin.value).toBe(true)
+  })
+
+  describe('validatePasswordRules', () => {
+    it('should reject passwords shorter than 6 characters', () => {
+      const { minLength, isValid } = validatePasswordRules('Ab1')
+      expect(minLength).toBe(false)
+      expect(isValid).toBe(false)
+    })
+
+    it('should reject passwords missing uppercase letters', () => {
+      const { hasUpper, isValid } = validatePasswordRules('secret123')
+      expect(hasUpper).toBe(false)
+      expect(isValid).toBe(false)
+    })
+
+    it('should reject passwords missing lowercase letters', () => {
+      const { hasLower, isValid } = validatePasswordRules('SECRET123')
+      expect(hasLower).toBe(false)
+      expect(isValid).toBe(false)
+    })
+
+    it('should reject passwords missing numbers', () => {
+      const { hasNumber, isValid } = validatePasswordRules('SecretPassword')
+      expect(hasNumber).toBe(false)
+      expect(isValid).toBe(false)
+    })
+
+    it('should accept passwords meeting all uppercase, lowercase, number, and length >= 6 criteria', () => {
+      const res = validatePasswordRules('FlowBright2026')
+      expect(res.minLength).toBe(true)
+      expect(res.hasUpper).toBe(true)
+      expect(res.hasLower).toBe(true)
+      expect(res.hasNumber).toBe(true)
+      expect(res.isValid).toBe(true)
+    })
+  })
+
+  describe('extractRecoveryToken', () => {
+    it('should extract token from route query access_token or token or code', () => {
+      expect(extractRecoveryToken({ access_token: 'rec-jwt-token-123' })).toBe('rec-jwt-token-123')
+      expect(extractRecoveryToken({ token: 'rec-token-456' })).toBe('rec-token-456')
+      expect(extractRecoveryToken({ code: 'rec-code-789' })).toBe('rec-code-789')
+    })
+
+    it('should return null when no token is present in route query and window is empty', () => {
+      expect(extractRecoveryToken({})).toBeNull()
+      expect(extractRecoveryToken(undefined)).toBeNull()
+    })
+  })
+
+  describe('requestPasswordReset & updatePassword API calls', () => {
+    it('should send POST request to /auth/reset-password with email and redirect_to', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true, data: { message: 'Password reset email sent successfully' } })
+      })
+      vi.stubGlobal('fetch', mockFetch)
+
+      const { requestPasswordReset } = useAuthEngine()
+      const res = await requestPasswordReset('test@flowbright.co', 'http://localhost:3000/resetpassword')
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/v1/auth/reset-password'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            email: 'test@flowbright.co',
+            redirect_to: 'http://localhost:3000/resetpassword'
+          })
+        })
+      )
+      expect(res.success).toBe(true)
+    })
+
+    it('should send PUT request to /auth/password with Authorization header and new_password', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true, data: { message: 'Password updated successfully' } })
+      })
+      vi.stubGlobal('fetch', mockFetch)
+
+      const { updatePassword } = useAuthEngine()
+      const res = await updatePassword('NewSecret123', 'rec-token-xyz')
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/v1/auth/password'),
+        expect.objectContaining({
+          method: 'PUT',
+          headers: expect.objectContaining({
+            'Authorization': 'Bearer rec-token-xyz',
+            'Content-Type': 'application/json'
+          }),
+          body: JSON.stringify({
+            new_password: 'NewSecret123'
+          })
+        })
+      )
+      expect(res.success).toBe(true)
+    })
+
+    it('should throw error when updatePassword is called without a token', async () => {
+      const { updatePassword, clearSession } = useAuthEngine()
+      clearSession()
+      await expect(updatePassword('NewSecret123', undefined)).rejects.toThrow('Authorization token is required')
+    })
   })
 })

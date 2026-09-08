@@ -275,6 +275,53 @@ export const useAuthEngine = () => {
     return null
   }
 
+  const requestPasswordReset = async (email: string, redirectTo: string) => {
+    const config = useRuntimeConfig()
+    const apiDomain = config?.public?.apiDomain || 'https://flowbright-platform-api.onrender.com'
+    const res = await fetch(`${apiDomain}/api/v1/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email.trim(),
+        redirect_to: redirectTo
+      })
+    })
+
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      throw new Error(data.error?.message || data.message || `Password reset request failed: ${res.status}`)
+    }
+    return data
+  }
+
+  const updatePassword = async (newPassword: string, token?: string) => {
+    const config = useRuntimeConfig()
+    const apiDomain = config?.public?.apiDomain || 'https://flowbright-platform-api.onrender.com'
+    const authToken = token || session.value?.token
+    if (!authToken) {
+      throw new Error('Authorization token is required to reset password')
+    }
+
+    const res = await fetch(`${apiDomain}/api/v1/auth/password`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        new_password: newPassword
+      })
+    })
+
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      throw new Error(data.error?.message || data.message || `Failed to update password: ${res.status}`)
+    }
+    return data
+  }
+
   return {
     session,
     tenants,
@@ -283,6 +330,8 @@ export const useAuthEngine = () => {
     clearSession,
     logout,
     refreshSessionToken,
+    requestPasswordReset,
+    updatePassword,
     switchTenant,
     login,
     loginWithProfile,
@@ -296,5 +345,51 @@ export const useAuthEngine = () => {
     setCompanyType,
     setUserRole
   }
+}
+
+export interface PasswordValidationRules {
+  minLength: boolean
+  hasUpper: boolean
+  hasLower: boolean
+  hasNumber: boolean
+  isValid: boolean
+}
+
+export const validatePasswordRules = (pwd: string): PasswordValidationRules => {
+  const minLength = (pwd || '').length >= 6
+  const hasUpper = /[A-Z]/.test(pwd || '')
+  const hasLower = /[a-z]/.test(pwd || '')
+  const hasNumber = /[0-9]/.test(pwd || '')
+  const isValid = minLength && hasUpper && hasLower && hasNumber
+  return { minLength, hasUpper, hasLower, hasNumber, isValid }
+}
+
+export const extractRecoveryToken = (routeQuery?: Record<string, any>): string | null => {
+  if (typeof window !== 'undefined') {
+    // 1. Check URL Hash fragment (#access_token=... or #token=...)
+    if (window.location.hash) {
+      const cleanHash = window.location.hash.startsWith('#')
+        ? window.location.hash.slice(1)
+        : window.location.hash
+      const params = new URLSearchParams(cleanHash)
+      const hashToken = params.get('access_token') || params.get('token')
+      if (hashToken) return hashToken
+    }
+
+    // 2. Check query string in window location (?access_token=... or ?token=... or ?code=...)
+    if (window.location.search) {
+      const searchParams = new URLSearchParams(window.location.search)
+      const searchToken = searchParams.get('access_token') || searchParams.get('token') || searchParams.get('code')
+      if (searchToken) return searchToken
+    }
+  }
+
+  // 3. Check Vue Route query object
+  if (routeQuery) {
+    const qToken = routeQuery.access_token || routeQuery.token || routeQuery.code
+    if (qToken) return String(qToken)
+  }
+
+  return null
 }
 
