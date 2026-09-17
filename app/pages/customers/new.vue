@@ -41,12 +41,12 @@ import type { CustomerFormData } from '../../features/customer/types'
 
 const router = useRouter()
 const localePath = useLocalePath()
-const { isLogistic } = useAuthEngine()
+const { isSimplifiedCompany } = useAuthEngine()
 const { addCustomer, isLoading, errorMsg } = useCustomerEngine()
 const { showSuccess, showError } = useAppToast()
 
 onMounted(() => {
-  if (isLogistic.value) {
+  if (isSimplifiedCompany.value) {
     router.push(localePath('/'))
   }
 })

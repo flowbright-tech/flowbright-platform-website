@@ -71,6 +71,24 @@ export const useAuthEngine = () => {
     return false
   })
 
+  const isLinebot = computed(() => {
+    initializeFromStorage()
+    const compType = (companyProfileState.value?.company_type || (companyProfileState.value as any)?.business_type || '')?.toLowerCase()
+    if (compType === 'linebot' || compType === 'line_bot' || compType === 'line-bot') return true
+    const tenantName = activeTenant.value?.name?.toLowerCase() || ''
+    if (tenantName.includes('linebot') || tenantName.includes('line bot') || tenantName.includes('line-bot')) return true
+    return false
+  })
+
+  const isSimplifiedCompany = computed(() => {
+    initializeFromStorage()
+    const compType = (companyProfileState.value?.company_type || (companyProfileState.value as any)?.business_type || '')?.toLowerCase()
+    if (compType === 'logistic' || compType === 'logistics' || compType === 'pos' || compType === 'linebot' || compType === 'line_bot' || compType === 'line-bot') return true
+    const tenantName = activeTenant.value?.name?.toLowerCase() || ''
+    if (tenantName.includes('logistic') || tenantName.includes('pos') || tenantName.includes('linebot') || tenantName.includes('line bot') || tenantName.includes('line-bot')) return true
+    return false
+  })
+
   const isAdmin = computed(() => {
     initializeFromStorage()
     const r = (userProfileState.value?.role || session.value?.role || '').toLowerCase()
@@ -79,7 +97,7 @@ export const useAuthEngine = () => {
     return r.includes('admin') || r.includes('manager') || r === 'system administrator' || r === ''
   })
 
-  const setCompanyType = (type: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | 'pos' | string) => {
+  const setCompanyType = (type: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | 'pos' | 'linebot' | 'line_bot' | 'line-bot' | string) => {
     if (!companyProfileState.value) {
       companyProfileState.value = {
         id: 'comp-01',
@@ -341,6 +359,9 @@ export const useAuthEngine = () => {
     isStore,
     isLogistic,
     isPos,
+    isLinebot,
+    isSimplifiedCompany,
+    isLogisticOrPos: isSimplifiedCompany,
     isAdmin,
     setCompanyType,
     setUserRole

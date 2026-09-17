@@ -28,7 +28,7 @@ export interface CompanyProfile {
   plan: string
   status: string
   image_url: string
-  company_type?: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | 'pos' | string
+  company_type?: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | 'pos' | 'linebot' | 'line_bot' | 'line-bot' | string
   credit_card_percent_charge?: number
   credit_card_charge_percent?: number
   created_at: string
@@ -73,6 +73,20 @@ export const MOCK_TENANTS: Tenant[] = [
     id: 'tenant-cnx-03',
     name: 'FlowBright Logistics (Chiang Mai)',
     code: 'FB-CHIANGMAI-03',
+    region: 'Thailand (TH)',
+    currency: 'THB'
+  },
+  {
+    id: 'tenant-pos-04',
+    name: 'FlowBright POS (Retail Shop)',
+    code: 'FB-RETAIL-04',
+    region: 'Thailand (TH)',
+    currency: 'THB'
+  },
+  {
+    id: 'tenant-bot-05',
+    name: 'FlowBright LineBot (Online Commerce)',
+    code: 'FB-LINEBOT-05',
     region: 'Thailand (TH)',
     currency: 'THB'
   }

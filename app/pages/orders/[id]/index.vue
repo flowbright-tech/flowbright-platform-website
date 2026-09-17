@@ -16,7 +16,7 @@
         {{ $t('orders.form_title_edit') || 'Edit Order' }}
       </h1>
       <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-        {{ isLogistic ? ($t('orders.form_subtitle_edit_logistic') || 'Update order status, delivery date, or package quantities') : ($t('orders.form_subtitle_edit') || 'Update order status, delivery date, customer info, or package quantities') }}
+        {{ isSimplifiedCompany ? ($t('orders.form_subtitle_edit_logistic') || 'Update order status, delivery date, or package quantities') : ($t('orders.form_subtitle_edit') || 'Update order status, delivery date, customer info, or package quantities') }}
       </p>
     </div>
 
@@ -56,7 +56,7 @@ import { useAppToast } from '../../../composables/useAppToast'
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
-const { isLogistic } = useAuthEngine()
+const { isSimplifiedCompany } = useAuthEngine()
 const { showSuccess, showError } = useAppToast()
 
 const { fetchOrderById, updateOrder, isLoading, errorMsg } = useOrderEngine()

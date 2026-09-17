@@ -59,7 +59,7 @@ import type { Customer, CustomerFormData } from '../../features/customer/types'
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
-const { isLogistic } = useAuthEngine()
+const { isSimplifiedCompany } = useAuthEngine()
 const { updateCustomer, fetchCustomerById, isLoading, errorMsg } = useCustomerEngine()
 const { showSuccess, showError } = useAppToast()
 
@@ -68,7 +68,7 @@ const customerToEdit = ref<Customer | null>(null)
 const isLoadingData = ref(true)
 
 onMounted(async () => {
-  if (isLogistic.value) {
+  if (isSimplifiedCompany.value) {
     router.push(localePath('/'))
     return
   }

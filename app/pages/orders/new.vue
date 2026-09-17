@@ -16,7 +16,7 @@
         {{ $t('orders.form_title_new') || 'Create New Order' }}
       </h1>
       <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-        {{ isLogistic ? ($t('orders.form_subtitle_new_logistic') || 'Select delivery date and add package items') : ($t('orders.form_subtitle_new') || 'Fill in customer details, select delivery date, and add package items') }}
+        {{ isSimplifiedCompany ? ($t('orders.form_subtitle_new_logistic') || 'Select delivery date and add package items') : ($t('orders.form_subtitle_new') || 'Fill in customer details, select delivery date, and add package items') }}
       </p>
     </div>
 
@@ -40,7 +40,7 @@ import type { OrderFormData } from '../../features/order/types'
 
 const router = useRouter()
 const localePath = useLocalePath()
-const { isLogistic } = useAuthEngine()
+const { isSimplifiedCompany } = useAuthEngine()
 const { addOrder, isLoading, errorMsg } = useOrderEngine()
 const { showSuccess, showError } = useAppToast()
 

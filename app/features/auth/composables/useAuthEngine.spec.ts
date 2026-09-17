@@ -84,6 +84,57 @@ describe('Auth Engine & Tenant Memory Cleansing', () => {
     expect(isPos.value).toBe(false)
   })
 
+  it('should evaluate isLinebot correctly when company_type is linebot, line_bot, or line-bot', () => {
+    const { setCompanyType, isLinebot } = useAuthEngine()
+    setCompanyType('linebot')
+    expect(isLinebot.value).toBe(true)
+
+    setCompanyType('line_bot')
+    expect(isLinebot.value).toBe(true)
+
+    setCompanyType('line-bot')
+    expect(isLinebot.value).toBe(true)
+
+    setCompanyType('lab')
+    expect(isLinebot.value).toBe(false)
+
+    setCompanyType('standard')
+    expect(isLinebot.value).toBe(false)
+
+    setCompanyType('pos')
+    expect(isLinebot.value).toBe(false)
+  })
+
+  it('should evaluate isSimplifiedCompany correctly for logistic, pos, and linebot', () => {
+    const { setCompanyType, isSimplifiedCompany } = useAuthEngine()
+    setCompanyType('logistic')
+    expect(isSimplifiedCompany.value).toBe(true)
+
+    setCompanyType('logistics')
+    expect(isSimplifiedCompany.value).toBe(true)
+
+    setCompanyType('pos')
+    expect(isSimplifiedCompany.value).toBe(true)
+
+    setCompanyType('linebot')
+    expect(isSimplifiedCompany.value).toBe(true)
+
+    setCompanyType('line_bot')
+    expect(isSimplifiedCompany.value).toBe(true)
+
+    setCompanyType('line-bot')
+    expect(isSimplifiedCompany.value).toBe(true)
+
+    setCompanyType('store')
+    expect(isSimplifiedCompany.value).toBe(false)
+
+    setCompanyType('lab')
+    expect(isSimplifiedCompany.value).toBe(false)
+
+    setCompanyType('standard')
+    expect(isSimplifiedCompany.value).toBe(false)
+  })
+
   it('should evaluate isAdmin correctly based on user role', () => {
     const { login, setUserRole, isAdmin } = useAuthEngine()
     login('user@flowbright.co', 'mock-token', MOCK_TENANTS[0].id)

@@ -1,5 +1,4 @@
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useLocalePath } from '#imports'
 import { useAuthEngine } from '../features/auth/composables/useAuthEngine'
 
@@ -12,9 +11,8 @@ export interface NavItem {
 }
 
 export const useNavigation = () => {
-  const { t } = useI18n()
   const localePath = useLocalePath()
-  const { isLab, isAdmin, isLogistic } = useAuthEngine()
+  const { isLab, isAdmin, isLogistic, isPos, isLinebot, isSimplifiedCompany } = useAuthEngine()
 
   const navItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [
@@ -26,8 +24,8 @@ export const useNavigation = () => {
       }
     ]
 
-    // Customer management is hidden for logistic company type
-    if (!isLogistic.value) {
+    // Customer management is hidden for logistic, pos, and linebot company types
+    if (!isSimplifiedCompany.value) {
       items.push({
         key: 'customers',
         labelKey: 'nav.customers',
@@ -105,6 +103,9 @@ export const useNavigation = () => {
     navItems,
     isLab,
     isLogistic,
+    isPos,
+    isLinebot,
+    isSimplifiedCompany,
     isAdmin
   }
 }

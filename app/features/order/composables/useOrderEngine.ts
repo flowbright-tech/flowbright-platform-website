@@ -118,7 +118,7 @@ export const resolveDefaultOrderStatus = (isLogisticOrPos: boolean, currentStatu
 }
 
 export const useOrderEngine = () => {
-  const { session, isLogistic, isPos } = useAuthEngine()
+  const { session, isLogistic, isPos, isLinebot, isSimplifiedCompany } = useAuthEngine()
   const { apiFetch } = useApiFetch()
 
   // State refs
@@ -216,7 +216,7 @@ export const useOrderEngine = () => {
       ? Number(data.credit_card_charge_percent ?? data.credit_card_percent_charge ?? 0)
       : 0
 
-    const isLogisticOrPos = isLogistic.value || isPos.value
+    const isLogisticOrPos = isSimplifiedCompany.value
 
     const payload = {
       ...data,
@@ -269,7 +269,7 @@ export const useOrderEngine = () => {
       ? Number(data.credit_card_charge_percent ?? data.credit_card_percent_charge ?? 0)
       : 0
 
-    const isLogisticOrPos = isLogistic.value || isPos.value
+    const isLogisticOrPos = isSimplifiedCompany.value
 
     const payload = {
       ...data,

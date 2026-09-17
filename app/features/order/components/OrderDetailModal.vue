@@ -31,9 +31,9 @@
         </div>
 
         <!-- Customer & Delivery Grid -->
-        <div class="grid grid-cols-1 gap-4" :class="{ 'md:grid-cols-2': !isLogistic }">
-          <!-- Customer Info (Hidden for logistic company type) -->
-          <div v-if="!isLogistic" class="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-2">
+        <div class="grid grid-cols-1 gap-4" :class="{ 'md:grid-cols-2': !isSimplifiedCompany }">
+          <!-- Customer Info (Hidden for logistic, pos, and linebot company types) -->
+          <div v-if="!isSimplifiedCompany" class="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-2">
             <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <UIcon name="i-heroicons-user" class="w-4 h-4 text-indigo-500" />
               {{ $t('orders.sec_customer') || 'Customer Information' }}
@@ -173,7 +173,7 @@ defineProps<{
 }>()
 
 const { t, locale } = useI18n()
-const { isLogistic, isLab } = useAuthEngine()
+const { isLogistic, isSimplifiedCompany, isLab } = useAuthEngine()
 
 const formatCurrency = (val?: number) => {
   return Number(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })

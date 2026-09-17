@@ -3,8 +3,8 @@
     <UCard class="glass-panel" :ui="{ body: { padding: 'p-6 sm:p-8' } }">
       <form @submit.prevent="submitForm" class="space-y-8">
 
-        <!-- Section 1: Customer Selection & Details (Hidden for Logistic company type) -->
-        <div v-if="!isLogistic" class="space-y-4">
+        <!-- Section 1: Customer Selection & Details (Hidden for Logistic, POS, and LineBot company types) -->
+        <div v-if="!isSimplifiedCompany" class="space-y-4">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <UIcon name="i-heroicons-user" class="w-5 h-5 text-indigo-500" />
@@ -371,8 +371,8 @@ import type { Package } from '../../package/types'
 const { t, locale } = useI18n()
 const { apiFetch } = useApiFetch()
 const { showError } = useAppToast()
-const { company, isStore, isLogistic, isPos } = useAuthEngine()
-const isLogisticOrPos = computed(() => isLogistic.value || isPos.value)
+const { company, isStore, isLogistic, isPos, isLinebot, isSimplifiedCompany } = useAuthEngine()
+const isLogisticOrPos = isSimplifiedCompany
 
 // Helper to look up credit_card_percent_charge from local storage company profile
 const getCompanyCreditCardPercentCharge = (): number => {
@@ -519,18 +519,18 @@ const fetchCustomerOptions = async (query: string) => {
 }
 
 const debouncedFetchCustomerOptions = debounce((query: string) => {
-  if (isLogistic.value) return
+  if (isSimplifiedCompany.value) return
   fetchCustomerOptions(query)
 }, 300)
 
 watch(customerSearchQuery, (newVal) => {
-  if (isLogistic.value) return
+  if (isSimplifiedCompany.value) return
   debouncedFetchCustomerOptions(newVal)
 })
 
 // On customer select, populate form customer details
 watch(selectedCustomer, (val) => {
-  if (isLogistic.value) return
+  if (isSimplifiedCompany.value) return
   if (val) {
     form.customer_id = val.id
     form.customer_name = val.name
@@ -703,7 +703,7 @@ const submitForm = () => {
   errors.payment_channel = ''
   errors.items = ''
 
-  if (!isStore.value && !isLogistic.value && !form.customer_name.trim()) {
+  if (!isStore.value && !isSimplifiedCompany.value && !form.customer_name.trim()) {
     const errMsg = t('orders.err_customer_required') || 'Please select or specify customer information'
     errors.customer_name = errMsg
     showError(errMsg)
@@ -747,10 +747,10 @@ const submitForm = () => {
 
   emit('save', {
     ...form,
-    customer_id: isLogistic.value ? '' : form.customer_id,
-    customer_name: isLogistic.value ? '' : form.customer_name,
-    customer_email: isLogistic.value ? '' : form.customer_email,
-    customer_phone: isLogistic.value ? '' : form.customer_phone,
+    customer_id: isSimplifiedCompany.value ? '' : form.customer_id,
+    customer_name: isSimplifiedCompany.value ? '' : form.customer_name,
+    customer_email: isSimplifiedCompany.value ? '' : form.customer_email,
+    customer_phone: isSimplifiedCompany.value ? '' : form.customer_phone,
     transaction_date: form.delivery_date,
     discount: Number(form.discount || 0),
     credit_card_charge_percent: ccChargePercent,

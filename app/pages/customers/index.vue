@@ -1,20 +1,20 @@
 <template>
   <div class="space-y-6 max-w-7xl mx-auto">
-    <!-- Non-Applicable Restriction Banner for Logistic Company -->
-    <div v-if="isLogistic" class="p-8 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-sm">
+    <!-- Non-Applicable Restriction Banner for Logistic, POS, and LineBot Companies -->
+    <div v-if="isSimplifiedCompany" class="p-8 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-sm">
       <UIcon name="i-heroicons-information-circle" class="w-12 h-12 text-slate-400 mx-auto" />
       <h2 class="text-xl font-bold text-slate-900 dark:text-white">
-        {{ locale === 'th' ? 'ไม่เปิดใช้งานสำหรับประเภทโลจิสติกส์' : 'Not Applicable for Logistics Type' }}
+        {{ restrictionTitle }}
       </h2>
       <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-        {{ locale === 'th' ? 'ระบบการจัดการลูกค้า (Customers) ไม่จำเป็นต้องใช้งานสำหรับบริษัทประเภทโลจิสติกส์' : 'Customer management is not required for logistics company types.' }}
+        {{ restrictionSubtitle }}
       </p>
       <UButton color="neutral" variant="outline" :to="localePath('/')" class="font-bold">
         {{ locale === 'th' ? 'กลับไปยังหน้าแรก' : 'Return to Dashboard' }}
       </UButton>
     </div>
 
-    <!-- Active Content for non-logistic tenants -->
+    <!-- Active Content for non-restricted tenants -->
     <template v-else>
       <!-- Page Title Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60 dark:border-slate-800/80">
@@ -116,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useLocalePath } from '#imports'
@@ -131,7 +131,42 @@ import type { Customer } from '../../features/customer/types'
 const router = useRouter()
 const localePath = useLocalePath()
 const { locale } = useI18n()
-const { activeTenant, isLogistic } = useAuthEngine()
+const { activeTenant, isLogistic, isPos, isLinebot, isSimplifiedCompany } = useAuthEngine()
+
+const restrictionTitle = computed(() => {
+  if (isLogistic.value) {
+    return locale.value === 'th' ? 'ไม่เปิดใช้งานสำหรับประเภทโลจิสติกส์' : 'Not Applicable for Logistics Type'
+  }
+  if (isLinebot.value) {
+    return locale.value === 'th' ? 'ไม่เปิดใช้งานสำหรับประเภท LineBot' : 'Not Applicable for LineBot Type'
+  }
+  if (isPos.value) {
+    return locale.value === 'th' ? 'ไม่เปิดใช้งานสำหรับประเภท POS' : 'Not Applicable for POS Type'
+  }
+  return locale.value === 'th' ? 'ไม่เปิดใช้งานสำหรับประเภทธุรกิจนี้' : 'Not Applicable for This Business Type'
+})
+
+const restrictionSubtitle = computed(() => {
+  if (isLogistic.value) {
+    return locale.value === 'th'
+      ? 'ระบบการจัดการลูกค้า (Customers) ไม่จำเป็นต้องใช้งานสำหรับบริษัทประเภทโลจิสติกส์'
+      : 'Customer management is not required for logistics company types.'
+  }
+  if (isLinebot.value) {
+    return locale.value === 'th'
+      ? 'ระบบการจัดการลูกค้า (Customers) ไม่จำเป็นต้องใช้งานสำหรับบริษัทประเภท LineBot'
+      : 'Customer management is not required for LineBot company types.'
+  }
+  if (isPos.value) {
+    return locale.value === 'th'
+      ? 'ระบบการจัดการลูกค้า (Customers) ไม่จำเป็นต้องใช้งานสำหรับบริษัทประเภท POS'
+      : 'Customer management is not required for POS company types.'
+  }
+  return locale.value === 'th'
+    ? 'ระบบการจัดการลูกค้า (Customers) ไม่จำเป็นต้องใช้งานสำหรับบริษัทประเภทนี้'
+    : 'Customer management is not required for this company type.'
+})
+
 const {
   searchQuery,
   currentPage,
@@ -149,7 +184,7 @@ const isDeleteModalOpen = ref(false)
 const customerToDelete = ref<Customer | null>(null)
 
 onMounted(async () => {
-  if (!isLogistic.value) {
+  if (!isSimplifiedCompany.value) {
     await fetchCustomers()
   }
 })
