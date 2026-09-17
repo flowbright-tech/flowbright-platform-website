@@ -110,5 +110,28 @@ export default defineNuxtConfig({
   typescript: {
     strict: true,
     typeCheck: false
+  },
+
+  hooks: {
+    'vite:extendConfig'(config: any) {
+      const devtoolsPlugin = config.plugins?.find((p: any) => p?.name === 'nuxt:devtools:config')
+      if (devtoolsPlugin && devtoolsPlugin.applyToEnvironment && !devtoolsPlugin.__patchedForVite8) {
+        devtoolsPlugin.__patchedForVite8 = true
+        const originalApply = devtoolsPlugin.applyToEnvironment
+        devtoolsPlugin.applyToEnvironment = function (env: any) {
+          const res = originalApply.call(this, env)
+          if (res && res.configResolved) {
+            const fn = res.configResolved
+            delete res.configResolved
+            try {
+              fn(env.config || (typeof env.getTopLevelConfig === 'function' ? env.getTopLevelConfig() : null) || config)
+            } catch (e) {
+              // Ignore any extraction error
+            }
+          }
+          return res
+        }
+      }
+    }
   }
 })
