@@ -4,126 +4,115 @@
     <PrintActionBar
       :title="$t('orders.slip_title') || 'Receipt Slip Preview (58mm)'"
       :pdf-filename="`Slip_${invoice?.code || invoice?.order_number || orderId}.pdf`"
-      :pdf-format="[58, 210]"
       :print-button-label="$t('orders.print_slip') || 'Print Slip (58mm)'"
     />
 
     <!-- Loading Skeleton -->
-    <div v-if="isLoading" class="w-[58mm] min-h-[210mm] bg-white p-4 rounded-xl shadow-md space-y-4">
-      <div class="flex flex-col items-center space-y-2">
-        <USkeleton class="h-10 w-10 rounded-full" />
-        <USkeleton class="h-4 w-32" />
-        <USkeleton class="h-3 w-40" />
-      </div>
-      <div class="border-y border-dashed border-slate-200 py-3 space-y-2">
+    <div v-if="isLoading" class="w-[58mm] bg-white p-3 rounded-xl shadow-md space-y-3">
+      <div class="flex flex-col items-center space-y-1.5">
+        <USkeleton class="h-8 w-8 rounded-full" />
         <USkeleton class="h-3 w-28" />
-        <USkeleton class="h-3 w-36" />
+        <USkeleton class="h-2.5 w-36" />
       </div>
-      <div class="space-y-2">
-        <USkeleton class="h-3 w-full" />
-        <USkeleton class="h-3 w-full" />
-        <USkeleton class="h-4 w-20 ml-auto" />
+      <div class="border-y border-dashed border-slate-200 py-2 space-y-1.5">
+        <USkeleton class="h-2.5 w-24" />
+        <USkeleton class="h-2.5 w-32" />
+      </div>
+      <div class="space-y-1.5">
+        <USkeleton class="h-2.5 w-full" />
+        <USkeleton class="h-2.5 w-full" />
+        <USkeleton class="h-3 w-16 ml-auto" />
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="errorMsg" class="w-[58mm] bg-white p-6 rounded-xl shadow-md text-center space-y-3">
-      <UIcon name="i-heroicons-exclamation-triangle" class="w-8 h-8 text-rose-500 mx-auto" />
+    <div v-else-if="errorMsg" class="w-[58mm] bg-white p-4 rounded-xl shadow-md text-center space-y-2">
+      <UIcon name="i-heroicons-exclamation-triangle" class="w-7 h-7 text-rose-500 mx-auto" />
       <h2 class="text-xs font-bold text-slate-800">{{ errorMsg }}</h2>
       <UButton size="xs" color="neutral" variant="solid" @click="fetchInvoiceData">
         Retry
       </UButton>
     </div>
 
-    <!-- 58mm Thermal Slip (Print target) -->
+    <!-- 58mm Thermal Slip (Print target - Paper-Saving & Auto Height) -->
     <div v-else class="slip-page-container">
       <div class="slip-page print-content">
         <!-- Header: Company Detail -->
         <div class="flex flex-col items-center text-center space-y-0.5">
           <!-- Logo (if available) -->
-          <div v-if="company?.image_url" class="w-10 h-10 mb-1 rounded-md overflow-hidden shrink-0">
+          <div v-if="company?.image_url" class="w-8 h-8 mb-0.5 rounded overflow-hidden shrink-0">
             <img :src="company.image_url" class="w-full h-full object-contain" alt="Logo" />
           </div>
 
           <!-- Company Name (TH & EN) -->
-          <h1 class="text-[11px] font-extrabold leading-tight text-slate-900 tracking-tight">
+          <h1 class="text-[10px] font-extrabold leading-tight text-slate-900 tracking-tight">
             {{ company?.name_th || 'คลินิก เอ็ม.ที อินเตอร์แล็บ' }}
           </h1>
-          <h2 class="text-[9px] font-bold leading-tight text-slate-700">
+          <h2 class="text-[8.5px] font-bold leading-tight text-slate-700">
             {{ company?.name_en || 'METRO MED COMPANY LIMITED' }}
           </h2>
 
           <!-- Company Address -->
-          <p class="text-[7.5px] leading-snug text-slate-600 font-medium mt-0.5">
+          <p class="text-[7px] leading-tight text-slate-600 font-medium">
             {{ locale === 'th' ? (company?.address_th || company?.address_en || '') : (company?.address_en || company?.address_th || '') }}
           </p>
 
           <!-- Company Phone -->
-          <p v-if="company?.phone" class="text-[7.5px] leading-snug text-slate-600 font-medium">
+          <p v-if="company?.phone" class="text-[7px] leading-tight text-slate-600 font-medium">
             {{ locale === 'th' ? 'โทร.' : 'Tel.' }}: {{ formatPhone(company.phone) }}
           </p>
 
           <!-- Company Tax ID -->
-          <p v-if="company?.tax_id" class="text-[7.5px] leading-snug text-slate-600 font-medium">
+          <p v-if="company?.tax_id" class="text-[7px] leading-tight text-slate-600 font-medium">
             {{ locale === 'th' ? 'เลขประจำตัวผู้เสียภาษี' : 'Tax ID' }}: {{ company.tax_id }}
           </p>
 
-          <!-- Company Email & Dynamic Website (strictly depends on company.website) -->
-          <p v-if="company?.email" class="text-[7px] text-slate-500">
+          <!-- Company Email & Dynamic Website -->
+          <p v-if="company?.email" class="text-[6.5px] text-slate-500">
             Email: {{ company.email.trim() }}
           </p>
-          <p v-if="company?.website" class="text-[7px] text-slate-500">
+          <p v-if="company?.website" class="text-[6.5px] text-slate-500">
             Web: {{ company.website.trim() }}
           </p>
         </div>
 
         <!-- Dashed Separator -->
-        <div class="border-b border-dashed border-slate-400 my-2"></div>
+        <div class="border-b border-dashed border-slate-400 my-1"></div>
 
-        <!-- Slip Title & Order Metadata -->
-        <div class="space-y-1">
-          <div class="text-center font-extrabold text-[10.5px] uppercase tracking-wider text-slate-900">
+        <!-- Slip Title & Date/Time & Customer Info -->
+        <div class="space-y-0.5">
+          <div class="text-center font-extrabold text-[10px] uppercase tracking-wider text-slate-900">
             {{ $t('orders.receipt_slip') || 'RECEIPT / SLIP' }}
           </div>
 
-          <div class="text-[8px] text-slate-700 space-y-0.5 pt-0.5">
-            <div class="flex justify-between">
-              <span class="font-medium text-slate-500">{{ locale === 'th' ? 'เลขที่' : 'No.' }}:</span>
-              <span class="font-mono font-bold text-slate-900">{{ invoice?.order_number || invoice?.code || orderId }}</span>
-            </div>
-
-            <div class="flex justify-between">
+          <div class="text-[7.5px] text-slate-700 space-y-0.5 pt-0.5">
+            <!-- Date Time (Using Date Time Now at User Client Time) -->
+            <div class="flex justify-between items-center">
               <span class="font-medium text-slate-500">{{ locale === 'th' ? 'วันที่' : 'Date' }}:</span>
-              <span class="font-mono text-slate-900">{{ formatSlipDate(invoice?.delivery_date || invoice?.created_at) }}</span>
+              <span class="font-mono font-semibold text-slate-900">{{ clientDateTime }}</span>
             </div>
 
-            <!-- Customer Details (if present) -->
-            <div v-if="customer || invoice?.customer_name" class="pt-0.5">
-              <div class="flex justify-between">
-                <span class="font-medium text-slate-500">{{ locale === 'th' ? 'ลูกค้า' : 'Customer' }}:</span>
-                <span class="font-bold text-slate-900 truncate max-w-[32mm] text-right">{{ getCustomerFullName() }}</span>
-              </div>
-              <div v-if="customer?.code || invoice?.customer_code" class="flex justify-between text-[7.5px]">
-                <span class="text-slate-400">HN:</span>
-                <span class="font-mono font-bold text-slate-700">{{ customer?.code || invoice?.customer_code }}</span>
-              </div>
+            <!-- Customer Details (HN removed) -->
+            <div v-if="customer || invoice?.customer_name" class="flex justify-between items-center">
+              <span class="font-medium text-slate-500">{{ locale === 'th' ? 'ลูกค้า' : 'Customer' }}:</span>
+              <span class="font-bold text-slate-900 truncate max-w-[34mm] text-right">{{ getCustomerFullName() }}</span>
             </div>
 
             <!-- Payment Channel -->
-            <div class="flex justify-between pt-0.5">
-              <span class="font-medium text-slate-500">{{ locale === 'th' ? 'ช่องทางชำระ' : 'Channel' }}:</span>
+            <div class="flex justify-between items-center">
+              <span class="font-medium text-slate-500">{{ locale === 'th' ? 'ชำระโดย' : 'Channel' }}:</span>
               <span class="font-semibold text-slate-900 capitalize">{{ formatPaymentChannel(invoice?.payment_channel) }}</span>
             </div>
           </div>
         </div>
 
         <!-- Dashed Separator -->
-        <div class="border-b border-dashed border-slate-400 my-2"></div>
+        <div class="border-b border-dashed border-slate-400 my-1"></div>
 
         <!-- Order Items -->
         <div>
           <!-- Column headers -->
-          <div class="flex justify-between text-[7.5px] font-bold text-slate-500 uppercase pb-1 border-b border-slate-200">
+          <div class="flex justify-between text-[7px] font-bold text-slate-500 uppercase pb-0.5 border-b border-slate-200">
             <span>{{ locale === 'th' ? 'รายการสินค้า' : 'Item Description' }}</span>
             <span>{{ locale === 'th' ? 'จำนวนเงิน' : 'Amount' }}</span>
           </div>
@@ -133,18 +122,18 @@
             <div
               v-for="(item, idx) in invoice?.items"
               :key="idx"
-              class="py-1 text-[8px]"
+              class="py-0.5 text-[7.5px]"
             >
               <div class="font-bold text-slate-900 leading-tight break-words">
                 {{ getItemName(item) }}
               </div>
-              <div class="flex justify-between items-center text-[7.5px] text-slate-600 mt-0.5">
+              <div class="flex justify-between items-center text-[7px] text-slate-600">
                 <span class="font-mono">{{ item.quantity }} x ฿{{ formatPrice(item.unit_price) }}</span>
                 <span class="font-mono font-bold text-slate-900">
                   ฿{{ formatPrice(item.subtotal || (item.quantity * item.unit_price)) }}
                 </span>
               </div>
-              <div v-if="item.notes" class="text-[7px] text-slate-400 italic">
+              <div v-if="item.notes" class="text-[6.5px] text-slate-400 italic">
                 * {{ item.notes }}
               </div>
             </div>
@@ -152,10 +141,10 @@
         </div>
 
         <!-- Dashed Separator -->
-        <div class="border-b border-dashed border-slate-400 my-2"></div>
+        <div class="border-b border-dashed border-slate-400 my-1"></div>
 
         <!-- Totals & Total Net -->
-        <div class="space-y-1 text-[8px]">
+        <div class="space-y-0.5 text-[7.5px]">
           <!-- Subtotal -->
           <div class="flex justify-between text-slate-600">
             <span>{{ locale === 'th' ? 'รวมเงิน' : 'Subtotal' }}</span>
@@ -178,42 +167,18 @@
           </div>
 
           <!-- Solid Divider before Total Net -->
-          <div class="border-b-2 border-slate-900 my-1"></div>
+          <div class="border-b border-slate-900 my-0.5"></div>
 
           <!-- TOTAL NET -->
-          <div class="flex justify-between items-center text-[10px] font-extrabold text-slate-900 py-0.5">
+          <div class="flex justify-between items-center text-[9.5px] font-extrabold text-slate-900 py-0.5">
             <span>{{ $t('orders.total_net') || 'TOTAL NET' }}</span>
-            <span class="font-mono text-[12px] font-black text-indigo-700">
+            <span class="font-mono text-[11.5px] font-black text-indigo-700">
               ฿{{ formatPrice(invoice?.total_amount) }}
             </span>
           </div>
 
           <!-- Solid Divider after Total Net -->
-          <div class="border-b border-slate-900 my-1"></div>
-
-          <!-- Payment status note -->
-          <div class="flex justify-between items-center text-[7.5px] text-slate-500 pt-0.5">
-            <span>{{ locale === 'th' ? 'สถานะ' : 'Status' }}:</span>
-            <span class="font-bold uppercase text-emerald-600">{{ invoice?.status || 'COMPLETED' }}</span>
-          </div>
-        </div>
-
-        <!-- Dashed Separator -->
-        <div class="border-b border-dashed border-slate-400 my-2"></div>
-
-        <!-- Footer -->
-        <div class="text-center space-y-1 pt-1">
-          <div class="font-mono text-[8.5px] tracking-wider text-slate-600">
-            * {{ invoice?.order_number || invoice?.code || orderId }} *
-          </div>
-
-          <p class="text-[8px] font-bold text-slate-700">
-            {{ locale === 'th' ? 'ขอบคุณที่ใช้บริการ' : 'Thank you for your business!' }}
-          </p>
-
-          <p class="text-[7px] text-slate-400">
-            Printed: {{ printDate }}
-          </p>
+          <div class="border-b border-slate-900 my-0.5"></div>
         </div>
       </div>
     </div>
@@ -234,7 +199,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { locale, t } = useI18n()
+const { locale, t, setLocale } = useI18n()
 const { apiFetch } = useApiFetch()
 const { company: authCompany } = useAuthEngine()
 
@@ -244,7 +209,7 @@ const errorMsg = ref<string | null>(null)
 const invoice = ref<any>(null)
 const company = ref<any>(null)
 const customer = ref<any>(null)
-const printDate = ref('')
+const clientDateTime = ref('')
 
 const fetchInvoiceData = async () => {
   isLoading.value = true
@@ -288,23 +253,6 @@ const fetchInvoiceData = async () => {
 const formatPrice = (val?: number) => {
   if (val === undefined || val === null || isNaN(val)) return '0.00'
   return Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-const formatSlipDate = (dateStr?: string) => {
-  if (!dateStr) return '-'
-  try {
-    const d = new Date(dateStr)
-    if (isNaN(d.getTime())) return dateStr
-    const day = String(d.getDate()).padStart(2, '0')
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const month = months[d.getMonth()]
-    const year = d.getFullYear()
-    const hours = String(d.getHours()).padStart(2, '0')
-    const mins = String(d.getMinutes()).padStart(2, '0')
-    return `${day}-${month}-${year} ${hours}:${mins}`
-  } catch {
-    return dateStr
-  }
 }
 
 const formatPhone = (phone?: string) => {
@@ -356,33 +304,49 @@ const calculateSubtotal = () => {
   }, 0)
 }
 
-onMounted(() => {
+const updateClientDateTime = () => {
   const now = new Date()
   const day = String(now.getDate()).padStart(2, '0')
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const month = months[now.getMonth()]
+  const month = String(now.getMonth() + 1).padStart(2, '0')
   const year = now.getFullYear()
   const hours = String(now.getHours()).padStart(2, '0')
   const mins = String(now.getMinutes()).padStart(2, '0')
-  printDate.value = `${day}-${month}-${year} ${hours}:${mins}`
+  clientDateTime.value = `${day}/${month}/${year} ${hours}:${mins}`
+}
+
+onMounted(() => {
+  // Requirement 2: Default slip to Thai language unless explicitly in English route
+  if (!route.path.startsWith('/en/')) {
+    if (setLocale) {
+      setLocale('th')
+    } else {
+      locale.value = 'th'
+    }
+  }
+
+  // Requirement 4: Date time using now at user client time
+  updateClientDateTime()
 
   fetchInvoiceData()
 })
 </script>
 
 <style scoped>
-/* Screen View: 58mm x 210mm paper container */
+/* Screen View: 58mm compact thermal paper container (paper saving) */
 .slip-page-container {
   display: block;
   width: 58mm;
   max-width: 58mm;
+  min-height: auto;
+  height: auto;
 }
 
 .slip-page {
   box-sizing: border-box;
   width: 58mm;
-  min-height: 210mm;
-  padding: 4mm 3mm;
+  min-height: auto;
+  height: auto;
+  padding: 2.5mm 2mm;
   margin: 0 auto;
   background: #ffffff;
   color: #0f172a;
@@ -391,10 +355,10 @@ onMounted(() => {
   border-radius: 4px;
 }
 
-/* Print CSS Media Queries */
+/* Print CSS Media Queries: dynamic height for minimal paper usage */
 @media print {
   @page {
-    size: 58mm 210mm;
+    size: 58mm auto;
     margin: 0;
   }
 
@@ -411,6 +375,8 @@ onMounted(() => {
   .slip-page-container {
     width: 58mm !important;
     max-width: 58mm !important;
+    min-height: auto !important;
+    height: auto !important;
     padding: 0 !important;
     margin: 0 auto !important;
     box-shadow: none !important;
@@ -419,8 +385,9 @@ onMounted(() => {
   .slip-page {
     width: 58mm !important;
     max-width: 58mm !important;
-    min-height: 210mm !important;
-    padding: 3mm 2.5mm !important;
+    min-height: auto !important;
+    height: auto !important;
+    padding: 2mm 1.5mm !important;
     margin: 0 auto !important;
     box-shadow: none !important;
     border: none !important;

@@ -276,7 +276,7 @@ const openLabForm = (id: string) => {
 
 const openSlip = (id: string) => {
   if (typeof window !== 'undefined') {
-    const routeUrl = localePath ? localePath(`/orders/${id}/slip`) : `/orders/${id}/slip`
+    const routeUrl = localePath ? localePath(`/orders/${id}/slip`, 'th') : `/orders/${id}/slip`
     window.open(routeUrl, '_blank')
   }
 }

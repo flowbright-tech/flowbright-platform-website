@@ -208,11 +208,20 @@ const handleExportPdf = async () => {
       }
     })
 
+    const isSlip = targetEl.classList.contains('slip-page') || !!targetEl.closest('.slip-page-container')
+    let pdfFormat: any = props.pdfFormat || 'a4'
+    if (isSlip) {
+      const elWidth = targetEl.offsetWidth || 1
+      const elHeight = targetEl.offsetHeight || 1
+      const dynamicHeightMm = Math.max(25, Math.round((elHeight / elWidth) * 58))
+      pdfFormat = [58, dynamicHeightMm]
+    }
+
     // 2. Create jsPDF document instance
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: props.pdfFormat || 'a4'
+      format: pdfFormat
     })
 
     const pdfWidth = pdf.internal.pageSize.getWidth() // 210mm

@@ -136,7 +136,7 @@ const handlePrintInvoice = (order: Order) => {
 
 const handlePrintSlip = (order: Order) => {
   if (import.meta.client) {
-    const routeUrl = localePath(`/orders/${order.id}/slip`)
+    const routeUrl = localePath(`/orders/${order.id}/slip`, 'th')
     window.open(routeUrl, '_blank')
   }
 }
