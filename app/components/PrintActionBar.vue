@@ -213,7 +213,7 @@ const handleExportPdf = async () => {
     if (isSlip) {
       const elWidth = targetEl.offsetWidth || 1
       const elHeight = targetEl.offsetHeight || 1
-      const dynamicHeightMm = Math.max(25, Math.round((elHeight / elWidth) * 58))
+      const dynamicHeightMm = Math.max(30, Math.round((elHeight / elWidth) * 48) + 6)
       pdfFormat = [58, dynamicHeightMm]
     }
 
@@ -224,11 +224,17 @@ const handleExportPdf = async () => {
       format: pdfFormat
     })
 
-    const pdfWidth = pdf.internal.pageSize.getWidth() // 210mm
-    const pdfHeight = pdf.internal.pageSize.getHeight() // 297mm
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = pdf.internal.pageSize.getHeight()
 
     // 3. Render image onto PDF
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+    if (isSlip) {
+      const slipWidthMm = 48
+      const xOffset = Math.max(0, (pdfWidth - slipWidthMm) / 2)
+      pdf.addImage(imgData, 'PNG', xOffset, 0, slipWidthMm, pdfHeight)
+    } else {
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+    }
 
     const rawName = props.pdfFilename || `${props.title || 'document'}.pdf`
     const cleanFilename = rawName.endsWith('.pdf') ? rawName : `${rawName}.pdf`
