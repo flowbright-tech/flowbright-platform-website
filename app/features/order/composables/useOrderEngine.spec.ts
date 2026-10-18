@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calculateItemSubtotal, calculateOrderTotal, getTodayDateString, formatDeliveryDate, formatTransactionDate, resolveDefaultOrderStatus } from './useOrderEngine'
+import { calculateItemSubtotal, calculateOrderTotal, calculateOrderSummary, getTodayDateString, formatDeliveryDate, formatTransactionDate, resolveDefaultOrderStatus } from './useOrderEngine'
 
 describe('Order Calculation & Utility Engine', () => {
   describe('calculateItemSubtotal', () => {
@@ -105,6 +105,27 @@ describe('Order Calculation & Utility Engine', () => {
       expect(resolveDefaultOrderStatus(false, 'processing')).toBe('processing')
       expect(resolveDefaultOrderStatus(false, 'completed')).toBe('completed')
       expect(resolveDefaultOrderStatus(false, 'Cancelled')).toBe('cancelled')
+    })
+  })
+
+  describe('calculateOrderSummary', () => {
+    it('should compute complete breakdown with items including package_barcode metadata', () => {
+      const items = [
+        { package_id: 'pkg-1', package_barcode: '8850123456789', quantity: 2, unit_price: 150, subtotal: 300 },
+        { package_id: 'pkg-2', package_barcode: '8850987654321', quantity: 1, unit_price: 200, subtotal: 200 }
+      ]
+      const summary = calculateOrderSummary(items, 50, 'credit_card', 3)
+      expect(summary.itemsSubtotal).toBe(500)
+      expect(summary.discountAmount).toBe(50)
+      expect(summary.subtotalAfterDiscount).toBe(450)
+      expect(summary.creditCardFee).toBe(13.50)
+      expect(summary.totalAmount).toBe(463.50)
+    })
+
+    it('should handle zero-item empty lists cleanly', () => {
+      const summary = calculateOrderSummary([])
+      expect(summary.itemsSubtotal).toBe(0)
+      expect(summary.totalAmount).toBe(0)
     })
   })
 })

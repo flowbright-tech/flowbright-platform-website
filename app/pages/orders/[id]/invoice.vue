@@ -106,8 +106,8 @@
           </div>
         </div>
 
-        <!-- Customer Profile Metadata Section -->
-        <div class="border border-slate-200 rounded-lg p-3.5 space-y-3 bg-slate-50/50">
+        <!-- Customer Profile Metadata Section (Standard / Lab only - Hidden for Logistic / POS) -->
+        <div v-if="!isLogisticOrPos" class="border border-slate-200 rounded-lg p-3.5 space-y-3 bg-slate-50/50">
           <div class="flex justify-between items-center text-[12px]">
             <div>
               <span class="font-bold text-slate-800">ได้รับเงินจาก</span>
@@ -143,6 +143,15 @@
               <span class="font-bold text-slate-700">Passport No. :</span>
               <span class="font-mono font-bold text-slate-900 ml-1.5">{{ customer?.passport || customer?.id_card || '-' }}</span>
             </div>
+          </div>
+        </div>
+
+        <!-- Simplified Payment Channel Bar for Logistic / POS (Customer info removed) -->
+        <div v-else-if="invoice?.payment_channel" class="border border-slate-200 rounded-lg p-3 bg-slate-50/50 flex justify-between items-center text-[12px]">
+          <div>
+            <span class="font-bold text-slate-800">ช่องทางการชำระเงิน</span>
+            <span class="text-[10px] text-slate-500 font-semibold ml-1">( Payment Channel ) :</span>
+            <span class="font-bold text-slate-900 ml-1.5 capitalize">{{ formatPaymentChannel(invoice?.payment_channel) }}</span>
           </div>
         </div>
 
@@ -208,7 +217,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLocalePath, useSwitchLocalePath } from '#imports'
 import { useI18n } from 'vue-i18n'
@@ -228,7 +237,15 @@ const localePath = useLocalePath()
 const switchLocalePath = useSwitchLocalePath()
 const { locale } = useI18n()
 const { apiFetch } = useApiFetch()
-const { company: authCompany } = useAuthEngine()
+const { company: authCompany, isSimplifiedCompany, isLogistic, isPos } = useAuthEngine()
+
+const isLogisticOrPos = computed(() => {
+  const compType = (company.value?.company_type || (company.value as any)?.business_type || authCompany.value?.company_type || (authCompany.value as any)?.business_type || '').toLowerCase()
+  if (compType === 'logistic' || compType === 'logistics' || compType === 'pos' || compType === 'store' || compType === 'linebot' || compType === 'line_bot' || compType === 'line-bot') return true
+  const tenantName = (company.value?.name_en || company.value?.name_th || authCompany.value?.name_en || authCompany.value?.name_th || '').toLowerCase()
+  if (tenantName.includes('logistic') || tenantName.includes('pos')) return true
+  return isSimplifiedCompany.value || isLogistic.value || isPos.value
+})
 
 const orderId = String(route.params.id)
 const isLoading = ref(true)

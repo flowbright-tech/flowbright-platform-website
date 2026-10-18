@@ -178,35 +178,79 @@
 
         <!-- Section 3: Package Items -->
         <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
             <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <UIcon name="i-heroicons-gift" class="w-5 h-5 text-indigo-500" />
               <span>{{ $t('orders.sec_items') || 'Order Package Items' }}</span>
               <span class="text-red-500 font-bold ml-0.5">*</span>
             </h3>
 
-            <!-- Package Search & Dropdown -->
-            <div class="w-72">
-              <USelectMenu
-                v-model="selectedPackage"
-                v-model:search-term="packageSearchQuery"
-                :items="packageOptions"
-                :placeholder="$t('orders.package_placeholder') || 'Type to search packages...'"
-                size="sm"
-                class="w-full"
-                label-key="label"
-                ignore-filter
-                :loading="isSearchingPackages"
-              />
+            <!-- Actions: Barcode Scanner Input + Package Search Dropdown -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <!-- Barcode Scanner Input with Enter listener & auto-focus readiness -->
+              <div class="relative w-full sm:w-72">
+                <UInput
+                  ref="barcodeInputRef"
+                  v-model="barcodeScanInput"
+                  :placeholder="$t('orders.scan_barcode_placeholder') || 'Scan Barcode / SKU (Enter)...'"
+                  icon="i-heroicons-qr-code"
+                  size="sm"
+                  class="w-full font-mono text-xs transition-all duration-200"
+                  :class="{ 'ring-2 ring-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20': scanSuccessFlash }"
+                  :disabled="isScanningBarcode"
+                  @keydown.enter.prevent="handleBarcodeScan"
+                >
+                  <template #trailing>
+                    <button
+                      type="button"
+                      class="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-indigo-600 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                      :title="$t('orders.barcode_scanner_tooltip') || 'Press Enter to scan'"
+                      @click="handleBarcodeScan"
+                    >
+                      ↵ Enter
+                    </button>
+                  </template>
+                </UInput>
+              </div>
+
+              <!-- Package Search & Dropdown -->
+              <div class="w-full sm:w-64">
+                <USelectMenu
+                  v-model="selectedPackage"
+                  v-model:search-term="packageSearchQuery"
+                  :items="packageOptions"
+                  :placeholder="$t('orders.package_placeholder') || 'Type to search packages...'"
+                  size="sm"
+                  class="w-full"
+                  label-key="label"
+                  ignore-filter
+                  :loading="isSearchingPackages"
+                />
+              </div>
             </div>
           </div>
 
           <!-- Empty Items State -->
-          <div v-if="form.items.length === 0" class="p-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center space-y-2">
-            <UIcon name="i-heroicons-archive-box-x-mark" class="w-10 h-10 text-slate-400 mx-auto" />
-            <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold">
-              {{ $t('orders.no_items_placeholder') || 'No packages added yet. Use the package dropdown search above to add items.' }}
+          <div v-if="form.items.length === 0" class="p-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-center space-y-3">
+            <div class="flex justify-center items-center gap-2 text-slate-400">
+              <UIcon name="i-heroicons-qr-code" class="w-8 h-8" />
+              <UIcon name="i-heroicons-archive-box-x-mark" class="w-8 h-8" />
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold max-w-md mx-auto">
+              {{ $t('orders.no_items_placeholder') || 'No packages added yet. Scan a package barcode or use the search dropdown above to add items.' }}
             </p>
+            <div>
+              <UButton
+                type="button"
+                variant="outline"
+                size="xs"
+                icon="i-heroicons-qr-code"
+                color="primary"
+                @click="focusBarcodeInput"
+              >
+                {{ $t('orders.focus_scanner') || 'Focus Barcode Scanner' }}
+              </UButton>
+            </div>
           </div>
 
           <!-- Items Table -->
@@ -228,6 +272,10 @@
                     <td class="px-4 py-3">
                       <div class="font-bold text-sm text-slate-900 dark:text-white">
                         {{ locale === 'th' ? (item.package_name_th || item.package_name_en) : (item.package_name_en || item.package_name_th) }}
+                      </div>
+                      <div v-if="item.package_barcode" class="flex items-center gap-1 text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                        <UIcon name="i-heroicons-qr-code" class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>{{ item.package_barcode }}</span>
                       </div>
                     </td>
                     <td class="px-4 py-3">
@@ -358,8 +406,9 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref, computed, onMounted } from 'vue'
+import { reactive, watch, ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useToast } from '#imports'
 import type { Order, OrderFormData } from '../types'
 import { calculateItemSubtotal, calculateOrderSummary, calculateOrderTotal, getTodayDateString, safeLowerCase } from '../composables/useOrderEngine'
 import { useAuthEngine } from '../../auth/composables/useAuthEngine'
@@ -371,8 +420,22 @@ import type { Package } from '../../package/types'
 const { t, locale } = useI18n()
 const { apiFetch } = useApiFetch()
 const { showError } = useAppToast()
+const toast = useToast()
 const { company, isStore, isLogistic, isPos, isLinebot, isSimplifiedCompany } = useAuthEngine()
 const isLogisticOrPos = isSimplifiedCompany
+
+// Barcode scanner states & hardware UX
+const barcodeScanInput = ref('')
+const isScanningBarcode = ref(false)
+const barcodeInputRef = ref<any>(null)
+const scanSuccessFlash = ref(false)
+
+const focusBarcodeInput = () => {
+  nextTick(() => {
+    const el = barcodeInputRef.value?.$el?.querySelector?.('input') || barcodeInputRef.value?.$el || barcodeInputRef.value
+    el?.focus?.()
+  })
+}
 
 // Helper to look up credit_card_percent_charge from local storage company profile
 const getCompanyCreditCardPercentCharge = (): number => {
@@ -552,7 +615,8 @@ const fetchPackageOptions = async (query: string) => {
           label: locale.value === 'th' ? `${p.name_th} (฿${p.price})` : `${p.name_en} (฿${p.price})`,
           name_en: p.name_en,
           name_th: p.name_th,
-          price: p.price
+          price: p.price,
+          barcode: p.barcode || ''
         }))
       } else {
         packageOptions.value = []
@@ -576,30 +640,120 @@ watch(packageSearchQuery, (newVal) => {
   debouncedFetchPackageOptions(newVal)
 })
 
-// On package select, add item to order items list
+// Shared helper to add or increment package item
+const addPackageItem = (pkg: {
+  id: string
+  name_en?: string
+  name_th?: string
+  price: number
+  barcode?: string
+}): number => {
+  const existing = form.items.find(i => i.package_id === pkg.id)
+  let currentQty = 1
+  if (existing) {
+    existing.quantity += 1
+    existing.subtotal = calculateItemSubtotal(existing.quantity, existing.unit_price)
+    if (!existing.package_barcode && pkg.barcode) {
+      existing.package_barcode = pkg.barcode
+    }
+    currentQty = existing.quantity
+  } else {
+    const unit_price = Number(pkg.price) || 0
+    const quantity = 1
+    form.items.push({
+      package_id: pkg.id,
+      quantity,
+      unit_price,
+      subtotal: calculateItemSubtotal(quantity, unit_price),
+      notes: '',
+      package_name_en: pkg.name_en,
+      package_name_th: pkg.name_th,
+      package_barcode: pkg.barcode || ''
+    })
+    currentQty = 1
+  }
+  recalculateOrderTotal()
+  return currentQty
+}
+
+// On package select from dropdown, add item to order items list
 watch(selectedPackage, (val) => {
   if (val) {
-    const existing = form.items.find(i => i.package_id === val.id)
-    if (existing) {
-      existing.quantity += 1
-      existing.subtotal = calculateItemSubtotal(existing.quantity, existing.unit_price)
-    } else {
-      const unit_price = Number(val.price) || 0
-      const quantity = 1
-      form.items.push({
-        package_id: val.id,
-        quantity,
-        unit_price,
-        subtotal: calculateItemSubtotal(quantity, unit_price),
-        notes: '',
-        package_name_en: val.name_en,
-        package_name_th: val.name_th
-      })
-    }
-    recalculateOrderTotal()
+    addPackageItem(val)
     selectedPackage.value = null
   }
 })
+
+// Hardware Barcode Scanner & Enter Key Handler
+const handleBarcodeScan = async () => {
+  const code = barcodeScanInput.value.trim()
+  if (!code) return
+
+  isScanningBarcode.value = true
+  try {
+    const normalizedCode = code.toLowerCase()
+    // 1. Try finding in loaded options first (fast path)
+    let found: any = packageOptions.value.find((p: any) =>
+      (p.barcode && p.barcode.toLowerCase() === normalizedCode) ||
+      (p.id && p.id.toLowerCase() === normalizedCode) ||
+      (p.code && p.code.toLowerCase() === normalizedCode)
+    )
+
+    // 2. Query API if not found in memory
+    if (!found) {
+      const res = await apiFetch(`/api/v1/packages?search=${encodeURIComponent(code)}&page=1&limit=10`)
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const exactBarcode = json.data.find((p: Package) => p.barcode && p.barcode.toLowerCase() === normalizedCode)
+          const exactCode = json.data.find((p: Package) => p.code && p.code.toLowerCase() === normalizedCode)
+          const matched = exactBarcode || exactCode || json.data[0]
+
+          found = {
+            id: matched.id,
+            name_en: matched.name_en,
+            name_th: matched.name_th,
+            price: matched.price,
+            barcode: matched.barcode || ''
+          }
+        }
+      }
+    }
+
+    if (found) {
+      const qty = addPackageItem(found)
+      const pkgName = locale.value === 'th' ? (found.name_th || found.name_en) : (found.name_en || found.name_th)
+
+      // Green flash indicator
+      scanSuccessFlash.value = true
+      setTimeout(() => {
+        scanSuccessFlash.value = false
+      }, 800)
+
+      toast.add({
+        title: t('orders.barcode_added', { name: pkgName }) || `Added ${pkgName}`,
+        description: `${pkgName} × ${qty} (฿${formatCurrency(found.price * qty)})`,
+        color: 'success',
+        icon: 'i-heroicons-qr-code'
+      })
+      barcodeScanInput.value = ''
+    } else {
+      toast.add({
+        title: t('orders.barcode_not_found', { code }) || `No package found with barcode "${code}"`,
+        description: code,
+        color: 'error',
+        icon: 'i-heroicons-exclamation-circle'
+      })
+      barcodeScanInput.value = ''
+    }
+  } catch (err) {
+    console.error('Barcode scan error:', err)
+    showError(err)
+  } finally {
+    isScanningBarcode.value = false
+    focusBarcodeInput()
+  }
+}
 
 // Summary breakdown computation
 const summaryBreakdown = computed(() => {
@@ -662,6 +816,9 @@ const formatCurrency = (val: number) => {
 onMounted(() => {
   fetchCustomerOptions('')
   fetchPackageOptions('')
+  if (isLogisticOrPos.value) {
+    focusBarcodeInput()
+  }
 })
 
 // Watch editing prop to populate form on edit
@@ -687,7 +844,8 @@ watch(() => props.orderToEdit, (newVal) => {
           subtotal: item.subtotal || calculateItemSubtotal(item.quantity || 1, item.unit_price || 0),
           notes: item.notes || '',
           package_name_en: item.package_name_en || (item as any).package?.name_en || (item as any).name_en || item.package_id,
-          package_name_th: item.package_name_th || (item as any).package?.name_th || (item as any).name_th || item.package_id
+          package_name_th: item.package_name_th || (item as any).package?.name_th || (item as any).name_th || item.package_id,
+          package_barcode: item.package_barcode || (item as any).package?.barcode || (item as any).barcode || ''
         }))
       : []
     recalculateOrderTotal()

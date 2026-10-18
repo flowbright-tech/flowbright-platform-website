@@ -13,6 +13,7 @@ export interface OrderItem {
   package_name_th?: string
   package_price?: number
   package_image?: string
+  package_barcode?: string
 }
 
 export interface Order {
