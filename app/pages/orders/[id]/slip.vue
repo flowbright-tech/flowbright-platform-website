@@ -51,18 +51,12 @@
     <!-- 58mm Thermal Slip (Print target - 48mm Printable Head, Dynamic Auto-Height) -->
     <div v-else class="slip-page-container">
       <div class="slip-page print-content">
-        <!-- Header: Company Detail (Requirement 1: Show ONLY Company Name, Address, Tel, Email, Website - Kept Left) -->
+        <!-- Header: Company Detail -->
         <div class="flex flex-col items-start text-left space-y-0.5 pb-1">
-          <!-- Company Name (TH & EN) -->
+          <!-- Company Name (Selected language only) -->
           <h1 class="text-[9.5px] font-extrabold leading-tight text-slate-950 tracking-tight text-left">
-            {{ company?.name_th || authCompany?.name_th || 'คลินิก เอ็ม.ที อินเตอร์แล็บ' }}
+            {{ getCompanyName() }}
           </h1>
-          <h2
-            v-if="(company?.name_en || authCompany?.name_en) && (company?.name_en || authCompany?.name_en) !== (company?.name_th || authCompany?.name_th)"
-            class="text-[8px] font-bold leading-tight text-slate-800 text-left"
-          >
-            {{ company?.name_en || authCompany?.name_en }}
-          </h2>
 
           <!-- Company Address -->
           <p v-if="getCompanyAddress()" class="text-[7.5px] leading-tight text-slate-700 font-medium text-left break-words">
@@ -77,11 +71,6 @@
           <!-- Company Email -->
           <p v-if="getCompanyEmail()" class="text-[7px] leading-tight text-slate-600 text-left break-all">
             Email: {{ getCompanyEmail().trim() }}
-          </p>
-
-          <!-- Company Website -->
-          <p v-if="getCompanyWebsite()" class="text-[7px] leading-tight text-slate-600 text-left break-all">
-            Web: {{ getCompanyWebsite().trim() }}
           </p>
         </div>
 
@@ -206,11 +195,6 @@
 
           <!-- Solid Divider after Total Net -->
           <div class="border-b-2 border-slate-950 my-1"></div>
-
-          <!-- Thank You Message -->
-          <div class="text-center text-[7.5px] text-slate-600 font-medium pt-1 pb-0.5">
-            {{ locale === 'th' ? 'ขอบคุณที่ใช้บริการ' : 'Thank you for your business' }}
-          </div>
 
           <!-- Hardware auto-cut safe margin feed buffer (4mm) -->
           <div class="h-[4mm] print:block"></div>
@@ -369,16 +353,19 @@ const getCompanyAddress = (): string => {
   return company.value?.address_en || company.value?.address_th || authCompany.value?.address_en || authCompany.value?.address_th || ''
 }
 
+const getCompanyName = (): string => {
+  if (locale.value === 'th') {
+    return company.value?.name_th || authCompany.value?.name_th || company.value?.name_en || authCompany.value?.name_en || 'คลินิก เอ็ม.ที อินเตอร์แล็บ'
+  }
+  return company.value?.name_en || authCompany.value?.name_en || company.value?.name_th || authCompany.value?.name_th || 'METRO MED COMPANY LIMITED'
+}
+
 const getCompanyPhone = (): string => {
   return company.value?.phone || authCompany.value?.phone || ''
 }
 
 const getCompanyEmail = (): string => {
   return company.value?.email || authCompany.value?.email || ''
-}
-
-const getCompanyWebsite = (): string => {
-  return company.value?.website || authCompany.value?.website || ''
 }
 
 const getItemName = (item: any): string => {
