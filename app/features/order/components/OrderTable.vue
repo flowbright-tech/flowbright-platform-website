@@ -75,6 +75,8 @@
             :title="$t('orders.print_document') || 'Print Document'" @click="$emit('printDocument', row.original)" />
           <UButton color="neutral" variant="ghost" icon="i-heroicons-printer" size="md"
             :title="$t('orders.print_invoice') || 'Print Invoice'" @click="$emit('print', row.original)" />
+          <UButton color="neutral" variant="ghost" icon="i-heroicons-ticket" size="md"
+            :title="$t('orders.print_slip') || 'Print Slip (58mm)'" @click="$emit('printSlip', row.original)" />
           <UButton color="neutral" variant="ghost" icon="i-heroicons-eye" size="md"
             :title="$t('orders.view_detail') || 'View Details'" @click="$emit('view', row.original)" />
           <UButton color="primary" variant="ghost" icon="i-heroicons-pencil-square" size="md"
@@ -130,6 +132,7 @@ defineEmits<{
   (e: 'edit', order: Order): void
   (e: 'delete', id: string): void
   (e: 'print', order: Order): void
+  (e: 'printSlip', order: Order): void
   (e: 'printDocument', order: Order): void
   (e: 'openLabForm', order: Order): void
 }>()

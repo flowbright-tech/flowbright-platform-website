@@ -50,6 +50,7 @@
       @edit="handleEditOrder"
       @delete="handleConfirmDelete"
       @print="handlePrintInvoice"
+      @print-slip="handlePrintSlip"
       @print-document="handlePrintDocument"
       @open-lab-form="handleOpenLabForm"
     />
@@ -129,6 +130,13 @@ const handleViewOrder = (order: Order) => {
 const handlePrintInvoice = (order: Order) => {
   if (import.meta.client) {
     const routeUrl = localePath(`/orders/${order.id}/invoice`)
+    window.open(routeUrl, '_blank')
+  }
+}
+
+const handlePrintSlip = (order: Order) => {
+  if (import.meta.client) {
+    const routeUrl = localePath(`/orders/${order.id}/slip`)
     window.open(routeUrl, '_blank')
   }
 }

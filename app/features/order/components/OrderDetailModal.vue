@@ -142,9 +142,20 @@
           </div>
         </div>
 
-        <!-- Action Bar in Modal (Lab In/Out Form visible only for Lab companies) -->
-        <div v-if="isLab" class="flex items-center justify-end gap-3 pt-2">
+        <!-- Action Bar in Modal -->
+        <div class="flex items-center justify-end gap-3 pt-2">
           <UButton
+            color="neutral"
+            variant="outline"
+            icon="i-heroicons-ticket"
+            size="sm"
+            class="font-bold"
+            @click="openSlip(order.id)"
+          >
+            {{ $t('orders.print_slip') || 'Print Slip (58mm)' }}
+          </UButton>
+          <UButton
+            v-if="isLab"
             color="emerald"
             variant="soft"
             icon="i-heroicons-beaker"
@@ -162,11 +173,13 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useLocalePath } from '#imports'
 import type { Order } from '../types'
 import { formatTransactionDate, formatDeliveryDate } from '../composables/useOrderEngine'
 import { useAuthEngine } from '../../auth/composables/useAuthEngine'
 
 const isOpen = defineModel<boolean>('open', { default: false })
+const localePath = useLocalePath()
 
 defineProps<{
   order?: Order | null
@@ -256,7 +269,15 @@ const formatPaymentChannel = (channel?: string) => {
 
 const openLabForm = (id: string) => {
   if (typeof window !== 'undefined') {
-    window.open(`/orders/${id}/lab-form`, '_blank')
+    const routeUrl = localePath ? localePath(`/orders/${id}/lab-form`) : `/orders/${id}/lab-form`
+    window.open(routeUrl, '_blank')
+  }
+}
+
+const openSlip = (id: string) => {
+  if (typeof window !== 'undefined') {
+    const routeUrl = localePath ? localePath(`/orders/${id}/slip`) : `/orders/${id}/slip`
+    window.open(routeUrl, '_blank')
   }
 }
 </script>

@@ -27,6 +27,19 @@
         {{ locale === 'th' ? 'English' : 'ไทย' }}
       </UButton>
 
+      <!-- Print Slip Button (Optional) -->
+      <UButton
+        v-if="showSlipButton"
+        color="neutral"
+        variant="outline"
+        icon="i-heroicons-ticket"
+        size="sm"
+        class="font-semibold shadow-xs"
+        @click="handlePrintSlip"
+      >
+        {{ $t('orders.print_slip') || 'Print Slip (58mm)' }}
+      </UButton>
+
       <!-- Export PDF Button (Error color - Red) -->
       <UButton
         color="error"
@@ -40,7 +53,7 @@
         Export PDF
       </UButton>
 
-      <!-- Print Button (Print (A4)) -->
+      <!-- Print Button -->
       <UButton
         color="primary"
         icon="i-heroicons-printer"
@@ -48,7 +61,7 @@
         class="font-semibold shadow-sm"
         @click="handlePrint"
       >
-        Print (A4)
+        {{ printButtonLabel }}
       </UButton>
     </div>
   </div>
@@ -60,15 +73,23 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useLocalePath, useSwitchLocalePath } from '#imports'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   title: string
   backPath?: string
   pdfFilename?: string
-}>()
+  showSlipButton?: boolean
+  slipUrl?: string
+  pdfFormat?: string | [number, number]
+  printButtonLabel?: string
+}>(), {
+  pdfFormat: 'a4',
+  printButtonLabel: 'Print (A4)'
+})
 
 const emit = defineEmits<{
   (e: 'back'): void
   (e: 'print'): void
+  (e: 'printSlip'): void
   (e: 'exportPdf'): void
   (e: 'toggleLanguage'): void
 }>()
@@ -85,6 +106,13 @@ const handleBack = () => {
     router.push(localePath(props.backPath))
   } else {
     router.push(localePath('/orders'))
+  }
+}
+
+const handlePrintSlip = () => {
+  emit('printSlip')
+  if (props.slipUrl && import.meta.client) {
+    window.open(props.slipUrl, '_blank')
   }
 }
 
@@ -159,7 +187,7 @@ const handleExportPdf = async () => {
   emit('exportPdf')
   if (!import.meta.client) return
 
-  const targetEl = (document.querySelector('.a4-page') || document.querySelector('.print-content')) as HTMLElement
+  const targetEl = (document.querySelector('.slip-page') || document.querySelector('.a4-page') || document.querySelector('.print-content')) as HTMLElement
   if (!targetEl) return
 
   isExportingPdf.value = true
@@ -184,7 +212,7 @@ const handleExportPdf = async () => {
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4'
+      format: props.pdfFormat || 'a4'
     })
 
     const pdfWidth = pdf.internal.pageSize.getWidth() // 210mm

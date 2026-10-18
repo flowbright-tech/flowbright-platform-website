@@ -4,6 +4,8 @@
     <PrintActionBar
       title="Invoice Printing Preview"
       :pdf-filename="`Invoice_${invoice?.code || invoice?.order_number || orderId}.pdf`"
+      :show-slip-button="true"
+      :slip-url="localePath(`/orders/${orderId}/slip`)"
     />
 
     <!-- Loading Skeleton -->
