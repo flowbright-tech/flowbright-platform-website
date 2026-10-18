@@ -56,8 +56,18 @@
               />
             </UFormField>
 
+            <!-- Barcode -->
+            <UFormField :label="$t('packages.barcode') || 'Barcode'">
+              <UInput
+                v-model="form.barcode"
+                placeholder="e.g. 8851234567890"
+                size="md"
+                class="w-full font-mono"
+              />
+            </UFormField>
+
             <!-- Description -->
-            <UFormField :label="$t('packages.description') || 'Description'">
+            <UFormField :label="$t('packages.description') || 'Description'" class="md:col-span-2">
               <UInput
                 v-model="form.description"
                 placeholder="Brief description of the package bundle..."
@@ -243,6 +253,7 @@ const form = reactive({
   description: '',
   image_url: '',
   price: 0,
+  barcode: '',
   items: [] as Array<{
     product_id: string
     quantity: number
@@ -344,6 +355,7 @@ watch(() => props.packageToEdit, async (newVal) => {
     form.description = newVal.description || ''
     form.image_url = newVal.image_url || ''
     form.price = newVal.price || 0
+    form.barcode = newVal.barcode || ''
     
     if (newVal.items && Array.isArray(newVal.items)) {
       form.items = await Promise.all(
@@ -391,6 +403,7 @@ watch(() => props.packageToEdit, async (newVal) => {
     form.description = ''
     form.image_url = ''
     form.price = 0
+    form.barcode = ''
     form.items = []
   }
 }, { immediate: true })
@@ -484,6 +497,7 @@ const submitForm = async () => {
     description: form.description,
     image_url: uploadedImageUrl,
     price: form.price,
+    barcode: form.barcode.trim(),
     items: form.items.map(item => ({
       product_id: item.product_id,
       quantity: item.quantity

@@ -13,9 +13,15 @@
 
         <!-- Name EN Column -->
         <template #name_en-cell="{ row }">
-          <span class="text-sm font-bold text-slate-900 dark:text-white">
-            {{ row.original.name_en || '-' }}
-          </span>
+          <div class="flex flex-col">
+            <span class="text-sm font-bold text-slate-900 dark:text-white">
+              {{ row.original.name_en || '-' }}
+            </span>
+            <div v-if="row.original.barcode" class="flex items-center gap-1 text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+              <UIcon name="i-heroicons-qr-code" class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span>{{ row.original.barcode }}</span>
+            </div>
+          </div>
         </template>
 
         <!-- Name TH Column -->

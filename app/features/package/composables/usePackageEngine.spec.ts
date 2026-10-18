@@ -131,6 +131,7 @@ describe('Package Engine API & Logic', () => {
       description: 'Test description',
       image_url: 'https://example.com/image.png',
       price: 150,
+      barcode: '8851234567890',
       items: [{ product_id: 'prod-02', quantity: 3 }]
     }
 

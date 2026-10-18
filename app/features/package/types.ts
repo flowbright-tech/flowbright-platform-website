@@ -16,6 +16,7 @@ export interface Package {
   description?: string | null
   image_url?: string | null
   price: number
+  barcode?: string | null
   items: PackageItem[]
   created_at?: string | null
   updated_at?: string | null
@@ -27,6 +28,7 @@ export interface PackageFormData {
   description: string
   image_url: string
   price: number
+  barcode?: string
   items: {
     product_id: string
     quantity: number

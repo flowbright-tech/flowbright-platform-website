@@ -548,6 +548,7 @@
     "name_th": "Package Name (Thai)",
     "description": "Description",
     "price": "Price",
+    "barcode": "Barcode",
     "sec_basic": "Basic Information",
     "sec_image": "Package Image",
     "sec_items": "Package Items",
@@ -652,6 +653,10 @@
     "view_detail": "View Details",
     "order_detail_title": "Order Specification Detail",
     "print_invoice": "Print Invoice",
+    "print_slip": "Print Slip (58mm)",
+    "slip_title": "Receipt Slip Preview",
+    "receipt_slip": "Receipt (Slip)",
+    "total_net": "Total Net",
     "print_document": "Print Document",
     "lab_form": "Lab Technician Worksheet (Lab In/Out)",
     "col_tests": "Tests"
