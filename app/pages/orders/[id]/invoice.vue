@@ -80,7 +80,7 @@
             </p>
             <p class="text-[9.5px] text-slate-500 font-semibold flex items-center gap-4 pt-0.5">
               <span v-if="company?.email">Email : {{ company.email.trim() }}</span>
-              <span>Website : https://mtinterlab.co</span>
+              <span v-if="company?.website">Website : {{ company.website.trim() }}</span>
             </p>
           </div>
         </div>

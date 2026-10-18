@@ -31,6 +31,7 @@ export interface CompanyProfile {
   company_type?: 'lab' | 'standard' | 'store' | 'logistic' | 'logistics' | 'pos' | 'linebot' | 'line_bot' | 'line-bot' | string
   credit_card_percent_charge?: number
   credit_card_charge_percent?: number
+  website?: string
   created_at: string
   updated_at: string
 }
