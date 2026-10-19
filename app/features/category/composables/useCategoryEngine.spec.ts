@@ -101,7 +101,7 @@ describe('Category Engine API & Logic', () => {
     expect(result?.name_en).toBe('Raw Materials')
   })
 
-  it('should fetch subcategories by parent ID using ParentID query', async () => {
+  it('should fetch subcategories by parent ID using parent_id query', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -117,7 +117,7 @@ describe('Category Engine API & Logic', () => {
     const result = await fetchSubcategoriesByParent('cat-01')
 
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('https://flowbright-platform-api.onrender.com/api/v1/categories?ParentID=cat-01'),
+      expect.stringContaining('https://flowbright-platform-api.onrender.com/api/v1/categories?parent_id=cat-01'),
       expect.objectContaining({
         method: 'GET'
       })

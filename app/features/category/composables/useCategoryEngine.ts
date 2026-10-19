@@ -110,14 +110,14 @@ export const useCategoryEngine = () => {
     }
   }
 
-  // API Call to fetch subcategories by parent category ID using query ParentID=x
+  // API Call to fetch subcategories by parent category ID using query parent_id=x
   const fetchSubcategoriesByParent = async (parentId: string): Promise<Category[]> => {
     if (!parentId || parentId === 'root') {
       return []
     }
 
     try {
-      const res = await apiFetch(`/api/v1/categories?ParentID=${encodeURIComponent(parentId)}`)
+      const res = await apiFetch(`/api/v1/categories?parent_id=${encodeURIComponent(parentId)}`)
       if (res.ok) {
         const json = await res.json()
         if (json.success && Array.isArray(json.data)) {
@@ -126,7 +126,7 @@ export const useCategoryEngine = () => {
       }
       return []
     } catch (err) {
-      console.error('Error fetching subcategories by ParentID:', err)
+      console.error('Error fetching subcategories by parent_id:', err)
       return []
     }
   }

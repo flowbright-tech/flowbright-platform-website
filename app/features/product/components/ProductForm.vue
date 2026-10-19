@@ -71,7 +71,7 @@
               />
             </UFormField>
 
-            <!-- Subcategory Dropdown (Calls API with ParentID=x) -->
+            <!-- Subcategory Dropdown (Calls API with parent_id=x) -->
             <UFormField :label="dl('subcategory', $t('products.subcategory') || 'Subcategory')">
               <USelectMenu
                 v-model="form.subcategory_id"
@@ -450,7 +450,7 @@ const fetchSubcategories = async (parentId: string) => {
     const list = await fetchSubcategoriesByParent(parentId)
     subcategoryList.value = list || []
   } catch (err) {
-    console.error('Error fetching subcategories by ParentID:', parentId, err)
+    console.error('Error fetching subcategories by parent_id:', parentId, err)
     subcategoryList.value = []
   } finally {
     isLoadingSubcategories.value = false
