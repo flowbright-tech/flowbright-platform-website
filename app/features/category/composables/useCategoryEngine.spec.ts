@@ -101,6 +101,33 @@ describe('Category Engine API & Logic', () => {
     expect(result?.name_en).toBe('Raw Materials')
   })
 
+  it('should fetch subcategories by parent ID using ParentID query', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        data: [
+          { id: 'sub-01', name_en: 'Chemical Reagents', name_th: 'สารเคมี', parent_id: 'cat-01', level: 2, is_active: true }
+        ]
+      })
+    })
+
+    const { fetchSubcategoriesByParent } = useCategoryEngine()
+    const result = await fetchSubcategoriesByParent('cat-01')
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('https://flowbright-platform-api.onrender.com/api/v1/categories?ParentID=cat-01'),
+      expect.objectContaining({
+        method: 'GET'
+      })
+    )
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('sub-01')
+    expect(result[0].name_en).toBe('Chemical Reagents')
+  })
+
   it('should make POST request on addCategory and then refresh list', async () => {
     // 1st call for POST, 2nd & 3rd for refresh fetches
     mockFetch.mockResolvedValue({

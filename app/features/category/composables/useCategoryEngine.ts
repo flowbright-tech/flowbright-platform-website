@@ -110,6 +110,27 @@ export const useCategoryEngine = () => {
     }
   }
 
+  // API Call to fetch subcategories by parent category ID using query ParentID=x
+  const fetchSubcategoriesByParent = async (parentId: string): Promise<Category[]> => {
+    if (!parentId || parentId === 'root') {
+      return []
+    }
+
+    try {
+      const res = await apiFetch(`/api/v1/categories?ParentID=${encodeURIComponent(parentId)}`)
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && Array.isArray(json.data)) {
+          return json.data
+        }
+      }
+      return []
+    } catch (err) {
+      console.error('Error fetching subcategories by ParentID:', err)
+      return []
+    }
+  }
+
   // Add Category (POST)
   const addCategory = async (data: CategoryFormData) => {
     isLoading.value = true
@@ -228,6 +249,7 @@ export const useCategoryEngine = () => {
     fetchCategories,
     fetchAllCategories,
     fetchCategoryById,
+    fetchSubcategoriesByParent,
     paginatedCategories: categories,
     allCategories,
     totalFilteredCount,

@@ -6,6 +6,7 @@ export interface Product {
   sku: string
   barcode: string
   product_type: string
+  category_id?: string | null
   subcategory_id?: string | null
   selling_price: number
   cost: number
@@ -37,6 +38,7 @@ export interface ProductFormData {
   sku: string
   barcode: string
   product_type: string
+  category_id?: string | null
   subcategory_id?: string | null
   selling_price: number
   cost: number

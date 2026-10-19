@@ -24,6 +24,7 @@
     <!-- Product Form -->
     <ProductForm
       v-if="product"
+      :product-to-edit="product"
       :category-to-edit="product"
       :categories="allCategories"
       :is-loading="isLoading"

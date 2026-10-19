@@ -57,31 +57,33 @@
               />
             </UFormField>
 
-            <UFormField :error="errors.product_type || undefined">
-              <template #label>
-                <span>{{ $t('products.product_type') || 'Product Type' }}</span>
-                <span class="text-error font-bold ml-0.5">*</span>
-              </template>
+            <!-- Category Dropdown (Replaces Product Type) -->
+            <UFormField :label="dl('category', $t('products.category') || 'Category')">
               <USelectMenu
-                v-model="form.product_type"
-                :items="productTypeOptions"
-                value-key="value"
-                label-key="label"
-                size="md"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField :label="$t('products.category') || 'Category / Subcategory'">
-              <USelectMenu
-                v-model="form.subcategory_id"
+                v-model="selectedCategoryId"
                 :items="categoryOptions"
                 value-key="value"
                 label-key="label"
                 searchable
                 size="md"
                 class="w-full"
-                :placeholder="$t('products.no_category') || 'Select Category'"
+                :placeholder="dl('select_category', $t('products.select_category') || 'Select Category')"
+              />
+            </UFormField>
+
+            <!-- Subcategory Dropdown (Calls API with ParentID=x) -->
+            <UFormField :label="dl('subcategory', $t('products.subcategory') || 'Subcategory')">
+              <USelectMenu
+                v-model="form.subcategory_id"
+                :items="subcategoryOptions"
+                value-key="value"
+                label-key="label"
+                searchable
+                size="md"
+                class="w-full"
+                :placeholder="dl('select_subcategory', $t('products.select_subcategory') || 'Select Subcategory')"
+                :disabled="!selectedCategoryId || selectedCategoryId === 'root'"
+                :loading="isLoadingSubcategories"
               />
             </UFormField>
 
@@ -328,21 +330,28 @@ import type { Product, ProductFormData } from '../types'
 import type { Category } from '../../category/types'
 import { useImageUpload } from '../../../composables/useImageUpload'
 import { useAppToast } from '../../../composables/useAppToast'
-
 import { useDomainLabels } from '../../../composables/useDomainLabels'
 import { useAuthEngine } from '../../../features/auth/composables/useAuthEngine'
+import { useCategoryEngine } from '../../category/composables/useCategoryEngine'
 
 const { t, locale } = useI18n()
 const { dl, isLab } = useDomainLabels()
 const { isLogistic, isSimplifiedCompany } = useAuthEngine()
 const { uploadImage } = useImageUpload()
 const { showError } = useAppToast()
+const { fetchSubcategoriesByParent, fetchCategoryById } = useCategoryEngine()
+
 const isUploadingImage = ref(false)
+const selectedCategoryId = ref('root')
+const subcategoryList = ref<Category[]>([])
+const isLoadingSubcategories = ref(false)
+const isInitializing = ref(false)
 
 const props = defineProps<{
   categoryToEdit?: Product | null
+  productToEdit?: Product | null
   isLoading?: boolean
-  categories: Category[]
+  categories?: Category[]
 }>()
 
 const emit = defineEmits<{
@@ -381,7 +390,6 @@ const errors = reactive({
   name_en: '',
   name_th: '',
   sku: '',
-  product_type: '',
   unit: '',
   selling_price: '',
   cost: '',
@@ -405,55 +413,124 @@ const labFlagOptions = [
   { label: 'Lab In', value: 'labin' }
 ]
 
-const productTypeOptions = computed(() => {
-  const options = [
-    { label: dl('type_standard', 'Standard Item'), value: 'standard' },
-    { label: dl('type_service', 'Service Charge / Non-Stock'), value: 'service' },
-    { label: dl('type_kit', 'Kit / Assembly Bundle'), value: 'kit' }
-  ]
-  if (!isSimplifiedCompany.value) {
-    options.unshift({ label: dl('type_test', isLab.value ? 'Clinical Test' : 'Test Product'), value: 'test' })
-  }
-  return options
-})
+const extractVal = (val: any): string => {
+  if (!val) return ''
+  if (typeof val === 'object' && 'value' in val) return String(val.value)
+  return String(val)
+}
 
 const categoryOptions = computed(() => {
   const list = props.categories || []
   return [
-    { label: dl('no_category', 'None (Uncategorized)'), value: 'root' },
+    { label: dl('no_category', t('products.no_category') || 'None (Uncategorized)'), value: 'root' },
     ...list.map(c => ({
-      label: locale.value === 'th' ? c.name_th : c.name_en,
+      label: locale.value === 'th' ? (c.name_th || c.name_en) : (c.name_en || c.name_th),
       value: c.id
     }))
   ]
 })
 
-watch(() => props.categoryToEdit, (newVal) => {
+const subcategoryOptions = computed(() => {
+  return [
+    { label: dl('no_subcategory', t('products.no_subcategory') || 'None (No Subcategory)'), value: 'root' },
+    ...subcategoryList.value.map(c => ({
+      label: locale.value === 'th' ? (c.name_th || c.name_en) : (c.name_en || c.name_th),
+      value: c.id
+    }))
+  ]
+})
+
+const fetchSubcategories = async (parentId: string) => {
+  if (!parentId || parentId === 'root') {
+    subcategoryList.value = []
+    return
+  }
+  isLoadingSubcategories.value = true
+  try {
+    const list = await fetchSubcategoriesByParent(parentId)
+    subcategoryList.value = list || []
+  } catch (err) {
+    console.error('Error fetching subcategories by ParentID:', parentId, err)
+    subcategoryList.value = []
+  } finally {
+    isLoadingSubcategories.value = false
+  }
+}
+
+watch(selectedCategoryId, async (newVal, oldVal) => {
+  if (isInitializing.value) return
+  const catId = extractVal(newVal)
+  if (oldVal !== undefined && catId !== extractVal(oldVal)) {
+    form.subcategory_id = 'root'
+  }
+  if (!catId || catId === 'root') {
+    subcategoryList.value = []
+    return
+  }
+  await fetchSubcategories(catId)
+})
+
+watch(() => props.productToEdit || props.categoryToEdit, async (newVal) => {
   if (newVal) {
-    form.name_en = newVal.name_en || ''
-    form.name_th = newVal.name_th || ''
-    form.sku = newVal.sku || ''
-    form.barcode = newVal.barcode || ''
-    form.product_type = newVal.product_type || (isSimplifiedCompany.value ? 'standard' : (isLab.value ? 'test' : 'standard'))
-    form.subcategory_id = newVal.subcategory_id || 'root'
-    form.selling_price = Number(newVal.selling_price ?? 0)
-    form.cost = Number(newVal.cost ?? 0)
-    form.stock = Number(newVal.stock ?? 0)
-    form.reserve_stock = Number(newVal.reserve_stock ?? 0)
-    form.unit = newVal.unit || 'pcs'
-    form.description = newVal.description || ''
-    form.image_url = newVal.image_url || ''
-    form.is_active = newVal.is_active ?? true
-    form.remark = newVal.remark || ''
-    form.leadtime = newVal.leadtime || ''
-    form.sample_type_volum = newVal.sample_type_volum || ''
-    form.storage_condition = newVal.storage_condition || ''
-    form.collection_remark = newVal.collection_remark || ''
-    form.principle = newVal.principle || ''
-    form.method = newVal.method || ''
-    form.clinical_use = newVal.clinical_use || ''
-    form.reference_range_unit = newVal.reference_range_unit || ''
-    form.lab_flag = newVal.lab_flag || 'labout'
+    isInitializing.value = true
+    try {
+      form.name_en = newVal.name_en || ''
+      form.name_th = newVal.name_th || ''
+      form.sku = newVal.sku || ''
+      form.barcode = newVal.barcode || ''
+      form.product_type = newVal.product_type || (isSimplifiedCompany.value ? 'standard' : (isLab.value ? 'test' : 'standard'))
+      form.selling_price = Number(newVal.selling_price ?? 0)
+      form.cost = Number(newVal.cost ?? 0)
+      form.stock = Number(newVal.stock ?? 0)
+      form.reserve_stock = Number(newVal.reserve_stock ?? 0)
+      form.unit = newVal.unit || 'pcs'
+      form.description = newVal.description || ''
+      form.image_url = newVal.image_url || ''
+      form.is_active = newVal.is_active ?? true
+      form.remark = newVal.remark || ''
+      form.leadtime = newVal.leadtime || ''
+      form.sample_type_volum = newVal.sample_type_volum || ''
+      form.storage_condition = newVal.storage_condition || ''
+      form.collection_remark = newVal.collection_remark || ''
+      form.principle = newVal.principle || ''
+      form.method = newVal.method || ''
+      form.clinical_use = newVal.clinical_use || ''
+      form.reference_range_unit = newVal.reference_range_unit || ''
+      form.lab_flag = newVal.lab_flag || 'labout'
+
+      const rawCatId = (newVal as any).category_id
+      const rawSubcatId = newVal.subcategory_id
+
+      if (rawCatId && rawCatId !== 'root') {
+        selectedCategoryId.value = rawCatId
+        await fetchSubcategories(rawCatId)
+        form.subcategory_id = (rawSubcatId && rawSubcatId !== 'root') ? rawSubcatId : 'root'
+      } else if (rawSubcatId && rawSubcatId !== 'root') {
+        const isRoot = props.categories?.some(c => c.id === rawSubcatId)
+        if (isRoot) {
+          selectedCategoryId.value = rawSubcatId
+          await fetchSubcategories(rawSubcatId)
+          form.subcategory_id = 'root'
+        } else {
+          const catInfo = await fetchCategoryById(rawSubcatId)
+          if (catInfo?.parent_id) {
+            selectedCategoryId.value = catInfo.parent_id
+            await fetchSubcategories(catInfo.parent_id)
+            form.subcategory_id = rawSubcatId
+          } else {
+            selectedCategoryId.value = rawSubcatId
+            await fetchSubcategories(rawSubcatId)
+            form.subcategory_id = 'root'
+          }
+        }
+      } else {
+        selectedCategoryId.value = 'root'
+        form.subcategory_id = 'root'
+        subcategoryList.value = []
+      }
+    } finally {
+      isInitializing.value = false
+    }
   }
 }, { immediate: true })
 
@@ -495,8 +572,7 @@ const submitForm = async () => {
   }
 
   if (!form.product_type) {
-    errors.product_type = dl('err_product_type', 'Product type is required')
-    isValid = false
+    form.product_type = isSimplifiedCompany.value ? 'standard' : (isLab.value ? 'test' : 'standard')
   }
 
   if (!form.unit.trim()) {
@@ -560,15 +636,13 @@ const submitForm = async () => {
     }
   }
 
-  const extractVal = (val: any): string => {
-    if (!val) return ''
-    if (typeof val === 'object' && 'value' in val) return String(val.value)
-    return String(val)
-  }
-
   const selectedType = extractVal(form.product_type) || (isSimplifiedCompany.value ? 'standard' : (isLab.value ? 'test' : 'standard'))
-  const selectedCat = extractVal(form.subcategory_id)
+  const selectedCat = extractVal(selectedCategoryId.value)
+  const selectedSubcat = extractVal(form.subcategory_id)
   const selectedLabFlag = isSimplifiedCompany.value ? null : (extractVal(form.lab_flag) || 'labout')
+
+  const finalCategoryId = (selectedCat && selectedCat !== 'root') ? selectedCat : null
+  const finalSubcategoryId = (selectedSubcat && selectedSubcat !== 'root') ? selectedSubcat : null
 
   const payload: ProductFormData = {
     name_en: form.name_en,
@@ -576,7 +650,8 @@ const submitForm = async () => {
     sku: form.sku,
     barcode: form.barcode || '',
     product_type: selectedType,
-    subcategory_id: (selectedCat === 'root' || !selectedCat) ? null : selectedCat,
+    category_id: finalCategoryId,
+    subcategory_id: finalSubcategoryId,
     selling_price: Number(form.selling_price || 0),
     cost: Number(form.cost || 0),
     stock: isLab.value ? 0 : Number(form.stock || 0),
