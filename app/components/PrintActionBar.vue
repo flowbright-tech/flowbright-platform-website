@@ -213,7 +213,7 @@ const handleExportPdf = async () => {
     if (isSlip) {
       const elWidth = targetEl.offsetWidth || 1
       const elHeight = targetEl.offsetHeight || 1
-      const dynamicHeightMm = Math.max(30, Math.round((elHeight / elWidth) * 48) + 6)
+      const dynamicHeightMm = Math.max(30, Math.round((elHeight / elWidth) * 44) + 4)
       pdfFormat = [58, dynamicHeightMm]
     }
 
@@ -229,7 +229,7 @@ const handleExportPdf = async () => {
 
     // 3. Render image onto PDF
     if (isSlip) {
-      const slipWidthMm = 48
+      const slipWidthMm = 44
       const xOffset = Math.max(0, (pdfWidth - slipWidthMm) / 2)
       pdf.addImage(imgData, 'PNG', xOffset, 0, slipWidthMm, pdfHeight)
     } else {
@@ -251,7 +251,9 @@ const handleExportPdf = async () => {
 const handlePrint = () => {
   emit('print')
   if (import.meta.client) {
-    window.print()
+    setTimeout(() => {
+      window.print()
+    }, 50)
   }
 }
 </script>

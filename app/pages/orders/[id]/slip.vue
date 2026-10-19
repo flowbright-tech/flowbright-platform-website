@@ -8,21 +8,88 @@
       @print="handlePrintClicked"
     />
 
-    <!-- Paper Saving & Auto-Cut Notice for AN58 (Screen only, hidden on print) -->
-    <div class="no-print w-full max-w-sm mb-3 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-lg text-emerald-800 dark:text-emerald-300 text-[11px] flex items-center justify-between gap-2 shadow-xs">
-      <div class="flex items-center gap-1.5">
-        <UIcon name="i-heroicons-check-badge" class="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-        <span class="font-medium">
-          {{ locale === 'th' ? `ตัดกระดาษอัตโนมัติ: ความยาว ${calculatedHeightMm} มม.` : `Auto-cut length: ${calculatedHeightMm} mm` }}
-        </span>
+    <!-- Paper Preset & Easy Print Controls (Screen only, hidden on print) -->
+    <div class="no-print w-full max-w-sm mb-3.5 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xs space-y-2">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-100">
+          <UIcon name="i-heroicons-printer" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <span>{{ locale === 'th' ? 'ตั้งค่ากระดาษสลิปความร้อน' : 'Thermal Slip Paper Setup' }}</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+            {{ locale === 'th' ? 'พอดีหน้า 100%' : '100% Fit' }}
+          </span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400">
+            {{ locale === 'th' ? 'Margins: None' : 'Margins: None' }}
+          </span>
+        </div>
       </div>
-      <span class="text-[10px] text-emerald-700/80 dark:text-emerald-400/80">
-        {{ locale === 'th' ? 'ตั้งค่า Margins: None' : 'Margins: None' }}
-      </span>
+
+      <!-- Presets Selector Buttons -->
+      <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900/60 rounded-lg">
+        <button
+          type="button"
+          class="flex flex-col items-center justify-center py-1.5 px-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer border"
+          :class="selectedPreset === 'dynamic'
+            ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 shadow-xs'
+            : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'"
+          @click="setPreset('dynamic')"
+        >
+          <span class="flex items-center gap-1">
+            <UIcon name="i-heroicons-bolt" class="w-3.5 h-3.5" />
+            <span>{{ locale === 'th' ? 'ตัดออโต้' : 'Auto-Cut' }}</span>
+          </span>
+          <span class="text-[9.5px] font-normal text-slate-500">
+            {{ calculatedHeightMm }} mm
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="flex flex-col items-center justify-center py-1.5 px-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer border"
+          :class="selectedPreset === 'fixed_100x50'
+            ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 shadow-xs'
+            : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'"
+          @click="setPreset('fixed_100x50')"
+        >
+          <span class="flex items-center gap-1">
+            <UIcon name="i-heroicons-document" class="w-3.5 h-3.5" />
+            <span>100x50mm</span>
+          </span>
+          <span class="text-[9.5px] font-normal text-slate-500">
+            {{ locale === 'th' ? 'สลิปคงที่' : 'Fixed' }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="flex flex-col items-center justify-center py-1.5 px-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer border"
+          :class="selectedPreset === 'continuous'
+            ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 shadow-xs'
+            : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'"
+          @click="setPreset('continuous')"
+        >
+          <span class="flex items-center gap-1">
+            <UIcon name="i-heroicons-ticket" class="w-3.5 h-3.5" />
+            <span>{{ locale === 'th' ? 'ม้วนต่อเนื่อง' : 'Continuous' }}</span>
+          </span>
+          <span class="text-[9.5px] font-normal text-slate-500">
+            58mm
+          </span>
+        </button>
+      </div>
+
+      <!-- Quick Helpful Guide for Thermal Printing -->
+      <p class="text-[10px] text-slate-500 dark:text-slate-400 text-center leading-tight">
+        {{ locale === 'th'
+          ? '💡 พิมพ์ที่ขนาด Scale 100% พอดีหน้า ไม่ต้องปรับ 95% และตั้งค่า Margins: None'
+          : '💡 Prints at 100% Scale. No need for 95% scale adjustment. Set Margins: None.'
+        }}
+      </p>
     </div>
 
     <!-- Loading Skeleton -->
-    <div v-if="isLoading" class="w-[48mm] bg-white p-3 rounded-xl shadow-md space-y-3">
+    <div v-if="isLoading" class="w-[44mm] bg-white p-3 rounded-xl shadow-md space-y-3">
       <div class="flex flex-col items-start space-y-1.5">
         <USkeleton class="h-3 w-28" />
         <USkeleton class="h-2.5 w-36" />
@@ -40,7 +107,7 @@
     </div>
 
     <!-- Error State -->
-    <div v-else-if="errorMsg" class="w-[48mm] bg-white p-4 rounded-xl shadow-md text-center space-y-2">
+    <div v-else-if="errorMsg" class="w-[44mm] bg-white p-4 rounded-xl shadow-md text-center space-y-2">
       <UIcon name="i-heroicons-exclamation-triangle" class="w-7 h-7 text-rose-500 mx-auto" />
       <h2 class="text-xs font-bold text-slate-800">{{ errorMsg }}</h2>
       <UButton size="xs" color="neutral" variant="solid" @click="fetchInvoiceData">
@@ -48,7 +115,7 @@
       </UButton>
     </div>
 
-    <!-- 58mm Thermal Slip (Print target - 48mm Printable Head, Dynamic Auto-Height) -->
+    <!-- 58mm Thermal Slip (Print target - 44mm Printable Head, Dynamic Auto-Height) -->
     <div v-else class="slip-page-container">
       <div class="slip-page print-content">
         <!-- Header: Company Detail -->
@@ -196,8 +263,8 @@
           <!-- Solid Divider after Total Net -->
           <div class="border-b-2 border-slate-950 my-1"></div>
 
-          <!-- Hardware auto-cut safe margin feed buffer (4mm) -->
-          <div class="h-[4mm] print:block"></div>
+          <!-- Hardware auto-cut safe margin feed buffer (2mm) -->
+          <div class="h-[2mm] print:block"></div>
         </div>
       </div>
     </div>
@@ -229,23 +296,42 @@ const invoice = ref<any>(null)
 const company = ref<any>(null)
 const customer = ref<any>(null)
 const clientDateTime = ref('')
-const calculatedHeightMm = ref(90)
+const calculatedHeightMm = ref(85)
+
+type PaperPreset = 'dynamic' | 'fixed_100x50' | 'continuous'
+const selectedPreset = ref<PaperPreset>('dynamic')
 
 let resizeObserver: ResizeObserver | null = null
+
+const setPreset = (preset: PaperPreset) => {
+  selectedPreset.value = preset
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('srp_slip_paper_preset', preset)
+    } catch (_) {}
+  }
+  updateDynamicPageSize()
+}
 
 const updateDynamicPageSize = () => {
   if (!import.meta.client) return
   const slipEl = document.querySelector('.slip-page') as HTMLElement
   if (!slipEl) return
 
-  const widthPx = slipEl.offsetWidth || 1
   const heightPx = Math.max(slipEl.scrollHeight, slipEl.offsetHeight)
-  // Calculate content height in mm based on 48mm printable head width
-  const contentHeightMm = Math.ceil((heightPx / widthPx) * 48)
-  // Add 6mm feed buffer to ensure hardware cutter blade clears past the footer
-  const totalHeightMm = Math.max(35, contentHeightMm + 6)
+  // Convert physical DOM height in px to mm (1 CSS px = 25.4 / 96 mm)
+  const contentHeightMm = Math.ceil(heightPx * (25.4 / 96))
+  // Add 3mm feed buffer to ensure hardware cutter blade clears cleanly past the footer
+  const totalHeightMm = Math.max(35, contentHeightMm + 3)
 
   calculatedHeightMm.value = totalHeightMm
+
+  let pageSizeCss = `58mm ${totalHeightMm}mm`
+  if (selectedPreset.value === 'fixed_100x50') {
+    pageSizeCss = '50mm 100mm'
+  } else if (selectedPreset.value === 'continuous') {
+    pageSizeCss = '58mm 210mm'
+  }
 
   let styleEl = document.getElementById('slip-dynamic-page-style') as HTMLStyleElement
   if (!styleEl) {
@@ -254,12 +340,13 @@ const updateDynamicPageSize = () => {
     document.head.appendChild(styleEl)
   }
 
-  // Inject valid CSS <length>{2} rule: width 58mm, height dynamic length (overrides fixed 210mm paper)
+  // NOTE: According to W3C CSS Paged Media Module, '!important' inside @page is strictly illegal
+  // and causes Chrome/Safari to reject the entire @page rule. We inject clean, valid CSS:
   styleEl.textContent = `
     @media print {
       @page {
-        size: 58mm ${totalHeightMm}mm !important;
-        margin: 0 !important;
+        size: ${pageSizeCss};
+        margin: 0;
       }
     }
   `
@@ -464,6 +551,16 @@ const updateClientDateTime = () => {
 }
 
 onMounted(() => {
+  // Restore user saved paper preset
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem('srp_slip_paper_preset') as PaperPreset
+      if (saved && ['dynamic', 'fixed_100x50', 'continuous'].includes(saved)) {
+        selectedPreset.value = saved
+      }
+    } catch (_) {}
+  }
+
   // Default slip to Thai language unless explicitly in English route
   if (!route.path.startsWith('/en/')) {
     if (setLocale) {
@@ -520,11 +617,11 @@ onUnmounted(() => {
 
 .slip-page {
   box-sizing: border-box;
-  width: 48mm;
-  max-width: 48mm;
+  width: 44mm;
+  max-width: 44mm;
   min-height: auto;
   height: auto;
-  padding: 2.5mm 1.5mm;
+  padding: 2mm 1.2mm;
   margin: 0 auto;
   background: #ffffff;
   color: #000000;
@@ -533,15 +630,15 @@ onUnmounted(() => {
   border-radius: 4px;
 }
 
-/* Print CSS Media Queries: 48mm printable head width & dynamic roll height */
+/* Print CSS Media Queries: 44mm printable head width (fits 48mm/50mm heads at 100% scale) */
 @media print {
   @page {
-    size: 58mm auto;
+    size: 58mm 120mm;
     margin: 0;
   }
 
   html, body {
-    width: 58mm !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
@@ -564,23 +661,23 @@ onUnmounted(() => {
 
   .slip-page-container {
     display: block !important;
-    width: 48mm !important;
-    max-width: 48mm !important;
+    width: 100% !important;
+    max-width: 100% !important;
     min-height: auto !important;
     height: auto !important;
     padding: 0 !important;
-    margin: 0 0 0 1mm !important;
+    margin: 0 auto !important;
     box-shadow: none !important;
   }
 
   .slip-page {
     box-sizing: border-box !important;
-    width: 48mm !important;
-    max-width: 48mm !important;
+    width: 44mm !important;
+    max-width: 44mm !important;
     min-height: auto !important;
     height: auto !important;
     padding: 1.5mm 1mm !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
