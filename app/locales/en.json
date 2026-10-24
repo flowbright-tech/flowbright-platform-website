@@ -76,6 +76,7 @@
     "boms": "BOMs",
     "packages": "Packages",
     "orders": "Orders",
+    "reports": "Reports",
     "audit_logs": "Audit Logs"
   },
   "header": {
@@ -728,5 +729,33 @@
     "refresh_page": "Reload System",
     "go_back": "Go Back",
     "developer_details": "Developer Technical Details"
+  },
+  "reports": {
+    "title": "Executive Reports",
+    "subtitle": "Export inventory stock balances and order sales reports in Microsoft Excel (.xlsx) format",
+    "stock_report_title": "Inventory Stock Balance Report",
+    "stock_report_desc": "Export complete current product inventory balances, stock levels, valuations, and SKU statuses.",
+    "download_stock": "Download Stock Report (.xlsx)",
+    "downloading": "Downloading...",
+    "sales_report_title": "Sales & Orders Report",
+    "sales_report_desc": "Export orders, sales revenues, line items, and customer transaction details filtered by date range.",
+    "download_sales": "Download Sales Report (.xlsx)",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "date_range": "Export Date Range",
+    "presets": "Quick Presets",
+    "preset_today": "Today",
+    "preset_this_month": "This Month",
+    "preset_last_month": "Last Month",
+    "preset_last_7_days": "Last 7 Days",
+    "preset_last_30_days": "Last 30 Days",
+    "file_format": "File Format: Microsoft Excel (.xlsx)",
+    "export_success": "Report exported successfully. Downloading file...",
+    "export_failed": "Failed to export report. Please try again.",
+    "invalid_date_range": "Start date cannot be after end date",
+    "date_required": "Please provide both start date and end date",
+    "admin_only_notice": "Only System Administrators can access and export reports",
+    "access_restricted_title": "Access Restricted",
+    "access_restricted_desc": "Reports generation and data export are strictly restricted to Admin users only."
   }
 }

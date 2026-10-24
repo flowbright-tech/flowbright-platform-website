@@ -55,4 +55,20 @@ describe('useNavigation Composable', () => {
     expect(customerItem).toBeDefined()
     expect(customerItem?.to).toBe('/customers')
   })
+
+  it('should display reports navigation item for admin role', () => {
+    setUserRole('admin')
+    const { navItems } = useNavigation()
+    const reportItem = navItems.value.find(item => item.key === 'reports')
+    expect(reportItem).toBeDefined()
+    expect(reportItem?.to).toBe('/reports')
+    expect(reportItem?.labelKey).toBe('nav.reports')
+  })
+
+  it('should hide reports navigation item for non-admin user role', () => {
+    setUserRole('user')
+    const { navItems } = useNavigation()
+    const reportItem = navItems.value.find(item => item.key === 'reports')
+    expect(reportItem).toBeUndefined()
+  })
 })

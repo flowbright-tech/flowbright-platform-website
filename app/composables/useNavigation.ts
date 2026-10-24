@@ -86,6 +86,16 @@ export const useNavigation = () => {
       to: localePath('/orders')
     })
 
+    // Admin only: Reports
+    if (isAdmin.value) {
+      items.push({
+        key: 'reports',
+        labelKey: 'nav.reports',
+        icon: 'i-heroicons-document-chart-bar',
+        to: localePath('/reports')
+      })
+    }
+
     // Admin only: Audit Logs
     if (isAdmin.value) {
       items.push({
